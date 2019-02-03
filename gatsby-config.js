@@ -5,9 +5,11 @@ module.exports = {
     description: ``,
     siteUrl: `http://brunoluiz.net/blog`,
     social: {
-      twitter: `brunoluiz`
+      twitter: `brunoluiz`,
+      github: 'brunoluiz'
     }
   },
+  pathPrefix: '/blog',
   plugins: [
     {
       resolve: `gatsby-source-filesystem`,
