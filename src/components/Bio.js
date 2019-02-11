@@ -31,7 +31,7 @@ function Bio () {
               }}
             />
             <p>
-              Personal Blog by <strong>{author}</strong>.
+              Personal Blog by <strong>{author}</strong>
               <br />A collection of my random thoughts
             </p>
           </div>
