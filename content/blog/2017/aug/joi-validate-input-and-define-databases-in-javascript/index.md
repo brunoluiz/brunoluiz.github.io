@@ -1,6 +1,6 @@
 ---
 title: "Joi: validate input and define databases in JavaScript"
-date: "2017-03-07T19:44:37.121Z"
+date: "2017-08-30T19:44:37.121Z"
 header: header.jpeg
 ---
 
