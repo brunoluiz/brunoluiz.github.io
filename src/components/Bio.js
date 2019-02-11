@@ -32,7 +32,7 @@ function Bio () {
             />
             <p>
               Personal Blog by <strong>{author}</strong>.
-              <br />A collection of my programming thoughts
+              <br />A collection of my random thoughts
             </p>
           </div>
         )
