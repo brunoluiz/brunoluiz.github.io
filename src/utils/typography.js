@@ -1,6 +1,6 @@
 import Typography from 'typography'
 import CodePlugin from 'typography-plugin-code'
-import theme from 'typography-theme-moraga'
+import theme from 'typography-theme-sutro'
 
 theme.plugins = [new CodePlugin()]
 
