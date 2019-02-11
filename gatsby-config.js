@@ -2,8 +2,8 @@ module.exports = {
   siteMetadata: {
     title: `Bruno Luiz Blog`,
     author: `Bruno Luiz Silva`,
-    description: ``,
-    siteUrl: `http://brunoluiz.net/blog`,
+    description: `Personal Blog by Bruno Luiz. A collection of my random thoughts.`,
+    siteUrl: `https://brunoluiz.net/blog`,
     social: {
       twitter: `brunoluiz`,
       github: 'brunoluiz'
