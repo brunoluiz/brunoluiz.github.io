@@ -8,7 +8,6 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 Mattis rhoncus urna neque viverra justo nec ultrices. Libero id faucibus nisl tincidunt eget. Sed cras ornare arcu dui vivamus arcu felis bibendum. Blandit turpis cursus in hac. Eu facilisis sed odio morbi quis commodo odio. Augue lacus viverra vitae congue eu consequat. Non arcu risus quis varius. Ipsum dolor sit amet consectetur adipiscing. Faucibus ornare suspendisse sed nisi lacus sed viverra tellus in. In est ante in nibh mauris cursus mattis molestie. Vulputate ut pharetra sit amet aliquam id diam maecenas ultricies. Pulvinar elementum integer enim neque volutpat ac tincidunt vitae. Semper viverra nam libero justo laoreet sit amet cursus. Nulla pellentesque dignissim enim sit. Dui sapien eget mi proin sed libero.
 
 ```javascript
-import Typography from 'typography'
 import CodePlugin from 'typography-plugin-code'
 import sternGroveTheme from 'typography-theme-stern-grove'
 
@@ -18,3 +17,5 @@ sternGroveTheme.plugins = [
 
 const typography = new Typography(sternGroveTheme)
 ```
+
+Mattis rhoncus urna neque viverra justo nec ultrices. Libero id faucibus nisl tincidunt eget. Sed cras ornare arcu dui vivamus arcu felis bibendum. Blandit turpis cursus in hac. Eu facilisis sed odio morbi quis commodo odio. Augue lacus viverra vitae congue eu consequat. Non arcu risus quis varius. Ipsum dolor sit amet consectetur adipiscing. Faucibus ornare suspendisse sed nisi lacus sed viverra tellus in. In est ante in nibh mauris cursus mattis molestie. Vulputate ut pharetra sit amet aliquam id diam maecenas ultricies. Pulvinar elementum integer enim neque volutpat ac tincidunt vitae. Semper viverra nam libero justo laoreet sit amet cursus. Nulla pellentesque dignissim enim sit. Dui sapien eget mi proin sed libero.
