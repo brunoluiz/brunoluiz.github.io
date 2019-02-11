@@ -12,6 +12,12 @@ module.exports = {
   pathPrefix: '/blog',
   plugins: [
     {
+      resolve: `gatsby-plugin-canonical-urls`,
+      options: {
+        siteUrl: `https://brunoluiz.net/blog`
+      }
+    },
+    {
       resolve: `gatsby-source-filesystem`,
       options: {
         path: `${__dirname}/content/blog`,
@@ -77,7 +83,6 @@ module.exports = {
         icon: `content/assets/coffee.svg`
       }
     },
-    `gatsby-plugin-offline`,
     `gatsby-plugin-react-helmet`,
     {
       resolve: `gatsby-plugin-typography`,
