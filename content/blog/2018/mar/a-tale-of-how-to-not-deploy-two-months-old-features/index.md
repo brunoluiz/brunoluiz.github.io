@@ -6,8 +6,6 @@ header: header.jpeg
 
 ![Photo by rawpixel.com on Unsplash](header.jpeg)
 
-## The Most Special Retail Market Date
-
 There is one big and very special date on the e-commerce and retail market and it's called Black Friday. For many, it means "discount prices", "sale!", "50% off", but for developers and IT people it is a challenging adventure.
 
 To begin with, two weeks before, feature deployments are frozen and everything passes through load tests. On the week, machines are scaled up and, at the event's day, all eyes are on metrics and logs.

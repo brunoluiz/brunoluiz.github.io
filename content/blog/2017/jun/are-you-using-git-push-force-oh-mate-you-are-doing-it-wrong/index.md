@@ -4,7 +4,7 @@ date: "2017-06-03T19:44:37.121Z"
 header: header.png
 ---
 
-![Git branching]('header.png')
+![Git branching](header.png)
 
 You are developing some feature together with your team. Most likely you have done the usual dance: checkout a branch from the master or development branch, done your commits, pushed this feature branch to the remote and opened a push request for peer review.
 
