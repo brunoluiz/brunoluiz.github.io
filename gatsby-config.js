@@ -9,12 +9,12 @@ module.exports = {
       github: 'brunoluiz'
     }
   },
-  pathPrefix: '/blog',
+  pathPrefix: '/',
   plugins: [
     {
       resolve: `gatsby-plugin-canonical-urls`,
       options: {
-        siteUrl: `https://brunoluiz.net/blog`
+        siteUrl: `https://brunoluiz.net`
       }
     },
     {
