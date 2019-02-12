@@ -3,7 +3,7 @@ module.exports = {
     title: `Bruno Luiz Blog`,
     author: `Bruno Luiz Silva`,
     description: `Personal Blog by Bruno Luiz Silva | A collection of my random thoughts.`,
-    siteUrl: `https://brunoluiz.net/blog`,
+    siteUrl: `https://brunoluiz.net`,
     social: {
       twitter: `brunoluiz`,
       github: 'brunoluiz'
