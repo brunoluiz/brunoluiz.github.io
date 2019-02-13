@@ -4,8 +4,12 @@ import theme from 'typography-theme-sutro'
 
 theme.plugins = [new CodePlugin()]
 
+theme.overrideThemeStyles = ({ rhythm }, options) => ({
+  // 'h3 a': {
+  // color: '#222'
+  // }
+})
 const typography = new Typography(theme)
-// delete theme.googleFonts
 
 // Hot reload typography in development.
 if (process.env.NODE_ENV !== `production`) {
