@@ -3,7 +3,7 @@ module.exports = {
     title: `Bruno Luiz Blog`,
     author: `Bruno Luiz Silva`,
     description: `Personal Blog by Bruno Luiz Silva | A collection of my random thoughts.`,
-    siteUrl: `https://brunoluiz.net`,
+    siteUrl: `https://www.brunoluiz.net`,
     social: {
       twitter: `brunoluiz`,
       github: 'brunoluiz'
@@ -14,7 +14,7 @@ module.exports = {
     {
       resolve: `gatsby-plugin-canonical-urls`,
       options: {
-        siteUrl: `https://brunoluiz.net`
+        siteUrl: `https://www.brunoluiz.net`
       }
     },
     {
