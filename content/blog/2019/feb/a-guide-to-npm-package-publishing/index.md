@@ -1,6 +1,6 @@
 ---
 title: A guide on npm package publishing
-date: "2019-02-11T19:44:37.121Z"
+date: "2019-02-15T19:44:37.121Z"
 header: header.jpeg
 ---
 
@@ -143,7 +143,7 @@ init-version=1.0.0
 
 Now, a simple `npm init -y` can be used to create packages. It will not ask for user input, using the npm configs instead and `@<scope>/<folder-name>` as the name.
 
-There are many other configs available, projects can have specific npm configs and even environment variables can be used to setup configs. Check [the npm documentation](https://docs.npmjs.com/misc/config) for more details.
+There are many other configs available through it. Besides, projects can have their own specific configs and even environment variables can be used for it. Check [the npm documentation](https://docs.npmjs.com/misc/config) for more details.
 
 ## Where to go now?
 
