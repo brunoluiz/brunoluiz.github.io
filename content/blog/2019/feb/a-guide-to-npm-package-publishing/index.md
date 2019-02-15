@@ -134,12 +134,11 @@ These are saved at `~/.npmrc`, together with other user configs.
 ```bash
 # ~/.npmrc
 
-//registry.npmjs.org/:_authToken=xyz
 init-author-name=Bruno Luiz da Silva
 init-author-email=contact@brunoluiz.net
 init-author-url=http://brunoluiz.net/
 init-version=1.0.0
-@brunoluiz:registry=https://registry.npmjs.org/
+...
 ```
 
 Now, a simple `npm init -y` can be used to create packages. It will not ask for user input, using the npm configs instead and `@<scope>/<folder-name>` as the name.
