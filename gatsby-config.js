@@ -7,7 +7,8 @@ module.exports = {
     social: {
       twitter: `brunoluiz`,
       github: 'brunoluiz'
-    }
+    },
+    icon: `/coffee.png`
   },
   pathPrefix: '/',
   plugins: [
@@ -67,7 +68,7 @@ module.exports = {
     {
       resolve: `gatsby-plugin-google-analytics`,
       options: {
-        // trackingId: `ADD YOUR TRACKING ID HERE`,
+        trackingId: 'UA-86893932-1'
       }
     },
     `gatsby-plugin-feed`,

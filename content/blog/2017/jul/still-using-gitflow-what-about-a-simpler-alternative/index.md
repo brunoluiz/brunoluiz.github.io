@@ -1,7 +1,7 @@
 ---
 title: Still using GitFlow? What about a simpler alternative?
 date: "2017-07-18T19:44:37.121Z"
-header: header.jpeg
+cover: header.jpeg
 ---
 
 ![Alternative on sight](header.jpeg)

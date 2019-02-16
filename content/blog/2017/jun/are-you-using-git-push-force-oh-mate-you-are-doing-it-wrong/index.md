@@ -1,7 +1,7 @@
 ---
 title: Are you using git push force? Oh mate, you are doing it wrong!
 date: "2017-06-03T19:44:37.121Z"
-header: header.png
+cover: header.png
 ---
 
 ![Git branching](header.png)

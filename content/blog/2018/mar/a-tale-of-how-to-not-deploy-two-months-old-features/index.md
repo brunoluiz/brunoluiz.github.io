@@ -1,7 +1,7 @@
 ---
 title: A Tale Of How To Not Deploy Two Months Old Features
 date: "2018-03-07T19:44:37.121Z"
-header: header.jpeg
+cover: header.jpeg
 ---
 
 ![Photo by rawpixel.com on Unsplash](header.jpeg)

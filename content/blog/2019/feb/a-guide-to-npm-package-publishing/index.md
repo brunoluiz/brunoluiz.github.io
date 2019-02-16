@@ -1,7 +1,7 @@
 ---
 title: A guide on npm package publishing
 date: "2019-02-15T19:44:37.121Z"
-header: header.jpeg
+cover: header.jpeg
 ---
 
 ![Photo by Paul Esch-Laurent on Unsplash](header.jpeg)
