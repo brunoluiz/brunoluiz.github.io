@@ -14,7 +14,7 @@ function Bio () {
           <div
             style={{
               display: `flex`,
-              marginBottom: rhythm(2.5)
+              marginBottom: rhythm(1)
             }}
           >
             <Image
@@ -31,10 +31,7 @@ function Bio () {
               }}
             />
             <p>
-              Personal Blog by{' '}
-              <strong>
-                {author} <a href={social.email}>(contact me)</a>
-              </strong>
+              Personal Blog by <strong>{author}</strong>
               <br />A collection of random software engineering thoughts
             </p>
           </div>
