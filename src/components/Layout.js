@@ -9,6 +9,7 @@ class Layout extends React.Component {
     const { location, title, children } = this.props
     const rootPath = `${__PATH_PREFIX__}/`
     let header
+    let footer
 
     if (location.pathname === rootPath) {
       header = (
@@ -30,6 +31,15 @@ class Layout extends React.Component {
             {title}
           </Link>
         </h1>
+      )
+      footer = (
+        <footer>
+          <a href={`mailto:contact@brunoluiz.net`}>e-mail</a>
+          {' • '}
+          <a href={`https://github.com/brunoluiz`}>github</a>
+          {' • '}
+          <a href={`${__PATH_PREFIX__}/rss.xml`}>rss</a>
+        </footer>
       )
     } else {
       header = (
@@ -62,13 +72,7 @@ class Layout extends React.Component {
       >
         <header>{header}</header>
         <main>{children}</main>
-        <footer>
-          <a href={`mailto:contact@brunoluiz.net`}>mail</a>
-          {' • '}
-          <a href={`https://github.com/brunoluiz`}>github</a>
-          {' • '}
-          <a href={`${__PATH_PREFIX__}/rss.xml`}>rss</a>
-        </footer>
+        {footer}
       </div>
     )
   }
