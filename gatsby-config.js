@@ -2,9 +2,10 @@ module.exports = {
   siteMetadata: {
     title: `Bruno Luiz Blog`,
     author: `Bruno Luiz Silva`,
-    description: `Personal Blog by Bruno Luiz Silva | A collection of my random thoughts.`,
+    description: `Personal Blog by Bruno Luiz Silva | A collection of random software engineering thoughts.`,
     siteUrl: `https://brunoluiz.net`,
     social: {
+      email: `contact@brunoluiz.net`,
       twitter: `brunoluiz`,
       github: 'brunoluiz'
     },

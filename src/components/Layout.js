@@ -63,6 +63,8 @@ class Layout extends React.Component {
         <header>{header}</header>
         <main>{children}</main>
         <footer>
+          <a href={`mailto:contact@brunoluiz.net`}>mail</a>
+          {' • '}
           <a href={`https://github.com/brunoluiz`}>github</a>
           {' • '}
           <a href={`${__PATH_PREFIX__}/rss.xml`}>rss</a>
