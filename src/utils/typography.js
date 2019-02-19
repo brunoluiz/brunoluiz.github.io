@@ -1,14 +1,10 @@
 import Typography from 'typography'
 import CodePlugin from 'typography-plugin-code'
-import theme from 'typography-theme-sutro'
+import theme from 'typography-theme-moraga'
 
 theme.plugins = [new CodePlugin()]
-
-theme.overrideThemeStyles = ({ rhythm }, options) => ({
-  // 'h3 a': {
-  // color: '#222'
-  // }
-})
+theme.headerWeight = 300
+theme.overrideThemeStyles = ({ rhythm }, options) => ({})
 const typography = new Typography(theme)
 
 // Hot reload typography in development.
