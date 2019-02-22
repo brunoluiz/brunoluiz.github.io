@@ -118,7 +118,7 @@ root = true
 end_of_line = lf
 insert_final_newline = true
 
-[*.{js,md,json}]
+[*.{js,md,ts,json}]
 charset = utf-8
 indent_style = space
 tab_width = 2
