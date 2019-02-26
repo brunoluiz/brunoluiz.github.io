@@ -101,7 +101,7 @@ To make Prettier compatible with StandardJS, create a file named `.prettierrc.js
 {
   "singleQuote": true,
   "jsxSingleQuote": true,
-  "noSemi": true,
+  "noSemi": true
 }
 ```
 
@@ -118,10 +118,11 @@ root = true
 end_of_line = lf
 insert_final_newline = true
 
-[*.{js,md,ts,json}]
+[*.{js,ts,md,json}]
 charset = utf-8
 indent_style = space
 tab_width = 2
+indent_size = 2
 trim_trailing_whitespace = true
 ```
 
@@ -156,8 +157,8 @@ If many projects require this to be setup, perhaps a bit of automation will be r
 #!/bin/sh
 
 APP_PATH=$1
-PRETTIER_CONF=.prettierrc.json
-EDITOR_CONF=.editorconfig
+PRETTIER_CONF=$PWD/.prettierrc.json
+EDITOR_CONF=$PWD/.editorconfig
 
 [ -z "$APP_PATH" ] && echo 'No project informed!' && exit
 cd $APP_PATH
@@ -189,6 +190,7 @@ git commit -m 'fix: Prettify 🔥'
 
 # push changes (open PR manually)
 git push -u origin chore/prettier-standard
+
 ```
 
 ## Coding using prettier and standard
