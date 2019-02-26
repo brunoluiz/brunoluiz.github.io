@@ -4,7 +4,7 @@ date: '2019-02-19T19:44:37.121Z'
 cover: cover.jpg
 ---
 
-![Photo by Markus Spiske on Unsplash](cover.jpg)
+![Cover photo by Hunter Haley on Unsplash](cover.jpg)
 
 In any programming language, different code quality and formatting discussions emerge. In JavaScript, it is no different. Discussions around the topic exist since the beginning of it.
 
@@ -149,10 +149,16 @@ It will checkout to `master`, pull the new updates and apply the required change
 
 ## Coding using prettier and standard
 
-With the above configs, most modern editors will already catch-up which formatting and linting rules are in place. `vim` requires some extra configs though. [ Check this guide for `prettier` configs ](https://prettier.io/docs/en/vim.html). If `ALE` is been used with `vim`, add `let g:ale_linters = { 'javascript': ['standard'] }` to support linting as well.
+With the above configs, most modern editors will already catch-up which formatting and linting rules are in place. `vim` requires some extra configs though. [Check this guide for `prettier` configs](https://prettier.io/docs/en/vim.html). If `ALE` is been used with `vim`, add `let g:ale_linters = { 'javascript': ['standard'] }` to support linting as well.
 
 Now, just seat, relax and code ; )
 
 ## References and Credits
 
 - Cover photo by [ Hunter Haley ](https://unsplash.com/photos/s8OO2-t-HmQ) on [Unsplash](https://unsplash.com)
+- [`eslint` website](https://eslint.org/)
+- [Airbnb eslint configs](https://www.npmjs.com/package/eslint-config-airbnb)
+- [`standard` website](https://standardjs.com/)
+- [`semistandard` repo](https://github.com/Flet/semistandard)
+- [`standard-prettierfy` repo](https://github.com/brunoluiz/standard-prettierfy)
+- [Guide for `prettier` vim configs](https://prettier.io/docs/en/vim.html)
