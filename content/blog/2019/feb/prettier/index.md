@@ -1,6 +1,6 @@
 ---
-title: "Linters and Code Formatters in JS: the no-brainer way"
-date: "2019-02-19T19:44:37.121Z"
+title: 'Linters and Code Formatters in JS: the no-brainer way'
+date: '2019-02-19T19:44:37.121Z'
 cover: header.jpeg
 ---
 
@@ -16,9 +16,9 @@ Some code quality and formatting issues can be usually solved through linters an
 
 Linters are useful for a couple of stuff. Since syntax validation and style formatting analysis, to code smell and bad code detection.
 
-The most popular linter in JavaScript is [`eslint`](https://eslint.org/).  Using a set of rules, editors with linting support can indicate which parts of the code are breaking determined quality rules, sometimes even auto-fixing it. They are pretty much complete and flexible on it's rules.
+The most popular linter in JavaScript is [`eslint`](https://eslint.org/). Using a set of rules, editors with linting support can indicate which parts of the code are breaking determined quality rules, sometimes even auto-fixing it. They are pretty much complete and flexible on it's rules.
 
-The issue is which rules to choose. Some developers use the famous [ Airbnb eslint configs](https://www.npmjs.com/package/eslint-config-airbnb), but people usually over customize it. As the following example, projects using `eslint` can have plenty of `eslint-*` packages to achieve the team settled coding style configuration. 
+The issue is which rules to choose. Some developers use the famous [ Airbnb eslint configs](https://www.npmjs.com/package/eslint-config-airbnb), but people usually over customize it. As the following example, projects using `eslint` can require plenty of `eslint-*` packages and configs to achieve the team settled coding style configuration.
 
 ```js
 // package.json
@@ -37,38 +37,30 @@ The issue is which rules to choose. Some developers use the famous [ Airbnb esli
   "env": { "mocha": true },
   "parserOptions": { "sourceType": "script" },
   "extends": "airbnb-base",
-  "plugins": [ "filenames" ],
+  "plugins": ["filenames"],
   "rules": {
-    "arrow-parens": [ "error", "as-needed" ],
-    "comma-dangle": [ "error", "never" ],
-    "filenames/match-regex": [ "error", "^[a-z0-9-.]+$" ],
-    "import/no-extraneous-dependencies": [
-      "error",
-      { "devDependencies": true }
-    ],
-    "import/newline-after-import": [ "off" ],
-    "indent": [ "error", 4 ],
-    "max-len": [ "error", 120 ],
-    "no-console": [ "error" ],
-    "prefer-arrow-callback": [
-      "error",
-      { "allowNamedFunctions": true }
-    ],
-    "prefer-rest-params": [ "off" ],
-    "prefer-spread": [ "off" ],
-    "quote-props": [ "error", "consistent-as-needed" ],
-    "space-before-function-paren": [ "error", "never" ]
+    "arrow-parens": ["error", "as-needed"],
+    "comma-dangle": ["error", "never"],
+    "filenames/match-regex": ["error", "^[a-z0-9-.]+$"],
+    "import/no-extraneous-dependencies": ["error", { "devDependencies": true }],
+    "import/newline-after-import": ["off"],
+    "indent": ["error", 4],
+    "max-len": ["error", 120],
+    "no-console": ["error"],
+    "prefer-arrow-callback": ["error", { "allowNamedFunctions": true }],
+    "prefer-rest-params": ["off"],
+    "prefer-spread": ["off"],
+    "quote-props": ["error", "consistent-as-needed"],
+    "space-before-function-paren": ["error", "never"]
   }
 }
 ```
-
-Nasty, isn't it?
 
 ## Enter StandardJS
 
 StandardJS is a popular JavaScript community attempt to solve the "too many rules" issue. The team need to only add [`standard`](https://standardjs.com/) linter and it should settle discussions. It is an opionated linter, with [plenty of default rules](https://standardjs.com/#standardjs--the-rules) and [no way for customization](https://standardjs.com/#i-disagree-with-rule-x-can-you-change-it).
 
-There are some complications around StandardJS though (personal opinion: I still like it). Calling it "standard", where it is not actually the "de facto" standard for JS projects, can confuse people (there is even a [ disclaimer in their page ](https://standardjs.com/#but-this-isnt-a-real-web-standard)). But, the biggest polemic, is the decission to not use semi-colons.
+There are some complications around StandardJS though (personal opinion: I still like it). Calling it "standard", where it is not actually the "de facto" standard for JS projects, can confuse people (there is even a [disclaimer in their page](https://standardjs.com/#but-this-isnt-a-real-web-standard)). But, the biggest polemic, is the decission to not use semi-colons.
 
 The project arguments it is unnecessary nowadays, as all JS engines can deal with it using Automatic Semicolon Insertion (ASI). The catch is that ASI doesn't work as expected in some cases, and some think it can generate performance penalties.
 
@@ -80,13 +72,13 @@ It is still a good option for linting. If semi-colons are preferred, [`semistand
 
 While StandardJS tries to be the no-brainer linting option, Prettier tries to do the same for code formatting.
 
-There are some differences between linters and code formatting, enabling both to be even used together. 
+There are some differences between linters and code formatting, enabling both to be even used together.
 
 As previously said, a linter is a code analysis tool and doesn't apply only to formatting. Code formatter, on the other hand, just care about the code style. Usually, it is run after saving or commiting files, where it rewrites the file using a pre-defined set of code style rules. A [brief comparison can be found here](https://prettier.io/docs/en/comparison.html).
 
 Prettier fits exactly in this category. As it doesn't do code analysis, a linter can still be used together to indicate issues through the code.
 
-It comes with some pre-defined rules, allowing some customization over it. As it is highly opionated, developers should trust these rules and don't think/discuss them anymore (although some customization is still allowed).
+It comes with some pre-defined rules, allowing minor customization over it. As it is highly opionated, developers should trust these rules and don't think/discuss them anymore.
 
 Even with this narrow flexibility, there is a way to configure Prettier to be compatible with StandardJS. Someone even isolated it in package called [`prettier-standard`](https://github.com/sheerun/prettier-standard), to make developers life easier.
 
@@ -94,7 +86,7 @@ Even with this narrow flexibility, there is a way to configure Prettier to be co
 
 Install the required packages using `npm install husky lint-staged prettier standard`. `husky` and `lint-staged` will enable the implementation of pre-commit hooks, where prettier can be ran.
 
-To make Prettier compatible with StandardJS, create a file named `.prettierrc.json` with the following content, or install `prettier-standard` (easier option, but add extra dependency).
+To make Prettier compatible with StandardJS, create a file named `.prettierrc.json` with the following content, or install `prettier-standard` (easiest option, but it adds an extra dependency).
 
 ```json
 // .prettierrc.json
@@ -151,50 +143,12 @@ After these tweaks, the project is fully supporting StandardJS and Prettier. Wel
 
 ## Automating the configuration process
 
-If many projects require this to be setup, perhaps a bit of automation will be required. The following script do exactly what is suggested on the previous step, requiring only the installation of [`jq`](https://stedolan.github.io/jq/). Place all `.editorconfig` and `.prettierrc.json` in the script folder, execute it and *voilá*.
+If many projects require this to be setup, perhaps automation could help. I developed a script to do the job, requiring only [`jq`](https://stedolan.github.io/jq/) to be installed. To get it, clone the [`standard-prettierfy`](https://github.com/brunoluiz/standard-prettierfy) repo. Run the script from it's root folder and pass the targeted project folder: `./prettify.sh ../project`.
 
-```bash
-#!/bin/sh
-
-APP_PATH=$1
-PRETTIER_CONF=$PWD/.prettierrc.json
-EDITOR_CONF=$PWD/.editorconfig
-
-[ -z "$APP_PATH" ] && echo 'No project informed!' && exit
-cd $APP_PATH
-
-# update repo
-git checkout master
-git pull
-
-# create prettier branch
-git branch -D chore/prettier-standard
-git checkout -b chore/prettier-standard
-
-# set-up prettier and standard
-cp $EDITOR_CONF .
-cp $PRETTIER_CONF .
-npm install husky lint-staged prettier standard
-
-jq '. + { scripts: { "lint": "standard" } }' package.json > package.json.tmp && mv -f package.json.tmp package.json
-jq '. + { husky: { "hooks": { "pre-commit": "lint-staged" } } }'  package.json > package.json.tmp && mv -f package.json.tmp package.json
-jq '. + { "lint-staged": { "*.{js,json,md}": [ "prettier --write", "git add" ] } }'  package.json > package.json.tmp && mv -f package.json.tmp package.json
-
-git add --all
-git commit -m 'chore: Salut prettier and standard 🙌'
-
-# prettify code
-./node_modules/.bin/prettier --write "**/*.js"
-git add --all
-git commit -m 'fix: Prettify 🔥'
-
-# push changes (open PR manually)
-git push -u origin chore/prettier-standard
-
-```
+It will checkout to `master`, pull the new updates and apply the required changes on a branch called `chore/prettier-standard`. It will push the branch, but you will still need to open the Pull Request manually.
 
 ## Coding using prettier and standard
 
 With the above configs, most modern editors will already catch-up which formatting and linting rules are in place. `vim` requires some extra configs though. [ Check this guide for `prettier` configs ](https://prettier.io/docs/en/vim.html). If `ALE` is been used with `vim`, add `let g:ale_linters = { 'javascript': ['standard'] }` to support linting as well.
 
-Now, just seat, relax and code. Don't worry about formatting anymore ;)
+Now, just seat, relax and code ; )
