@@ -80,13 +80,13 @@ Prettier fits exactly in this category. As it doesn't do code analysis, a linter
 
 It comes with some pre-defined rules, allowing minor customization over it. As it is highly opionated, developers should trust these rules and don't think/discuss them anymore.
 
-Even with this narrow flexibility, there is a way to configure Prettier to be compatible with StandardJS. Someone even isolated it in package called [`prettier-standard`](https://github.com/sheerun/prettier-standard), to make developers life easier.
+Even with this narrow flexibility, there is a way to configure Prettier to be compatible with StandardJS.
 
 ## Installing and configuring Prettier and StandardJS
 
 Install the required packages using `npm install husky lint-staged prettier standard`. `husky` and `lint-staged` will enable the implementation of pre-commit hooks, where prettier can be ran.
 
-To make Prettier compatible with StandardJS, create a file named `.prettierrc.json` with the following content, or install `prettier-standard` (easiest option, but it adds an extra dependency).
+To make Prettier compatible with StandardJS, create a file named `.prettierrc.json` with the following content:
 
 ```json
 // .prettierrc.json
