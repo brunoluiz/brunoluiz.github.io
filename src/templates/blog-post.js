@@ -10,7 +10,7 @@ const e = encodeURIComponent
 const subject = title => e(`[blog] ${title}`)
 
 class BlogPostTemplate extends React.Component {
-  render () {
+  render() {
     const post = this.props.data.markdownRemark
     const siteTitle = this.props.data.site.siteMetadata.title
     const { previous, next } = this.props.pageContext

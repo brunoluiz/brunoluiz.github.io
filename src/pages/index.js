@@ -7,7 +7,7 @@ import SEO from '../components/seo'
 import { rhythm } from '../utils/typography'
 
 class BlogIndex extends React.Component {
-  render () {
+  render() {
     const { data } = this.props
     const { title: siteTitle, icon } = data.site.siteMetadata
     const posts = data.allMarkdownRemark.edges
