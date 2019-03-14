@@ -57,7 +57,7 @@ After installing or enabling it, the PS1 needs to be changed to include the kube
 
 The only issue with `kube-ps1` is, when used with `git` plugin in zsh, it can generate really long PS1 strings. If `tmux` is used, it can be actually set-up in the status bar through [`kube-tmux`](https://github.com/jonmosco/kube-tmux) plugin, avoiding PS1 cluttering.
 
-![kube-tmux example](./kube-tmux.png)
+![kube-tmux example](./kube-tmux-ps1.png)
 
 ## Investigating logs: the sane way
 
