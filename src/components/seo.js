@@ -74,14 +74,13 @@ function SEO ({
             ]
               .concat(
                 keywords.length > 0
-                  ? {
-                      name: `keywords`,
-                      content: keywords.join(`, `)
-                    }
+                  ? { name: `keywords`, content: keywords.join(`, `) }
                   : []
               )
               .concat(meta)}
-          />
+          >
+            <script src='https://my.remarkbox.com/static/js/iframe-resizer/iframeResizer.min.js' />
+          </Helmet>
         )
       }}
     />

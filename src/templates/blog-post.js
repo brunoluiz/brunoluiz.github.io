@@ -1,13 +1,11 @@
 import React from 'react'
 import { Link, graphql } from 'gatsby'
 
+import Comments from '../components/Comments'
 import Bio from '../components/Bio'
 import Layout from '../components/Layout'
 import SEO from '../components/seo'
 import { rhythm, scale } from '../utils/typography'
-
-const e = encodeURIComponent
-const subject = title => e(`[blog] ${title}`)
 
 class BlogPostTemplate extends React.Component {
   render () {
@@ -41,31 +39,6 @@ class BlogPostTemplate extends React.Component {
             marginBottom: rhythm(1)
           }}
         />
-        <p
-          style={{
-            marginBottom: rhythm(2)
-          }}
-        >
-          <a
-            href={`https://mobile.twitter.com/search?q=${e(
-              `https://brunoluiz.net${this.props.location.pathname}`
-            )}`}
-            target='_blank'
-            rel='noopener noreferrer'
-          >
-            Discuss on Twitter
-          </a>
-          {' • '}
-          <a
-            href={`mailto:contact@brunoluiz.net?subject=${subject(
-              post.frontmatter.title
-            )}`}
-            target='_blank'
-            rel='noopener noreferrer'
-          >
-            Discuss through e-mail
-          </a>
-        </p>
         <Bio />
 
         <ul
@@ -93,6 +66,7 @@ class BlogPostTemplate extends React.Component {
             )}
           </li>
         </ul>
+        <Comments uri={this.props.location.href} />
       </Layout>
     )
   }
