@@ -1,6 +1,6 @@
 ---
 title: Devops productivity tips for Kubernetes
-date: '2019-03-18T19:44:37.121Z'
+date: '2019-03-14T21:37:37.121Z'
 cover: header.jpeg
 ---
 
