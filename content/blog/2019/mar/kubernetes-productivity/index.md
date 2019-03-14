@@ -1,5 +1,5 @@
 ---
-title: Devops productivity tips for Kubernetes
+title: Devops productivity hacks for Kubernetes
 date: '2019-03-14T21:37:37.121Z'
 cover: header.jpeg
 ---
