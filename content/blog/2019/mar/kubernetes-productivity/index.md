@@ -6,13 +6,13 @@ cover: header.jpeg
 
 ![Photo by Cameron Venti on Unsplash](./header.jpeg)
 
-Today, Kubernetes is the de facto container orchestration solution. Together with the devops culture, developers have to get familiarised to its tools, such as kubectl.
+Today, Kubernetes is the de facto container orchestration solution. Together with the devops culture, developers have to get familiarised to its tools, such as `kubectl`.
 
 After some point though, using kubectl for everything can get quite verbose, specially if you use many namespaces and contexts. The following tips try to minimise the pain of doing operations solely through it, sometimes even using other tools besides it.
 
 ## Kubectx: context and namespaces management
 
-The operations done in kubectl usually require two params: context and namespace. Any operation will result in something as `kubectl --context dev --namespace hello-world exec -it hello-world-app-0 sh`. For a one time operation, probably it is fine, but after some point it can get cumbersome. One way to avoid these long command strings is by using [ `kubectx` ](https://github.com/ahmetb/kubectx).
+The operations done in kubectl usually require two params: context and namespace. Any operation will result in something as `kubectl --context dev --namespace hello-world exec -it hello-world-app-0 sh`. For a one time operation, probably it is fine, but after some point it can get cumbersome. One way to avoid these long command strings is by using [`kubectx`](https://github.com/ahmetb/kubectx).
 
 After installing it, the context can be set simply using `kubectx dev` and the namespace as `kubens hello-world`. To list the available contexts and namespaces, just run it without arguments. This will make the above operation to be as `kubectl exec -it hello-world-app-0 sh`.
 
@@ -87,5 +87,13 @@ These are just some tricks I use in my daily kubernetes life. I hope you enjoy a
 
 ## References
 
-- Header image: Photo by [Cameron Venti](https://unsplash.com/photos/QtETdXXR7gs?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText) on Unsplash
-- Header image: Photo by [Cameron Venti](https://unsplash.com/photos/QtETdXXR7gs?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText) on Unsplash
+- Cover photo by [Cameron Venti](https://unsplash.com/photos/QtETdXXR7gs?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText) on Unsplash
+- [`kubectx` repo](https://github.com/ahmetb/kubectx)
+- [`ahmetb/kubectl-aliases` repo](https://github.com/ahmetb/kubectl-aliases)
+- [`oh-my-zsh` repo](https://github.com/robbyrussell/oh-my-zsh)
+- [`oh-my-zsh` kubectl info](https://github.com/robbyrussell/oh-my-zsh/tree/master/plugins/kubectl)
+- [`kube-ps1` repo](https://github.com/jonmosco/kube-ps1)
+- [`oh-my-zsh` kube-ps1 info](https://github.com/robbyrussell/oh-my-zsh/tree/master/plugins/kube-ps1)
+- [`kube-tmux` repo](https://github.com/jonmosco/kube-tmux)
+- [`stern` repo](https://github.com/wercker/stern)
+- [`kube-applier` repo](https://github.com/box/kube-applier)
