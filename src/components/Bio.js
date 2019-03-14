@@ -4,7 +4,7 @@ import Image from 'gatsby-image'
 
 import { rhythm } from '../utils/typography'
 
-function Bio() {
+function Bio () {
   return (
     <StaticQuery
       query={bioQuery}

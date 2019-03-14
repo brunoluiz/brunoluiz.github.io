@@ -5,7 +5,7 @@ import Layout from '../components/Layout'
 import SEO from '../components/seo'
 
 class NotFoundPage extends React.Component {
-  render() {
+  render () {
     const { data } = this.props
     const siteTitle = data.site.siteMetadata.title
 
