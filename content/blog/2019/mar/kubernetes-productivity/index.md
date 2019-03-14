@@ -8,21 +8,21 @@ cover: header.jpeg
 
 Today, Kubernetes is the de facto container orchestration solution. Together with the devops culture, developers have to get familiarised to its tools, such as `kubectl`.
 
-After some point though, using `kubectl` for everything can get quite verbose, specially if you use many namespaces and contexts. The following tips try to minimise the pain of doing operations solely through it, sometimes even using other tools besides it.
+After some point though, using `kubectl` for everything can get quite verbose, especially if you use many namespaces and contexts. The following tips try to minimise the pain of doing operations solely through it, sometimes even using other tools beside it.
 
 ## Kubectx: context and namespaces management
 
-The operations done in `kubectl` usually require two params: context and namespace. Any operation will result in something as `kubectl --context dev --namespace hello-world exec -it hello-world-app-0 sh`. It is fine for a one time operation, but after some point it can get quite cumbersome. One way to avoid these long command strings is by using [`kubectx`](https://github.com/ahmetb/kubectx).
+Operations done in `kubectl` usually require two params: context and namespace. Any operation will result in something as `kubectl --context dev --namespace hello-world exec -it hello-world-app-0 sh`. It is fine for a one-time operation, but after some point, it can get quite cumbersome. One way to avoid these long command strings is by using [`kubectx`](https://github.com/ahmetb/kubectx).
 
-After installing it, the context can be set by simply using `kubectx dev` and the namespace as `kubens hello-world`. To list the available contexts and namespaces, just run it without arguments. The above operation can be ran by only using `kubectl exec -it hello-world-app-0 sh`.
+After installing it, the context can be set by simply using `kubectx dev` and the namespace as `kubens hello-world`. To list the available contexts and namespaces, just run it without arguments. The above operation can be run by only using `kubectl exec -it hello-world-app-0 sh`.
 
 ## Terminal aliases
 
-Seasoned unix developers are quite used to terminal aliases. Some are quite popular that are even grouped in packs, such as [oh-my-zsh git aliases](https://github.com/robbyrussell/oh-my-zsh/blob/master/plugins/git/git.plugin.zsh). With Kubernetes is not that different.
+Seasoned Unix developers are quite used to terminal aliases. Some are quite popular that are even grouped in packs, such as [oh-my-zsh git aliases](https://github.com/robbyrussell/oh-my-zsh/blob/master/plugins/git/git.plugin.zsh). With Kubernetes is not that different.
 
 Usually, having `alias k="kubectl"` already make operations shorter. Using the same example, it would result in `k exec -it hello-world-app-0 sh`. But, most likely, one alias will not be enough. There are some options for this.
 
-The first one can be set-up in any terminal emulator (`zsh`, `bash`...). Get the `.kubectl_aliases` file from [`ahmetb/kubectl-aliases`](https://github.com/ahmetb/kubectl-aliases) and place it in your home directory. After sourcing it on `.zshrc` or `.bashrc`, 600 aliases will be available out-of-box, including the forementioned `k`.
+The first one can be set-up in any terminal emulator (`zsh`, `bash`...). Get the `.kubectl_aliases` file from [`ahmetb/kubectl-aliases`](https://github.com/ahmetb/kubectl-aliases) and place it in your home directory. After sourcing it on `.zshrc` or `.bashrc`, 600 aliases will be available out-of-box, including the aforementioned `k`.
 
 ```bash
 [ -f ~/.kubectl_aliases ] && source ~/.kubectl_aliases
@@ -51,7 +51,7 @@ Developers are humans (in case you did not know) and humans do not have bulletpr
 
 To avoid this, an indicator can be used in the terminal to show what is the actual context and namespace. The easiest way to do it is by using [`kube-ps1`](https://github.com/jonmosco/kube-ps1). It already comes with `oh-my-zsh`, requiring `kube-ps1` to be added to `.zshrc` plugins variable.
 
-After installing or enabling it, the PS1 needs to be changed to include the kubectl context and namespace informations. This can be easily done by adding `export PS1='$(kube_ps1) '$PS1` to your `.bashrc/.zshrc` file. The final result will be something as the following.
+After installing or enabling it, the PS1 needs to be changed to include the kubectl context and namespace information. This can be easily done by adding `export PS1='$(kube_ps1) '$PS1` to your `.bashrc/.zshrc` file. The final result will be something like the following.
 
 ![kube-ps1 example](./kube-ps1.png)
 
@@ -71,13 +71,13 @@ kubectl --namespace dev --context labs logs <pod-id> -f
 
 If the pod is killed and restarted, the process has to be repeated as the pod id will change. Besides, the `kubectl` logs tool is quite simple in terms of features. [`stern`](https://github.com/wercker/stern) is meant to be more powerful and allows to tail multiple pods and containers at once (even the whole namespace, if required).
 
-To tail pods, such as the hello-world example, `stern hello-world` will do. It would tail everything using the `*hello-world*` as expression. If multiple pods were been run, it would log all hello-world pods.
+To tail pods, such as the hello-world example, `stern hello-world` will do. It would tail everything using the `*hello-world*` as an expression. If multiple pods were been run, it would log all hello-world pods.
 
 Shorter calls can be done setting up an alias, such as `alias s='stern'`. If set, it uses the `kubectx` and `kubens` settings, while accepting `--namespace` and `--context` args as well.
 
 ## Automatic deployments
 
-An way to avoid touching prod enviroment using `kubectl`, is by setting up [`kube-applier`](https://github.com/box/kube-applier). This service auto-deploy changes on infrastructure changes, based on a git repository.
+A way to avoid touching prod environment using `kubectl` is by setting up [`kube-applier`](https://github.com/box/kube-applier). This service auto-deploy changes on infrastructure changes, based on a git repository.
 
 It runs as a separate pod, watching and comparing kubernetes manifest repository with deployed services. If there is a difference between manifests, it will automatically apply what is in the git repository, making it the source of truth for kube manifests.
 
