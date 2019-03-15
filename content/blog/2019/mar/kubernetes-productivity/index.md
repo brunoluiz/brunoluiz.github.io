@@ -83,6 +83,36 @@ It runs as a separate pod, watching and comparing kubernetes manifest repository
 
 After installing `kube-applier`, no deploys should be done through `kubectl`, as it will always revert to git manifests. This avoids confusions around deployments made in a rush, not merged and then rollbacked by a mistake.
 
+## Add safety against wrong kubectl apply
+
+If `kube-applier` is not an option, perhaps it would be good to have a protection before `kubectl apply` operations. There are many ways to do this, the following considers overwriting `kaf` from `oh-my-zsh` plugin. It adds a confirmation prompt and shows which context it will be applied to.
+
+```bash
+# Confirm command to be executed
+confirm() {
+  echo -n "\e[33mDo you want to run $*? [N/yes] \e[m"
+  read REPLY
+
+  # if test "$REPLY" = "y" -o "$REPLY" = "Y"; then
+  if test "$REPLY" = "yes"; then
+    "$@"
+  else
+      echo "Cancelled by user"
+  fi
+}
+
+safe_kubectlapply() {
+  context=$(kubectl config current-context)
+  echo "\n"
+  echo "BECAREFUL!!! APPLYING TO \e[31m$context\e[m"
+  confirm kubectl apply -f "$@"
+}
+
+alias kaf='safe_kubectlapply'
+```
+
+This can pottentially save lifes. It can be modified to be used with other operations, such as `kdel` and `kdelf` (aliases for `kubectl delete`).
+
 ## Conclusion
 
 These are just some tricks I use in my daily kubernetes life. Have a good coding week! 😉
