@@ -12,7 +12,7 @@ After some point though, using `kubectl` for everything can get quite verbose, e
 
 ## Kubectx: context and namespaces management
 
-Operations done in `kubectl` usually require two params: context and namespace. Any operation will result in something as `kubectl --context dev --namespace hello-world exec -it hello-world-app-0 sh`. It is fine for a one-time operation, but after some point, it can get quite cumbersome. One way to avoid these long command strings is by using [`kubectx`](https://github.com/ahmetb/kubectx).
+Operations done in `kubectl` usually require two params: **context** and **namespace**. Any operation will result in something as `kubectl --context dev --namespace hello-world exec -it hello-world-app-0 sh`. It is fine for a one-time operation, but after some point, it can get quite cumbersome. One way to avoid these long command strings is by using [`kubectx`](https://github.com/ahmetb/kubectx).
 
 After installing it, the context can be set by simply using `kubectx dev` and the namespace as `kubens hello-world`. To list the available contexts and namespaces, just run it without arguments. The above operation can be run by only using `kubectl exec -it hello-world-app-0 sh`.
 
