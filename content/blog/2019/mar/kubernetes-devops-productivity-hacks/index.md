@@ -4,7 +4,7 @@ date: '2019-03-14T21:37:37.121Z'
 cover: header.jpeg
 ---
 
-![Photo by Cameron Venti on Unsplash](./header.jpeg)
+![Photo by Cameron Venti on Unsplash](header.jpeg)
 
 Today, Kubernetes is the de facto container orchestration solution. Together with the devops culture, developers have to get familiarised to its tools, such as `kubectl`.
 
@@ -53,11 +53,11 @@ To avoid this, an indicator can be used in the terminal to show what is the actu
 
 After installing or enabling it, the PS1 needs to be changed to include the kubectl context and namespace information. This can be easily done by adding `export PS1='$(kube_ps1) '$PS1` to your `.bashrc/.zshrc` file. The final result will be something like the following.
 
-![kube-ps1 example](./kube-ps1.png)
+![kube-ps1 example](kube-ps1.png)
 
 The only issue with `kube-ps1` is, when used with `git` plugin in zsh, it can generate really long PS1 strings. If `tmux` is used, it can be actually set-up in the status bar through [`kube-tmux`](https://github.com/jonmosco/kube-tmux) plugin, avoiding PS1 cluttering.
 
-![kube-tmux example](./kube-tmux-ps1.png)
+![kube-tmux example](kube-tmux-ps1.png)
 
 ## Investigating logs: the sane way
 
@@ -72,6 +72,12 @@ kubectl --namespace dev --context labs logs <pod-id> -f
 If the pod is killed and restarted, the process has to be repeated as the pod id will change. Besides, the `kubectl` logs tool is quite simple in terms of features. [`stern`](https://github.com/wercker/stern) is meant to be more powerful and allows to tail multiple pods and containers at once (even the whole namespace, if required).
 
 To tail pods, such as the hello-world example, `stern hello-world` will do. It would tail everything using the `*hello-world*` as an expression. If multiple pods were been run, it would log all hello-world pods.
+
+```bash
+stern hello-world  # tail all pods containing "hello-world" in its name
+stern .            # tail all pods in current namespace
+stern --since 1h . # tail logs from last one hour
+```
 
 Shorter calls can be done setting up an alias, such as `alias s='stern'`. If set, it uses the `kubectx` and `kubens` settings, while accepting `--namespace` and `--context` args as well.
 
