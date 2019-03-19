@@ -55,6 +55,7 @@
   },
   "scripts": {
     "lint": "standard",
+    "dev": "gatsby develop",
     "deploy": "gatsby build && gh-pages -d public -b master"
   },
   "devDependencies": {
