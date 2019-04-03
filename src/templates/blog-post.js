@@ -7,6 +7,11 @@ import Layout from '../components/Layout'
 import SEO from '../components/seo'
 import { rhythm, scale } from '../utils/typography'
 
+const getThumbnail = post =>
+  post.frontmatter.cover
+    ? post.frontmatter.cover.childImageSharp.fixed.src
+    : null
+
 class BlogPostTemplate extends React.Component {
   render () {
     const post = this.props.data.markdownRemark
@@ -19,7 +24,7 @@ class BlogPostTemplate extends React.Component {
           title={post.frontmatter.title}
           description={post.excerpt}
           pathname={this.props.location.pathname}
-          thumbnail={post.frontmatter.cover.childImageSharp.fixed.src}
+          thumbnail={getThumbnail(post)}
           type='article'
         />
         <h1>{post.frontmatter.title}</h1>
