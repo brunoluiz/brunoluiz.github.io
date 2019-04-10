@@ -1,7 +1,10 @@
 ---
 title: GraphQL as a Gateway
 date: '2019-04-03T07:54:37.121Z'
+cover: 'cover.jpg'
 ---
+
+![Photo by Christian Stahl on Unsplash](cover.jpg)
 
 GraphQL, REST, gRPC, Thrift... Have you ever imagined how to glue these together, in a micro-services architecture, and expose to the world? There are some common ways to do it, such as using Nginx or Kong, but an alternative way to do this is by using GraphQL in front of all services.
 
@@ -40,5 +43,12 @@ The caveats with this are: how to deal with bulk queries and how to properly rat
 
 ## References
 
+- [Photo by Christian Stahl on Unsplash](https://unsplash.com/photos/8S96OpxSlvg)
 - [Pattern: API Gateway / Backend for Front-End](https://microservices.io/patterns/apigateway.html)
 - [API Proxy vs API Gateway](https://stoplight.io/blog/api-proxy-vs-api-gateway-c008c942a02d/)
+
+- https://www.robinwieruch.de/why-graphql-advantages-disadvantages-alternatives/
+- https://medium.com/open-graphql/graphql-1-140fab436942
+- https://about.sourcegraph.com/graphql/graphql-at-massive-scale-graphql-as-the-glue-in-a-microservice-architecture
+- https://webapplog.com/graphql/
+- https://philsturgeon.uk/api/2017/01/26/graphql-vs-rest-caching/
