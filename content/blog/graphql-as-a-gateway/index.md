@@ -64,13 +64,27 @@ Frontend and backend developers can easily settle in a schema and, in a question
 
 Besides, code generation, IDE auto-completion, easy documentation/schema discovery and good API exploring tools (such as GraphQL Playground and GraphIQL) makes the development experience way nicer when compared to REST.
 
-## GraphQL as gateway
+## GraphQL as your API Gateway
 
-High hopes that you are convinced about trying GraphQL. Implementing a GraphQL server is not complicated and there are many guides around the web talking about it, such as Apollo Server and Relay official guides.
+High hopes that you are convinced about trying GraphQL. Implementing a GraphQL server is not complicated and there are many guides around the web talking about it, such as Apollo Server.
 
-Before implementing it though, the team need to decide the strategy on how to build and manage the GraphQL gateway.
+Teams will be able to develop its own micro-services independently, but the most important thing is settle on how schemas will be exposed and configured.
 
-### API Gateway team
+### Remote schema stitching
+
+The gateway will get the schema from other GraphQL services and then stich then together as the public facing schema. This allows more freedom for teams, but it will disperse the API schema through multiple places, making it harder to test and easier to break. There is a chance to have merge/stiching conflict.
+
+> Mention Apollo Federation
+
+### API Gateway owns schemas
+
+Schema is contained locally on the gateway. This make it easier to develop and easy to test, as everything will be in the same place. But, the service will be constantly modified by multiple teams (resolvers, schemas) and this can require constant gateway releases.
+
+This will lead to the service been constantly modified by multiple teams. Rules around code formatting and style will need to be agreed through all teams to make the code uniform.
+
+### Combination of both above
+
+It is possible to mix both strategies, which is specially useful if the team wants to use remote schema stitching but still has some services using GRPC or HTTP.
 
 ## References
 
@@ -85,7 +99,12 @@ Before implementing it though, the team need to decide the strategy on how to bu
 
 - [GraphQL Documentation](https://graphql.org/learn/)
 - [GitHub GraphQL Resource Limitations Documentation](https://developer.github.com/v4/guides/resource-limitations/)
-- [JSONAPI: REST alternative to GraphQL](https://jsonapi.org/)
+- [GraphQL Gateway Architectures](https://tomasalabes.me/blog/graphql/node/microservices/2018/08/11/graphql-architectures.html)
+- [Why GraphQL: Advantages, Disadvantages & Alternatives](https://www.robinwieruch.de/why-graphql-advantages-disadvantages-alternatives/)
+- [Why GraphQL is Taking Over APIs](https://webapplog.com/graphql/)
+- [Schema stitching -- Combining multiple GraphQL APIs into one](https://www.apollographql.com/docs/graphql-tools/schema-stitching)
+- [Schema stitching -- Combining multiple GraphQL APIs into one](https://www.apollographql.com/docs/graphql-tools/schema-stitching)
+- [Apollo Federation](https://blog.apollographql.com/apollo-federation-f260cf525d21)
 
 #### Tools
 
@@ -97,8 +116,4 @@ Before implementing it though, the team need to decide the strategy on how to bu
 
 #### Other
 
-- https://www.robinwieruch.de/why-graphql-advantages-disadvantages-alternatives/
-- https://medium.com/open-graphql/graphql-1-140fab436942
-- https://about.sourcegraph.com/graphql/graphql-at-massive-scale-graphql-as-the-glue-in-a-microservice-architecture
-- https://webapplog.com/graphql/
-- https://philsturgeon.uk/api/2017/01/26/graphql-vs-rest-caching/
+- [JSONAPI: REST alternative to GraphQL](https://jsonapi.org/)
