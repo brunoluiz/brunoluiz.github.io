@@ -6,7 +6,7 @@ cover: 'cover.jpg'
 
 ![Photo by Christian Stahl on Unsplash](cover.jpg)
 
-GraphQL, REST, gRPC, Thrift... Have you ever imagined how to glue these together, in a micro-services architecture, and expose to the world? There are some common ways to do it, such as using Nginx or Kong, but an alternative way to do this is by using GraphQL in front of all services.
+GraphQL, REST, GRPC, Thrift... Have you ever imagined how to stick these together, in a micro-services architecture, and expose to the world? There are some common ways to do it, such as using Nginx or Kong, but an alternative way to do this is by using GraphQL in front of all services.
 
 ## API Gateway pattern -- a quick introduction
 
@@ -31,13 +31,13 @@ _For more information on the API gateway pattern, give a look at [nginx micro-se
 
 GraphQL was initially developed by Facebook, [been open-sourced in 2015](https://code.fb.com/core-data/graphql-a-data-query-language/). Many companies started using it for internal APIs, but some are already exposing it as its public API (eg: GitHub, Shopify, Yelp and Contenful).
 
-### Schema validation and documentation
+### ✅ Schema validation and documentation
 
 In GraphQL, differently from REST, a schema is always required, following [GraphQL Foundation](https://graphql.org) directives. This allows not only schema validation since day one, but documentation as well. Typed languages can benefit from the schema and generate type definitions through it (eg: [typescript graphql-code-generator](https://github.com/dotansimha/graphql-code-generator)).
 
 In theory, the same could be done in REST by using OpenAPI/Swagger, specially for documentation ~~but yaml, yikes~~. But, the code generation tools are not exactly the best and sometimes the schema validation do not work properly, requiring extra middlewares and tweaks around it. As GraphQL is standardised, it doesn't suffer from these issues.
 
-### An endpoint to rule them all
+### 👑 An endpoint to rule them all
 
 GraphQL only exposes one endpoint, which can be a good and bad thing. Instead of having N client requests, only one is needed, with the server orchestrating everything required to fulfill the whole request -- eg: calling multiple micro-services, in multiple and different protocols.
 
@@ -48,7 +48,7 @@ An approach for tackle this is by calculating the query complexity and using it 
 > Should I mention GraphQL DataLoader?
 > Over/under fetching
 
-### Out-of-box standards
+### 📦 Out-of-box standards
 
 REST has been around for a long time, and during this period developers started to have specific necessities, such as sparse fieldsets, versioning, pagination. There are a lot of ways of doing these, but none is really a standard (perhaps, the closest one would be [jsonapi](https://jsonapi.org/)). GraphQL come with some of these specs out-of-box:
 
@@ -58,7 +58,7 @@ REST has been around for a long time, and during this period developers started 
 
 Of course, there are other stuff which one can compare against REST, but the idea is to show that GraphQL can be an option.
 
-### Developer experience
+### 🧰 Developer experience
 
 Frontend and backend developers can easily settle in a schema and, in a question of minutes, have stubs around it. As the schema is not only focused on documentation as OpenAPI, changes on it would require discussions, making it less error prone for the whole team.
 
@@ -66,25 +66,29 @@ Besides, code generation, IDE auto-completion, easy documentation/schema discove
 
 ## GraphQL as your API Gateway
 
-High hopes that you are convinced about trying GraphQL. Implementing a GraphQL server is not complicated and there are many guides around the web talking about it, such as Apollo Server.
+High hopes that you are convinced on trying GraphQL 🙌. Implementing a GraphQL server is not complicated and there are many guides in the web talking about it. [This list](https://graphql.org/code) has server implementation, separated by language.
 
-Teams will be able to develop its own micro-services independently, but the most important thing is settle on how schemas will be exposed and configured.
+As teams develop micro-services independently, a strategy is required to expose and change the public facing GraphQL API. There are three main strategies for it:
 
 ### Remote schema stitching
 
-The gateway will get the schema from other GraphQL services and then stich then together as the public facing schema. This allows more freedom for teams, but it will disperse the API schema through multiple places, making it harder to test and easier to break. There is a chance to have merge/stiching conflict.
+The gateway will get the schema from other GraphQL services and then stich it together as the public facing schema. This allows more freedom for teams, but it will disperse the API schema through multiple places, making it harder to test and easier to break, with a chance to have merge/stiching conflict.
 
-> Mention Apollo Federation
+Although this can be a problem, teams can make releases without even touching the API Gateway, making the deploys isolated instead of requiring constant API Gateways deploys.
+
+> Recently, Apollo Server implemented [Federation](https://www.apollographql.com/docs/apollo-server/federation/introduction/), which will replace remote schema stitching. Bear in mind it is still Apollo specific.
 
 ### API Gateway owns schemas
 
-Schema is contained locally on the gateway. This make it easier to develop and easy to test, as everything will be in the same place. But, the service will be constantly modified by multiple teams (resolvers, schemas) and this can require constant gateway releases.
+Schema is contained locally on the gateway. This easy the development and test, as everything will be in the same place. The caveat is that the service will be constantly modified by multiple teams (resolvers, schemas), requiring constant gateway releases.
 
-This will lead to the service been constantly modified by multiple teams. Rules around code formatting and style will need to be agreed through all teams to make the code uniform.
+As this service will be constantly modified by multiple people, rules around code formatting and style should be agreed through all teams to make the code uniform.
+
+Personally, I prefer this one as it keeps everything in one place, gives high visibility on what is happening and allow easy discovery of other resolvers.
 
 ### Combination of both above
 
-It is possible to mix both strategies, which is specially useful if the team wants to use remote schema stitching but still has some services using GRPC or HTTP.
+It is possible to mix both strategies, which is specially useful if the team wants to use remote schema stitching but have some services using GRPC or HTTP. Another way to tackle those non-GraphQL services is to put a server in front of it, allowing schema stiching and giving more flexibility for the the responsible team.
 
 ## References
 
