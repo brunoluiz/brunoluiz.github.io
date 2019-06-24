@@ -25,7 +25,7 @@ While proxies just forward requests, API Gateways encapsulate more of the applic
 
 GraphQL server implementation allow most of these features, but then what is and why GraphQL?
 
-_For more information on the API gateway pattern, give a look at [nginx micro-services article](https://www.nginx.com/blog/building-microservices-using-an-api-gateway/) and on this [Chris Richardson article](https://freecontent.manning.com/the-api-gateway-pattern/)_
+> _For more information on the API gateway pattern, give a look at [nginx micro-services article](https://www.nginx.com/blog/building-microservices-using-an-api-gateway/) and on this [Chris Richardson article](https://freecontent.manning.com/the-api-gateway-pattern/)._
 
 ## 🙋 Why GraphQL and not REST?
 
@@ -35,34 +35,29 @@ GraphQL was initially developed by Facebook, [been open-sourced in 2015](https:/
 
 In GraphQL, differently from REST, a schema is always required, following [GraphQL Foundation](https://graphql.org) directives. This allows not only schema validation since day one, but documentation as well. Typed languages can benefit from the schema and generate type definitions through it (eg: [typescript graphql-code-generator](https://github.com/dotansimha/graphql-code-generator)).
 
-In theory, the same could be done in REST by using OpenAPI/Swagger, specially for documentation ~~but yaml, yikes~~. But, the code generation tools are not exactly the best and sometimes the schema validation do not work properly, requiring extra middlewares and tweaks around it. As GraphQL is standardised, it doesn't suffer from these issues.
+In theory, the same could be done in REST by using OpenAPI/Swagger, specially for documentation ~~but yaml, yikes~~. But, the code generation tools are not exactly the best and sometimes the schema validation do not work properly, requiring extra middlewares and tweaks around it. As GraphQL is standardised in this sense, it doesn't suffer from these issues.
 
 ### An endpoint to rule them all
 
-GraphQL only exposes one endpoint, which can be a good and bad thing. Instead of having N client requests, only one is needed, with the server orchestrating everything required to fulfill the whole request -- eg: calling multiple micro-services, in multiple and different protocols.
+GraphQL only exposes one endpoint, which can be a good and bad thing. Instead of having N client requests, only one is needed, with the server orchestrating everything required to fulfill the whole request -- eg: calling multiple micro-services, in multiple and different protocols (solves under-fetching issues).
 
 One of the caveats of this approach is how to properly rate limit clients, as the queries can be quite complex, with multiple underlying requests, but still being one client request. This means an API user can't be limited through its number of calls anymore, but with something different.
 
 An approach for tackle this is by calculating the query complexity and using it as a rate limit score. [On GitHub API docs](https://developer.github.com/v4/guides/resource-limitations/), there are examples on how they deal with this.
 
-> Should I mention GraphQL DataLoader?
-> Over/under fetching
-
 ### Out-of-box standards
 
-REST has been around for a long time, and during this period developers started to have specific necessities, such as sparse fieldsets, versioning, pagination. There are a lot of ways of doing these, but none is really a standard (perhaps, the closest one would be [jsonapi](https://jsonapi.org/)). GraphQL come with some of these specs out-of-box:
+REST has been around for a long time, and during this period developers started to have specific necessities, such as sparse fieldsets, versioning, pagination. There are a lot of ways of doing these, but none is really a standard (perhaps, the closest thing would be [jsonapi](https://jsonapi.org/)). GraphQL come with some of these specs out-of-box:
 
-- [Sparse fieldset](https://graphql.org/learn/queries/#fields): while making the request, all the required fields need to be specified
-- [Versioning](https://graphql.org/learn/best-practices/#versioning): versioning is not a good practice in GraphQL instead, the schema should continually evolute. New capabilities can be inserted on new types and fiels, allowing the client to request it only when required. If a field needs to be deprecated, one can use a directive such as [`@deprecated`](https://www.apollographql.com/docs/graphql-tools/schema-directives)
+- [Sparse fieldset](https://graphql.org/learn/queries/#fields): while making the request, all the required fields need to be specified, avoiding over-fetching
+- [Versioning](https://graphql.org/learn/best-practices/#versioning): versioning is not a good practice in GraphQL instead, the schema should continually evolute. New capabilities can be inserted on new types and fields, allowing the client to plan and decide when to change to new resolvers. If a field needs to be deprecated, one can use a directive such as [`@deprecated`](https://www.apollographql.com/docs/graphql-tools/schema-directives).
 - [Pagination](https://graphql.org/learn/pagination/): there are some conventions and, for more complex implementations, there is the Connection model pattern.
 
 Of course, there are other stuff which one can compare against REST, but the idea is to show that GraphQL can be an option.
 
 ### Developer experience
 
-Frontend and backend developers can easily settle in a schema and, in a question of minutes, have stubs around it. As the schema is not only focused on documentation as OpenAPI, changes on it would require discussions, making it less error prone for the whole team.
-
-Besides, code generation, IDE auto-completion, easy documentation/schema discovery and good API exploring tools (such as GraphQL Playground and GraphIQL) makes the development experience way nicer when compared to REST.
+Front-end and back-end developers can easily settle in a schema and, in a question of minutes, have stubs around it. Besides, code generation, IDE auto-completion, easy documentation/schema discovery and good API exploring tools (such as GraphQL Playground and GraphIQL) makes the development experience way nicer when compared to REST.
 
 ## ⚡ GraphQL as your API Gateway
 
@@ -101,7 +96,7 @@ Hopefully, this might have clarified a bit what to expect from GraphQL as the ma
 - [Ngnix micro-services book chapter about API Gateway](https://www.nginx.com/blog/building-microservices-using-an-api-gateway/)
 - [Chris Richardson article about API Gateway](https://freecontent.manning.com/the-api-gateway-pattern/)
 - [API Proxy vs API Gateway](https://stoplight.io/blog/api-proxy-vs-api-gateway-c008c942a02d/)
-- [Pattern: API Gateway / Backend for Front-End](https://microservices.io/patterns/apigateway.html)
+- [Pattern: API Gateway / Back-end for Front-End](https://microservices.io/patterns/apigateway.html)
 
 #### GraphQL
 
@@ -124,3 +119,4 @@ Hopefully, this might have clarified a bit what to expect from GraphQL as the ma
 #### Other
 
 - [JSONAPI: REST alternative to GraphQL](https://jsonapi.org/)
+- [What is over and under-fetching](https://stackoverflow.com/questions/44564905/what-is-over-fetching-or-under-fetching/44568365)
