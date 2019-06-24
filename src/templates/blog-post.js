@@ -71,7 +71,11 @@ class BlogPostTemplate extends React.Component {
             )}
           </li>
         </ul>
-        <Comments uri={this.props.location.href} />
+        <Comments
+          url={this.props.location.href}
+          title={post.frontmatter.title}
+          id={post.id}
+        />
       </Layout>
     )
   }
