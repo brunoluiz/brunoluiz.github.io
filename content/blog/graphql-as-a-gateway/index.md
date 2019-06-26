@@ -1,7 +1,7 @@
 ---
 title: GraphQL feat API Gateway
 date: '2019-07-01T08:00:00Z'
-cover: 'cover.jpg'
+cover: './cover.jpg'
 ---
 
 ![Photo by Christian Stahl on Unsplash](cover.jpg)
