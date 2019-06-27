@@ -98,7 +98,7 @@ Although this can be a problem, teams can make releases without even touching th
 
 ### API Gateway owns schemas
 
-Schema is contained locally on the gateway. This easy the development and test, as everything will be in the same place. The caveat is that the service will be constantly modified by multiple teams (resolvers, schemas), requiring constant gateway releases.
+Schema is contained locally on the gateway. This makes development and testing easier, as everything will be in the same place. The caveat is that the service will be constantly modified by multiple teams (resolvers, schemas), requiring constant gateway releases.
 
 As this service will be constantly modified by multiple people, rules around code formatting and style should be agreed through all teams to make the code uniform.
 
