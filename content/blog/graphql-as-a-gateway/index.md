@@ -158,7 +158,7 @@ type Query {
 
 ### Caching is magic until it isn't
 
-Most clients do caching automatically, but sometimes it doesn't work as expected, requiring some manual cleaning. Besides, each request might ask for different fields, which makes a bit trickier to cache a resource on the server-side. One might request the whole resource, cache it, and then allow the API to use it as a reference to select specific fields.
+Most clients do caching automatically, but sometimes it doesn't work as expected, requiring some manual cleaning on the client. Besides, each request might ask for different fields, which makes a bit trickier to cache a resource on the server-side. One might request the whole resource, cache it in memory (eg: redis), and then allow the API to use it as a reference to select specific fields.
 
 ## 💡 Conclusion
 
