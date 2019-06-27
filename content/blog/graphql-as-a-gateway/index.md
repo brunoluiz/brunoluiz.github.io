@@ -126,13 +126,35 @@ query {
 }
 ```
 
-This type of thing is not solved by default on GraphQL implementations, which is where [DataLoader](https://github.com/graphql/dataloader) shines (there might be implementations on other languages as well). With it configurated, it will lead your back-end to only do the N + 1 calls, probably even saving you from more calls, as each category could have other resolvers to be called.
+This type of thing is not solved by default on GraphQL implementations, which is where [DataLoader](https://github.com/graphql/dataloader) pattern shines. Using batching and cache (per-request only), it will lead your back-end to only do `N + 1` calls, probably even saving you from more calls, as each category could have other resolvers to be called.
+
+The JavaScript implementation is under 400 LOC, making it easier to explore and understand how it does actually work. [There are implementation in other languages as well](https://github.com/graphql/dataloader/blob/master/README.md#other-implementations)
 
 ### Throttling is not easy as REST
 
-Having everything in one endpoint makes harder to properly implement rate limits, as the queries can be quite complex, with multiple underlying requests, but still being one client request. This means an API user can't be limited through its number of calls anymore, but with something different.
+Having everything in one endpoint makes harder to properly implement rate limits, as the queries can be quite complex, with multiple underlying requests, but still being one client request. This means an API user can't be limited through its number of calls to a certain endpoint anymore, but with something different.
 
-An approach to tackle this is by calculating the query complexity and using it as a rate limit score. [On GitHub API docs](https://developer.github.com/v4/guides/resource-limitations/), there are examples of how they deal with this. But, this doesn't come out-of-box in most server implementations 😞
+An approach to tackle this is by calculating the query complexity and using it as a rate limit score. [On GitHub API docs](https://developer.github.com/v4/guides/resource-limitations/), there are examples of how it works. But, this doesn't come out-of-box in most server implementations 😞 There are some packages such as [`graphql-validation-complexity`](https://github.com/4Catalyzer/graphql-validation-complexity) and [`graphql-cost-analysis`](https://github.com/pa-bru/graphql-cost-analysis), where the latter is more advanced, with more options to limit the upcoming queries.
+
+```graphql
+# Usage example of graphql-cost-analysis
+type Query {
+  # the cost will depend on the `limit` parameter passed to the field
+  # then the multiplier will be added to the `parent multipliers` array
+  customCostWithResolver(limit: Int): Int
+    @cost(multipliers: ["limit"], complexity: 4)
+
+  # for recursive cost
+  first(limit: Int): First
+    @cost(multipliers: ["limit"], useMultipliers: true, complexity: 2)
+
+  # You can specify several field parameters in the `multipliers` array
+  # then the values of the corresponding parameters will be added together.
+  # here, the cost will be `parent multipliers` * (`first` + `last`) * `complexity
+  severalMultipliers(first: Int, last: Int): Int
+    @cost(multipliers: ["first", "last"])
+}
+```
 
 ### Caching is magic until it isn't
 
@@ -163,8 +185,10 @@ Hopefully, this might have clarified a bit of what to expect from GraphQL as the
 
 #### Tools
 
-- [Typescript graphql-code-generator](https://github.com/dotansimha/graphql-code-generator)
+- [Typescript `graphql-code-generator`](https://github.com/dotansimha/graphql-code-generator)
 - [DataLoader](https://github.com/graphql/dataloader)
+- [`graphql-validation-complexity`](https://github.com/4Catalyzer/graphql-validation-complexity)
+- [`graphql-cost-analysis`](https://github.com/pa-bru/graphql-cost-analysis)
 
 #### Images
 
