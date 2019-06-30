@@ -23,8 +23,6 @@ While proxies just forward requests, API Gateways encapsulate more of the applic
 - Security: protect some endpoints with some sort of authentication (JWT token, basic, API tokens etc)
 - Metrics and Logs: as all requests would pass through it, many metrics and logs will be collected through this service
 
-GraphQL servers can implement some of these features -- developers can implement those quite easily as well -- but then what is and why GraphQL?
-
 > For more information on the API gateway pattern, give a look at [Nginx micro-services article](https://www.nginx.com/blog/building-microservices-using-an-api-gateway/) and on this [Chris Richardson article](https://freecontent.manning.com/the-api-gateway-pattern/).
 
 ## 🙋 Why GraphQL and not REST?
@@ -84,11 +82,11 @@ Front-end and back-end developers can easily settle in a schema and, in a questi
 
 High hopes that you are convinced on trying GraphQL 🙌 Implementing a GraphQL server is not complicated and there are many guides in the web talking about it. The official website [has a list with many server frameworks and libraries](https://graphql.org/code) (comes in many flavours).
 
-As mentioned at the first section, an API Gateway has some specific responsabilities. As GraphQL is implemented on top of a normal web server application, one can easily add some of the expected responsabilities to it, such as authorisation, metrics and logging. Things such as requests/response transformation, routing and composition are done on the GraphQL resolver level, mapping calls to the right services, using the right communication protocols.
+As mentioned in the first section, an API Gateway has some specific responsibilities. As GraphQL is implemented on top of a normal web server application, one can easily add some of these to it, such as authorisation, metrics and logging. Things such as requests/response transformation, routing and composition are done in the GraphQL resolver level, mapping calls to the right services, using the right communication protocols.
 
 > Even before going full micro-services and using it as a real API Gateway, companies can easily develop everything on top of a GraphQL monolith ~~wait, don' leave yet~~ and then, with more time and planning, redirect the resolvers to micro-services. This is particularly useful for small companies, which are still testing ideas around. During the migration, back-end might change a lot, but front-end will be able to continue requesting the same stuff.
 
-As teams develop micro-services, a strategy is required to expose and change the public facing GraphQL API. There are some known strategies for it:
+As teams develop micro-services, a strategy is required to expose and change the public facing GraphQL schema. There are some known strategies for it:
 
 ### Remote schema stitching
 
@@ -114,23 +112,39 @@ It is possible to mix both strategies, which is especially useful if the team wa
 
 ### Services can get a bit chatty
 
-On the request below, users want all posts `N` with its associated categories. The issue is, due to the GraphQL nature, each resolved post will call the categories resolver, resulting in `N` extra calls. But, what if from those 100 posts, only 1 category exists? `2N` calls don't seem optimal, as it could have been `N + 1`.
+On the request below, a user wants all posts with its associated author.
 
 ```graphql
 query {
-  posts(userId: "bruno") {
+  posts(authorId: "bruno") {
     title
-    categories {
-      id
+    author {
       name
     }
   }
 }
 ```
 
-This type of thing is not solved by default on GraphQL implementations, which is where [DataLoader](https://github.com/graphql/dataloader) pattern shines. Using batching and cache (per-request only), it will lead your back-end to only do `N + 1` calls, probably even saving you from more calls, as each category could have other resolvers to be called.
+The issue is, due to the GraphQL nature, each resolved `post` will call the `author` resolver, resulting in `N-1` unnecessary calls. Using SQL, it would give us:
 
-The JavaScript implementation is under 400 LOC, making it easier to explore and understand how it does actually work. [There are implementation in other languages as well](https://github.com/graphql/dataloader/blob/master/README.md#other-implementations)
+- `Query.posts` are resolved: `SELECT title, author_id FROM posts`
+- `Query.posts` still have un-resolved data about `Post.author.name`. For each item, GraphQL will call `Post.author` resolver
+- Post A calls `Post.author` resolver: `SELECT * FROM authors WHERE author_id = 'bruno'`
+- Post B calls `Post.author` resolver again with same query
+- Post C calls `Post.author` resolver again with same query
+- ...
+
+The two first selects would have returned the required data, but due to how GraphQL resolvers work -- each resolved item with missing data calls the subsequent resolver -- all these extra calls are made. This is where [DataLoader](https://github.com/graphql/dataloader) pattern shines.
+
+Using batching and cache (per-request only), it will lead your back-end to only do the right amount of calls, probably even saving you from more calls, as `author` could have other resolvers to be called. In the previous example it would do something as:
+
+- `Query.posts` are resolved: `SELECT title, author_id FROM posts`;
+- `Query.posts` still have un-resolved data about `Post.author.name`. For each item, the service would add a call to DataLoader with the required `author_id`
+- After passing through all items, DataLoader would only execute `SELECT * FROM authors WHERE author_id = 'bruno'` query and return the response.
+
+The JavaScript implementation is under 400 LOC, making it easier to explore and understand how it does actually work. [There are implementations in other languages as well](https://github.com/graphql/dataloader/blob/master/README.md#other-implementations).
+
+> MPJ, from FunFunFunction, released a [video series](https://www.youtube.com/watch?v=lAJWHHUz8_8&list=PL0zVEGEvSaeEjIDdbK1KfR7V9XBCVAr0P) on how to implement GraphQL in NodeJS. [Watch the DataLoader video here](https://www.youtube.com/watch?v=--AguZ20lLA&list=PL0zVEGEvSaeEjIDdbK1KfR7V9XBCVAr0P&index=3).
 
 ### Throttling is not easy as REST
 
@@ -164,7 +178,7 @@ Most clients do caching automatically, but sometimes it doesn't work as expected
 
 ## 💡 Conclusion
 
-Hopefully, this might have clarified a bit of what to expect from GraphQL as the main gateway. For those who want to go deeper, there are some references below, from where I took notes for this post.
+Hopefully, this might have clarified some details of using GraphQL as an API gateway. For those who want to go deeper, there are some references below, from where I took notes for this post.
 
 ## 📘 References
 
@@ -184,6 +198,7 @@ Hopefully, this might have clarified a bit of what to expect from GraphQL as the
 - [Why GraphQL is Taking Over APIs](https://webapplog.com/graphql/)
 - [Schema stitching -- Combining multiple GraphQL APIs into one](https://www.apollographql.com/docs/graphql-tools/schema-stitching)
 - [Apollo Federation](https://blog.apollographql.com/apollo-federation-f260cf525d21)
+- [FunFunFunction GraphQL Videos](https://www.youtube.com/watch?v=lAJWHHUz8_8&list=PL0zVEGEvSaeEjIDdbK1KfR7V9XBCVAr0P)
 
 #### Tools
 
