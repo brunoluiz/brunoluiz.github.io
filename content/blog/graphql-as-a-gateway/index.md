@@ -84,6 +84,8 @@ Front-end and back-end developers can easily settle in a schema and, in a questi
 
 High hopes that you are convinced on trying GraphQL 🙌 Implementing a GraphQL server is not complicated and there are many guides in the web talking about it. The official website [has a list with many server frameworks and libraries](https://graphql.org/code) (comes in many flavours).
 
+As mentioned at the first section, an API Gateway has some specific responsabilities. As GraphQL is implemented on top of a normal web server application, one can easily add some of the expected responsabilities to it, such as authorisation, metrics and logging. Things such as requests/response transformation, routing and composition are done on the GraphQL resolver level, mapping calls to the right services, using the right communication protocols.
+
 > Even before going full micro-services and using it as a real API Gateway, companies can easily develop everything on top of a GraphQL monolith ~~wait, don' leave yet~~ and then, with more time and planning, redirect the resolvers to micro-services. This is particularly useful for small companies, which are still testing ideas around. During the migration, back-end might change a lot, but front-end will be able to continue requesting the same stuff.
 
 As teams develop micro-services, a strategy is required to expose and change the public facing GraphQL API. There are some known strategies for it:
