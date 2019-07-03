@@ -19,7 +19,7 @@ While proxies just forward requests, API Gateways encapsulate more of the applic
 - Request/Response Transformation: requests made by a client can be reshaped before sent to internal services, with the same applying to responses
 - Request routing: as the proxy, route requests to specific services, translating to other protocols if required
 - Composition: one request to the gateway can actually be mapped to multiple internal API requests
-- Throttling: limit a user number of requests
+- Throttling: limit user requests up to a determined rate limit
 - Security: protect some endpoints with some sort of authentication (JWT token, basic, API tokens etc)
 - Metrics and Logs: as all requests would pass through it, many metrics and logs will be collected through this service
 
@@ -69,7 +69,7 @@ GraphQL only exposes one endpoint. Instead of having N client requests, only one
 REST has been around for a long time, and during this period developers started to have specific necessities, such as sparse fieldsets, versioning, pagination. There are a lot of ways of doing these, but none is really a standard (the closest solution is [JSONAPI](https://jsonapi.org/)). GraphQL comes with some of these specs out-of-box:
 
 - [Sparse fieldset](https://graphql.org/learn/queries/#fields): while making the request, all the required fields need to be specified, avoiding over-fetching
-- [Versioning](https://graphql.org/learn/best-practices/#versioning): versioning is not a good practice in GraphQL instead, the schema should continually evolute. New capabilities can be inserted on new types and fields, allowing the client to plan and decide when to change to new resolvers. If a field needs to be deprecated, one can use a directive such as [`@deprecated`](https://www.apollographql.com/docs/graphql-tools/schema-directives).
+- [Versioning](https://graphql.org/learn/best-practices/#versioning): route versioning is not a good practice in GraphQL instead, the schema should continually evolute. New capabilities can be inserted on new types and fields, allowing the client to plan and decide when to change to new resolvers. If a field needs to be deprecated, one can use a directive such as [`@deprecated`](https://www.apollographql.com/docs/graphql-tools/schema-directives).
 - [Pagination](https://graphql.org/learn/pagination/): there are some conventions and, for more complex implementations, there is the Connection model pattern.
 
 Of course, there is other stuff which one can compare against REST, but the idea is to show that GraphQL can be an option.
