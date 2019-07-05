@@ -6,20 +6,20 @@ cover: './cover.jpg'
 
 ![Photo by Christian Stahl on Unsplash](cover.jpg)
 
-GraphQL, REST, GRPC, Thrift... Have you ever imagined how to stick these together, in a micro-services architecture, and expose to the world? There are some common ways to do it, such as using Nginx or Kong, but an alternative way to do this is by using GraphQL in front of all services.
+GraphQL, REST, GRPC, Thrift... Have you ever imagined how to stick all of these together in a micro-services architecture and expose them to the world? There are some common ways to do this, such as using Nginx or Kong, but an alternative way is to use GraphQL in front of all these services.
 
 ## ⏩ API Gateway pattern -- a quick introduction
 
-Considering service A and B, how a client would be able to request it's data? The easiest and straight forward way would be to do a request to service A and another to B, each request pointing to different hosts (eg: `a.service/orders` and `b.service/users`).
+Say we have two services called A and B. How can a client get data from them? The easiest and the most straight forward way would be to make a request to service A and then another one to service B. Each request will be pointing to a different host (eg: `a.service/orders` and `b.service/users`).
 
-As the number of services grows, it is quite laborious to keep up with this strategy, as there could be too many services and requests to coordinate. To solve this, an API proxy can be used, where the client will request to only one service instead of multiple, and this proxy will orchestrate where this request should go, glueing all services in one place.
+As the number of services grows, it is quite laborious to keep using this strategy, as there will be too many services and requests to coordinate. To solve this an API proxy can be used. In this case the client will make requests to only one service instead of multiple ones and the proxy will decide where this request should go, glueing all services in one place.
 
-While proxies just forward requests, API Gateways encapsulate more of the application internal architecture, working as a Facade, with some other responsibilities as well, such as:
+While proxies just forward requests, API Gateways encapsulate more of the application's internal architecture, working as a Facade, with some other responsibilities as well, such as:
 
-- Request/Response Transformation: requests made by a client can be reshaped before sent to internal services, with the same applying to responses
-- Request routing: as the proxy, route requests to specific services, translating to other protocols if required
-- Composition: one request to the gateway can actually be mapped to multiple internal API requests
-- Throttling: limit user requests up to a determined rate limit
+- Request/Response Transformation: requests made by a client can be reshaped before being sent to internal services, with the same applying to responses
+- Request routing: as a proxy, it routes requests to specific services, translating to other protocols if required
+- Composition: one request to the gateway can actually be mapped to multiple internal ones
+- Throttling: limit user requests up to a determined threshold
 - Security: protect some endpoints with some sort of authentication (JWT token, basic, API tokens etc)
 - Metrics and Logs: as all requests would pass through it, many metrics and logs will be collected through this service
 
@@ -27,7 +27,7 @@ While proxies just forward requests, API Gateways encapsulate more of the applic
 
 ## 🙋 Why GraphQL and not REST?
 
-GraphQL was initially developed by Facebook, [been open-sourced in 2015](https://code.fb.com/core-data/graphql-a-data-query-language/). Many companies started using it for internal APIs, but some are already exposing it as its public API (eg: GitHub, Shopify, Yelp and Contentful).
+GraphQL was initially developed by Facebook, [open-sourced in 2015](https://code.fb.com/core-data/graphql-a-data-query-language/). Many companies started using it for internal APIs, but some are already exposing it as its public API (eg: GitHub, Shopify, Yelp and Contentful).
 
 ### Schema validation and documentation
 
