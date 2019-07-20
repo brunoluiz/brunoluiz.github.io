@@ -180,6 +180,8 @@ Most clients do caching automatically, but sometimes it doesn't work as expected
 
 Hopefully, this might have clarified some details of using GraphQL as an API gateway. For those who want to go deeper, there are some references below, from where I took notes for this post.
 
+Many thanks for [@southclaws](https://www.southcla.ws/), [@SpeedyCoder](http://michalbock.com/), [@cassiobock](https://github.com/cassiobock) and [@codepreneur](https://www.codepreneur.io/) for helping me in reviewing this post.
+
 ## 📘 References
 
 #### API Gateway
