@@ -58,7 +58,7 @@ type Category {
 }
 ```
 
-In theory, the same could be done with REST by using OpenAPI/Swagger, especially for documentation ~~but yaml, yikes~~. But, the code generation tools are not exactly the best and sometimes the schema validation does not work properly, requiring extra middleware and tweaks around it. As GraphQL is standardised in this sense, it doesn't suffer from these issues.
+In theory, the same could be done with REST by using OpenAPI/Swagger, especially for documentation ~~but YAML, yikes~~. But, the code generation tools are not exactly the best and sometimes the schema validation does not work properly, requiring extra middleware and tweaks around it. As GraphQL is standardised in this sense, it doesn't suffer from these issues.
 
 ### One endpoint to rule them all
 
@@ -72,7 +72,7 @@ REST has been around for a long time, and during this period developers started 
 - [Versioning](https://graphql.org/learn/best-practices/#versioning): route versioning is not a good practice in GraphQL instead, the schema should continually evolve. New capabilities can be inserted on new types and fields, allowing the client to plan and decide when to change to new resolvers. If a field needs to be deprecated, one can use a directive such as [`@deprecated`](https://www.apollographql.com/docs/graphql-tools/schema-directives).
 - [Pagination](https://graphql.org/learn/pagination/): there are some conventions and, for more complex implementations, there is the Connection model pattern.
 
-Of course, there is other stuff tjat one can compare against REST, but the idea is to show that GraphQL can be an option.
+Of course, there is other stuff that one can compare against REST, but the idea is to show that GraphQL can be an option.
 
 ### Developer experience
 
@@ -86,7 +86,7 @@ As mentioned in the first section, an API Gateway has some specific responsibili
 
 > Even before going full micro-services and using it as a real API Gateway, companies can easily develop everything on top of a GraphQL monolith ~~wait, don't leave yet~~ and then, with more time and planning, redirect the resolvers to micro-services. This is particularly useful for small companies, which are still testing ideas. During the migration, back-end might change a lot, but front-end will be able to continue requesting the same stuff.
 
-As teams develop micro-services, a strategy is required to expose and change the public facing GraphQL schema. There are some known strategies for it:
+As teams develop micro-services, a strategy is required to expose and change the public-facing GraphQL schema. There are some known strategies for it:
 
 ### Remote schema stitching
 
@@ -130,13 +130,13 @@ The issue is, due to the nature of GraphQL, each resolved `post` will call the `
 - `Query.posts` are resolved: `SELECT title, author_id FROM posts`
 - `Query.posts` still have un-resolved data about `Post.author.name`. For each item, GraphQL will call `Post.author` resolver
 - Post A calls `Post.author` resolver: `SELECT * FROM authors WHERE author_id = 'bruno'`
-- Post B calls `Post.author` resolver again with same query
-- Post C calls `Post.author` resolver again with same query
+- Post B calls `Post.author` resolver again with the same query
+- Post C calls `Post.author` resolver again with the same query
 - ...
 
-The two first selects would have returned the required data, but due to how GraphQL resolvers work -- each resolved item with missing data calls the subsequent resolver -- all these extra calls are made. This is where [DataLoader](https://github.com/graphql/dataloader) pattern shines.
+The two first selects would have returned the required data, but due to how GraphQL resolvers work -- each resolved item with missing data calls the subsequent resolver -- all these extra calls are made. This is where the [DataLoader](https://github.com/graphql/dataloader) pattern shines.
 
-Using batching and a cache (per-request only), it will lead your back-end only needing to make the right amount of calls. Probably even saving you from more calls, as `author` could have other resolvers to be called. In the previous example it would do something like:
+Using batching and a cache (per-request only), it will lead your back-end only needing to make the right amount of calls. Probably even saving you from more calls, as the `author` could have other resolvers to be called. In the previous example it would do something like:
 
 - `Query.posts` are resolved: `SELECT title, author_id FROM posts`.
 - `Query.posts` still have un-resolved data about `Post.author.name`. For each item, the service would add a call to DataLoader with the required `author_id`.
@@ -174,7 +174,7 @@ type Query {
 
 ### Caching is magic until it isn't
 
-Most clients do caching automatically, but sometimes it doesn't work as expected, requiring some manual cleaning on the client. Besides, each request might ask for different fields, which makes a bit trickier to cache a resource on the server-side. One might request the whole resource, cache it in memory (eg: redis), and then allow the API to use it as a reference to select specific fields.
+Most clients do caching automatically, but sometimes it doesn't work as expected, requiring some manual cleaning on the client. Besides, each request might ask for different fields, which makes a bit trickier to cache a resource on the server-side. One might request the whole resource, cache it in memory (eg: Redis), and then allow the API to use it as a reference to select specific fields.
 
 ## 💡 Conclusion
 
