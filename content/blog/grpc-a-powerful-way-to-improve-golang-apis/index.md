@@ -41,7 +41,7 @@ syntax = "proto3";
 package api;
 
 // Defines where your go package will be placed after compiled
-option go_package = "./generated/api";
+option go_package = "api";
 
 service Identity {
   rpc GetUser (GetUserRequest) returns (GetUserResponse) {}
@@ -83,7 +83,7 @@ It is possible to create a simple GRPC server and client based on the previous p
 - [Protocol buffers compiler][1]
 - [Golang protoc plugin][2]
 
-In a Golang project, running `protoc -I. --go\_out=plugins=grpc:. api.proto` should generate both server and client. The `go_package` option in the protobuf specifies the generated code output path.
+In a Golang project, running `protoc -I. --go_out=plugins=grpc:./generated api/api.proto` should generate both server and client. The `go_package` option in the protobuf specifies the generated code output path. In this case it will be `./generated/api`.
 
 To create a server, all methods defined by the proto need to implemented in a Golang struct. Peaking into the generated files, this is the interface generated from `service Identity`. An implementation fulfilling these methods will be enough to implement a server.
 
@@ -110,17 +110,17 @@ With its implementation, the following code will be enough to run it as a server
 ```go
 // File: cmd/server/main.go
 
-// Listen to a specific port
-lis, err := net.Listen("tcp", os.Getenv("GRPC_ADDRESS"))
-if err != nil {
-  return err
-}
-
 // Create a new GRPC Server
 s := grpc.NewServer()
 
 // Register our service implementation against the GRPC service
 api.RegisterIdentityServer(s, service.NewServer())
+
+// Listen to a specific port
+lis, err := net.Listen("tcp", os.Getenv("GRPC_ADDRESS"))
+if err != nil {
+  return err
+}
 
 // Start serving
 return s.Serve(lis)
@@ -176,6 +176,8 @@ GRPC might be more efficient and better in some cases, but it is not as straight
 Through annotations, a service can define which methods will be exposed as REST. Using the previous GRPC protobuf, here is an example -- note the `google.api.http` options:
 
 ```protobuf
+import "google/api/annotations.proto";
+
 service Identity {
   rpc GetUser (GetUserRequest) returns (GetUserResponse) {
     // Maps GetUser to an HTTP GET request, with the param `user_id`
@@ -197,16 +199,16 @@ With annotations in place, `protoc` needs to be changed to use the `grpc-gateway
 
 - [Install grpc-gateway locally][6]
 - Add GRPC Gateway paths to import paths (`-I$(GOPATH)/src/github.com/grpc-ecosystem/grpc-gateway/third\_party/googleapis`)
-- Add `--grpc-gateway\_out=logtostderr=true:.` to generate gateway code. It will place at `go_package` path
+- Add `--grpc-gateway_out=logtostderr=true:./generated` to generate gateway code. It will place at `go_package` path
 - Add `--grpc-swagger_out=logtostderr=true:.` to generate Swagger definitions. It will place it in the same folder as the proto file.
 
 ```makefile
 protoc -I. \
   -I$(GOPATH)/src \
   -I$(GOPATH)/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
-  --grpc-gateway_out=logtostderr=true:. \
+  --grpc-gateway_out=logtostderr=true:./generated \
   --swagger_out=logtostderr=true:. \
-  --go_out=plugins=grpc:. \
+  --go_out=plugins=grpc:./generated \
   api/api.proto
 ```
 
@@ -215,12 +217,15 @@ After running `protoc`, the reverse-proxy code will be available for use. Is jus
 ```go
 // File: cmd/gateway/main.go
 
-// Register gRPC server endpoint
 // Note: Make sure the gRPC server is running properly and accessible
+
 mux := runtime.NewServeMux()
 opts := []grpc.DialOption{grpc.WithInsecure()}
-err := api.RegisterIdentityHandlerFromEndpoint(context.Background(), mux, c.String("grpc-address"), opts)
-if err != nil {
+
+// Register gRPC server endpoint
+if err := api.RegisterIdentityHandlerFromEndpoint(
+  context.Background(), mux, c.String("grpc-address"), opts)
+); err != nil {
   return err
 }
 
