@@ -270,9 +270,9 @@ These tools, GUI or not, are quite useful while testing and inspecting GRPC serv
 
 On my actual workplace, GRPC has been proved quite useful for connecting services, especially internal ones. Protocol Buffers came to be our main IDL when defining contracts for APIs and Stream Events. Due to these contracts, communicating implementations and changes are easier.
 
-Implementing service clients and servers had been easier and faster. The most common issue is due to include paths errors, which sometimes get messy. But this is more due to our learnings around it than the technology itself.
+Implementing service clients and servers had been easier and faster. The most common issue is due to include paths errors, which sometimes get messy. But this is more due to our learnings around it than the technology itself. Some of the boilerplate, such as registering the server or dialing the client, can be tackled by creating custom protoc plugins. This proved quite useful, specially when the team is more product-oriented.
 
-For Golang, it proved to work quite well in most cases, with good community support. But, \`protoc\` can generate code to other languages as well, such as NodeJS and Java. Although, in our NodeJS services, we felt GRPC support is still behind Golang.
+For Golang, it proved to work quite well in most cases, with good community support. But, `protoc` can generate code to other languages as well, such as NodeJS and Java. Although, in our NodeJS services, we felt GRPC support is still behind Golang.
 
 In general, GRPC has been a good choice for our services. Hopefully, it will be good for your team as well.
 
