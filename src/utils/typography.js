@@ -4,7 +4,7 @@ import CodePlugin from 'typography-plugin-code'
 const theme = {
   scaleRatio: 2,
   baseFontSize: '17px',
-  baseLineHeight: 1.75,
+  baseLineHeight: 2,
   headerWeight: 500,
   bodyWeight: 400,
   boldWeight: 700,
@@ -46,7 +46,8 @@ const theme = {
       color: options.bodyColor
     },
     'h1,h2,h3,h4,h5,h6': {
-      marginTop: rhythm(1.5)
+      marginTop: rhythm(1.5),
+      lineHeight: 1.5
     },
     blockquote: {
       ...scale(1 / 5),
