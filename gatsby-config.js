@@ -9,7 +9,7 @@ module.exports = {
       twitter: `brunoluiz`,
       github: 'brunoluiz'
     },
-    icon: `/coffee.png`
+    icon: `/favicon.png`
   },
   pathPrefix: '/',
   plugins: [
@@ -82,7 +82,7 @@ module.exports = {
         background_color: `#ffffff`,
         theme_color: `#663399`,
         display: `minimal-ui`,
-        icon: `content/assets/coffee.svg`
+        icon: `content/assets/favicon.svg`
       }
     },
     `gatsby-plugin-react-helmet`,
