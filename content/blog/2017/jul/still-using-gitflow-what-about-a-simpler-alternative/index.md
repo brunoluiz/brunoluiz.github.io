@@ -1,7 +1,8 @@
 ---
-title: Still using GitFlow? What about a simpler alternative?
-date: "2017-07-18T19:44:37.121Z"
+title: 'Still using GitFlow? What about a simpler alternative?'
+date: '2017-07-18T19:44:37.121Z'
 cover: header.jpeg
+summary: 'GitFlow is a branching model created by Vincent Driessen on 2010. Since it was published, many companies had tested and implemented it, which allows us to have many reviews about how well (or not) it works. After some discussions within our team, we decided to not go with GitFlow, but use a simpler model instead, together with a tightly defined workflow.'
 ---
 
 ![Alternative on sight](header.jpeg)
@@ -38,8 +39,10 @@ There are more information about [about why devs prefers squash and merge, inste
 
 In the feature branch model, a merge is considered a new version release. To track each release version, tags can be used. These will be used as reference to choose which version should be deployed at the servers.
 
-To manage these tags/release, a good practice is the usage of [*semantic versioning](http://semver.org):*
+To manage these tags/release, a good practice is the usage of [\*semantic versioning](http://semver.org):\*
+
 > Given a version number **MAJOR.MINOR.PATCH**, increment the:
+>
 > 1. MAJOR version when you make incompatible API changes,
 > 2. MINOR version when you add functionality in a backwards-compatible manner, and
 > 3. PATCH version when you make backwards-compatible bug fixes.
@@ -66,7 +69,7 @@ In many PaaS, such as AWS Beanstalk or Heroku, a remote repository is set-up whe
 
 ## What happens if a hot-fix is needed?
 
-At some point, an issue will be raised and the production version will need a hot-fix *ASAP*. A feature branch can't just be opened to develop a fix, as the master will probably be ahead of the production version. In this case, the fix needs to be done directly on the production version:
+At some point, an issue will be raised and the production version will need a hot-fix _ASAP_. A feature branch can't just be opened to develop a fix, as the master will probably be ahead of the production version. In this case, the fix needs to be done directly on the production version:
 
 1. Checkout to the production version tag `git checkout v0.10.0`
 
@@ -106,9 +109,9 @@ It is very similar to the above one: a `git cherry-pick` should be done using a 
 
 The gap between the environments versions should be as short as possible. Otherwise, some issues may appear:
 
-* If the production is on `v0.1.10`, the latest release is `v0.10`, but the version `v0.3` will be deployed: the team members will have to check if some of the production patches are still required and then apply them, one by one.
+- If the production is on `v0.1.10`, the latest release is `v0.10`, but the version `v0.3` will be deployed: the team members will have to check if some of the production patches are still required and then apply them, one by one.
 
-* If some feature was only finished on `v0.10.0`, and it is required for the roll-out, but the `v0.7.0` is still not well tested: the release should be hold until the `v0.7.0` has been tested
+- If some feature was only finished on `v0.10.0`, and it is required for the roll-out, but the `v0.7.0` is still not well tested: the release should be hold until the `v0.7.0` has been tested
 
 Usually, these version gaps occur when the producing capacity is higher than the testing capacity (developers x testers ratio).
 

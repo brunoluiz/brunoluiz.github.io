@@ -1,12 +1,13 @@
 ---
-title: "Joi: validate input and define databases in JavaScript"
-date: "2017-08-30T19:44:37.121Z"
+title: 'Joi: validate input and define databases in JavaScript'
+date: '2017-08-30T19:44:37.121Z'
 cover: header.jpeg
+summary: 'As the saying goes: never trust user input. People coming from PHP and Java have many validation libraries available. But what about JavaScript? There are some options, but none seems more interesting than Joi.'
 ---
 
 ![Photo by Rayi Christian Wicaksono](header.jpeg)
 
-As the saying goes: *never trust user input*. People coming from PHP and Java have many validation libraries available. But what about JavaScript? There are some options, but none seems more interesting than Joi.
+As the saying goes: _never trust user input_. People coming from PHP and Java have many validation libraries available. But what about JavaScript? There are some options, but none seems more interesting than Joi.
 
 [Joi](https://github.com/hapijs/joi) is maintained by [Hapi.js project](https://hapijs.com/). Even though hapi.js is a web framework by itself, Joi is independent and can be used in any type of node project. This is great for people using express or restify, for example.
 
@@ -22,8 +23,14 @@ const Joi = require('joi')
 
 module.exports = Joi.object().keys({
   username: Joi.string(),
-  rating: Joi.number().integer().min(1).max(5).default(5),
-  email: Joi.string().email().required()
+  rating: Joi.number()
+    .integer()
+    .min(1)
+    .max(5)
+    .default(5),
+  email: Joi.string()
+    .email()
+    .required()
 })
 ```
 
@@ -34,19 +41,19 @@ This defines a model where an username, a rating (from 1 to 5) and an email (whi
 
 const schema = require('./rating-schema')
 
-const result = schema.validate({ 
+const result = schema.validate({
   username: 'brunoluiz',
   rating: 5,
-  email: 'contact@brunoluiz.net' 
+  email: 'contact@brunoluiz.net'
 })
 console.log(result) // result.error will be null
 
 // result.error will show an error due to missing e-mail
-const resultWithError = schema.validate({ 
+const resultWithError = schema.validate({
   username: 'brunoluiz',
-  rating: 5,
+  rating: 5
 })
-console.log(resultWithError)// result.error will have an error message
+console.log(resultWithError) // result.error will have an error message
 ```
 
 [More about Joi errors](https://github.com/hapijs/joi/blob/v10.6.0/API.md#errors)
@@ -74,10 +81,7 @@ module.exports = (req, res, next) => {
 // ....
 // routes.js
 
-app.post('/ratings',
-  ratingsValidator,
-  ratingsCreateController
-)
+app.post('/ratings', ratingsValidator, ratingsCreateController)
 ```
 
 In this case, if the `ratingsValidator` returns an error due to validation, express will stop the request before even reaching the controller.
@@ -95,9 +99,9 @@ const joigoose = require('joigoose')(mongoose)
 const schema = require('./rating-schema')
 
 // Convert joi to mongoose schema
-const mongooseSchema = joigoose.convert(schema);
+const mongooseSchema = joigoose.convert(schema)
 
-// Modify some fields with database specific instructions 
+// Modify some fields with database specific instructions
 mongooseSchema.email.unique = true
 
 // Add fields which don't make sense on the schema validator
@@ -119,7 +123,7 @@ module.exports = {
   email: Joi.string().email(),
   title: Joi.string(),
   content: Joi.binary(),
-  tags: vogels.types.stringSet(),
+  tags: vogels.types.stringSet()
 }
 ```
 
@@ -163,13 +167,16 @@ const Joi = require('joi')
 
 const ukzip = /^[A-Z]{1,2}[0-9]{1,2}[A-Z]{0,1} ?[0-9][A-Z]{2}$/i
 
-module.exports = Joi.extend({
-  name: 'number',
-  base: Joi.number().strict()
-}, {
-  name: 'zipcode',
-  base: Joi.regex(ukzip).description('UK Zipcode')
-})
+module.exports = Joi.extend(
+  {
+    name: 'number',
+    base: Joi.number().strict()
+  },
+  {
+    name: 'zipcode',
+    base: Joi.regex(ukzip).description('UK Zipcode')
+  }
+)
 ```
 
 When using Joi through this file, all number fields will be on the strict mode — which solves the issue of applying tweak #1 everywhere — and a `zipcode()` validator is created, based on a pre-defined regex.
@@ -187,7 +194,7 @@ const Joi = require('joi')
 
 module.exports = Joi.extend({
   name: 'object',
-  base: Joi.object().keys({ 
+  base: Joi.object().keys({
     extensionAttributes: Joi.object(),
     updatedAt: Joi.date().default(Date.now)
   })
@@ -214,9 +221,9 @@ const Joi = require('joi')
 const schema = Joi.object().keys({
   a: Joi.any()
     .valid('x')
-    .when('b', { 
-      is: 5, 
-      then: Joi.valid('y'), 
+    .when('b', {
+      is: 5,
+      then: Joi.valid('y'),
       otherwise: Joi.valid('z')
     }),
   b: Joi.any()
@@ -239,14 +246,14 @@ I hope this post convinced you to use some validation tool such as Joi, instead 
 
 ## References
 
-* Joi repo: [https://github.com/hapijs/joi](https://github.com/hapijs/joi)
+- Joi repo: [https://github.com/hapijs/joi](https://github.com/hapijs/joi)
 
-* Joi API Reference: [https://github.com/hapijs/joi/blob/v10.6.0/API.md](https://github.com/hapijs/joi/blob/v10.6.0/API.md)
+- Joi API Reference: [https://github.com/hapijs/joi/blob/v10.6.0/API.md](https://github.com/hapijs/joi/blob/v10.6.0/API.md)
 
-* Joigoose repo: [https://github.com/yoitsro/joigoose](https://github.com/yoitsro/joigoose)
+- Joigoose repo: [https://github.com/yoitsro/joigoose](https://github.com/yoitsro/joigoose)
 
-* Joi-browser repo: [https://github.com/jeffbski/joi-browser](https://github.com/jeffbski/joi-browser)
+- Joi-browser repo: [https://github.com/jeffbski/joi-browser](https://github.com/jeffbski/joi-browser)
 
-* Mongoose website: [http://mongoosejs.com](http://mongoosejs.com)
+- Mongoose website: [http://mongoosejs.com](http://mongoosejs.com)
 
-* Vogels repo: [https://github.com/ryanfitz/vogels](https://github.com/ryanfitz/vogels)
+- Vogels repo: [https://github.com/ryanfitz/vogels](https://github.com/ryanfitz/vogels)

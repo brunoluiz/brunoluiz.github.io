@@ -1,7 +1,8 @@
 ---
-title: A Tale Of How To Not Deploy Two Months Old Features
-date: "2018-03-07T19:44:37.121Z"
+title: 'A Tale Of How To Not Deploy Two Months Old Features'
+date: '2018-03-07T19:44:37.121Z'
 cover: header.jpeg
+summary: 'There is one big and very special date on the e-commerce and retail market and it is called Black Friday. For many, it means "discount prices", "sale!", "50% off", but for developers and IT people it is a challenging adventure.'
 ---
 
 ![Photo by rawpixel.com on Unsplash](header.jpeg)
@@ -24,7 +25,7 @@ When a product is just in its early days, the first clients are tech early adopt
 
 At some day in January, one of the major platform's clients informed they would launch more shops on the system. Besides the fact that, usually, some preparation is required, the biggest issue was that a specific feature was required. It had been developed at some point, but it was not well tested yet.
 
-Even worse, this feature depended on others, implemented in late November and early December, which means "Goodbye atomic deploys": the team will have to prepare a deploy package with all four sprint features. Dangerous, isn't it? Remember the *challenging adventure* part?
+Even worse, this feature depended on others, implemented in late November and early December, which means "Goodbye atomic deploys": the team will have to prepare a deploy package with all four sprint features. Dangerous, isn't it? Remember the _challenging adventure_ part?
 
 While finishing and polishing the required feature, the QA team had to work deliberately to test all features again to be sure that everything would be pretty smooth. Even those which were already tested as, since November, some hotfixes were made on the production environment and who knows if they could have affected one of the already tested features.
 
@@ -36,7 +37,7 @@ With the feature finished, the QA and management teams got together to test it. 
 
 It was 2 am when the whole deploy started. Low traffic and not that many orders flooding the system made it the perfect time to deploy the application. While deploying it, everything seemed fine, even though minor adjustments and migrations were needed. As soon as the clock hit 3h30 am, the team members were already wishing "Good Night" to each other.
 
-For a package with a lot of features and one quite critical, it was quite smooth… and this is when things started to fall apart. At 4 pm, one of the clients started to complain about some orders not being registered due to HTTP 400 errors and some inventory not being updated for no reason. *"WHAT THE F*CK IS GOING ON!" *everybody said, in despair.
+For a package with a lot of features and one quite critical, it was quite smooth… and this is when things started to fall apart. At 4 pm, one of the clients started to complain about some orders not being registered due to HTTP 400 errors and some inventory not being updated for no reason. *"WHAT THE F*CK IS GOING ON!" \*everybody said, in despair.
 
 All developers stopped to investigate the problem and, of course, hidden in the middle of one of the sprint release packages, there were two bugs: one related to how the application dealt with the inventory queue producer and the other related to how addresses were validated. Ten lines of code worth of trouble.
 

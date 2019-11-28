@@ -24,6 +24,7 @@ export const pageQuery = graphql`
           frontmatter {
             date(formatString: "MMMM DD, YYYY")
             title
+            summary
           }
         }
       }
@@ -46,13 +47,14 @@ const Index = ({ data, location }) => {
       <Bio />
       {posts.map(({ node }) => {
         const title = node.frontmatter.title || node.fields.slug
+        const summary = node.frontmatter.summary || node.excerpt
         return (
           <div key={node.fields.slug}>
             <h3>
               <Link to={node.fields.slug}>{title}</Link>
             </h3>
             <small>{node.frontmatter.date}</small>
-            <p dangerouslySetInnerHTML={{ __html: node.excerpt }} />
+            <p dangerouslySetInnerHTML={{ __html: summary }} />
           </div>
         )
       })}

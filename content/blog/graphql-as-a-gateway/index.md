@@ -2,6 +2,7 @@
 title: GraphQL feat API Gateway
 date: '2019-07-01T08:00:00Z'
 cover: './cover.jpg'
+summary: 'GraphQL, REST, gRPC, Thrift... Have you ever imagined how to stick these together in a micro-services architecture and expose to the world? There are some common ways to do it, such as using Nginx or Kong. But, an alternative way to do this is by using GraphQL in front of all services.'
 ---
 
 ![Photo by Christian Stahl on Unsplash](cover.jpg)
