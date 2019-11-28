@@ -74,16 +74,14 @@ In any protobuf file, each field has a number associated with it. These are uniq
 
 # Creating a simple GRPC server and client in Golang
 
-_[Code of this part available at Github brunoluiz/grpc-example](https://github.com/brunoluiz/grpc-example)_
-
-[(Code of this part available at Github)][https://github.com/brunoluiz/grpc-example]
+_[Code of this part available at Github brunoluiz/grpc-example@master](https://github.com/brunoluiz/grpc-example)_
 
 It is possible to create a simple GRPC server and client based on the previous protobuf definition. The following tools need to be installed:
 
 - [Protocol buffers compiler][1]
 - [Golang protoc plugin][2]
 
-In a Golang project, running `protoc -I. --go_out=plugins=grpc:./generated api/api.proto` should generate both server and client. The `go_package` option in the protobuf specifies the generated code output path. In this case it will be `./generated/api`.
+In a Golang project, running `protoc -I. --go_out=plugins=grpc:./generated api/api.proto` will generate both server and client. The `go_package` option in the protobuf specifies the generated code output path. In this case it will be `./generated/api`.
 
 To create a server, all methods defined by the proto need to implemented in a Golang struct. Peaking into the generated files, this is the interface generated from `service Identity`. An implementation fulfilling these methods will be enough to implement a server.
 
@@ -167,7 +165,7 @@ Most common interceptors, such as authorisation, validation, monitoring can be f
 
 # GRPC and REST together: What is this, a crossover episode?
 
-_[Code of this part available at Github brunoluiz/grpc-example](https://github.com/brunoluiz/grpc-example/pull/1)_
+_[Code of this part available at Github brunoluiz/grpc-example@with-gateway](https://github.com/brunoluiz/grpc-example/pull/1)_
 
 As previously mentioned, REST simplicity and low learning curve are some of its selling points. It allows quick testing, without the need to set-up a client binary -- who never did a quick `curl` to check some API? Besides, it is easier for non-developers to play with it. As it is web services _lingua franca,_ it might be required for third-party or front-end integrations as well.
 
