@@ -1,8 +1,8 @@
 module.exports = {
   siteMetadata: {
-    title: `Bruno Luiz Blog`,
+    title: `Bruno Luiz Silva`,
     author: `Bruno Luiz Silva`,
-    description: `Personal Blog by Bruno Luiz Silva | A collection of random software engineering thoughts.`,
+    description: `I do code | A collection of random software engineering thoughts.`,
     siteUrl: `https://brunoluiz.net`,
     social: {
       email: `contact@brunoluiz.net`,
@@ -97,6 +97,7 @@ module.exports = {
       options: {
         shortname: `brunoluiz`
       }
-    }
+    },
+    `gatsby-plugin-jss`
   ]
 }

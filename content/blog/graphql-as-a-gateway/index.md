@@ -8,7 +8,7 @@ cover: './cover.jpg'
 
 GraphQL, REST, gRPC, Thrift... Have you ever imagined how to stick these together in a micro-services architecture and expose to the world? There are some common ways to do it, such as using Nginx or Kong. But, an alternative way to do this is by using GraphQL in front of all services.
 
-## ⏩ API Gateway pattern -- a quick introduction
+## API Gateway pattern -- a quick introduction
 
 Consider two services: A and B. How a client would be able to request its data? The easiest way would be to make a request to service A and then another to B, each pointing to a different host (eg: `a.service/orders` and `b.service/users`).
 
@@ -25,7 +25,7 @@ While proxies just forward requests, API Gateways encapsulate more of the applic
 
 > For more information on the API gateway pattern, take a look at [Nginx micro-services article](https://www.nginx.com/blog/building-microservices-using-an-api-gateway/) and on this [Chris Richardson article](https://freecontent.manning.com/the-api-gateway-pattern/).
 
-## 🙋 Why GraphQL and not REST?
+## Why GraphQL and not REST?
 
 GraphQL was initially developed by Facebook and [was open-sourced in 2015](https://code.fb.com/core-data/graphql-a-data-query-language/). Many companies started using it for internal APIs, but some are already exposing it as its public API (eg: GitHub, Shopify, Yelp and Contentful).
 
@@ -78,7 +78,7 @@ Of course, there is other stuff that one can compare against REST, but the idea 
 
 Front-end and back-end developers can easily settle on a schema and, in a question of minutes, have stubs built around it. Besides, code generation, IDE auto-completion, easy documentation/schema discovery and good API exploring tools (such as GraphQL Playground and GraphiQL) makes the development experience way nicer when compared to REST.
 
-## ⚡ GraphQL as your API Gateway
+## GraphQL as your API Gateway
 
 High hopes that you are convinced on trying GraphQL 🙌 Implementing a GraphQL server is not complicated and there are many guides on the web talking about it. The official website [has a list with many server frameworks and libraries](https://graphql.org/code) (comes in many flavours).
 
@@ -108,7 +108,7 @@ As this service will be constantly modified by multiple people, rules around cod
 
 It is possible to mix both strategies, which is especially useful if the team wants to use remote schema stitching but have some services using gRPC or HTTP. Another way to tackle those non-GraphQL services is to put a server in front of it, allowing schema stitching and giving more flexibility for the responsible team.
 
-## 🙉 Caveats of using GraphQL
+## Caveats of using GraphQL
 
 ### Services can get a bit chatty
 
@@ -176,13 +176,13 @@ type Query {
 
 Most clients do caching automatically, but sometimes it doesn't work as expected, requiring some manual cleaning on the client. Besides, each request might ask for different fields, which makes a bit trickier to cache a resource on the server-side. One might request the whole resource, cache it in memory (eg: Redis), and then allow the API to use it as a reference to select specific fields.
 
-## 💡 Conclusion
+## Conclusion
 
 Hopefully, this might have clarified some details of using GraphQL as an API gateway. For those who want to go deeper, there are some references below, from where I took notes for this post.
 
 Many thanks for [@southclaws](https://www.southcla.ws/), [@SpeedyCoder](http://michalbock.com/), [@cassiobock](https://github.com/cassiobock) and [@codepreneur](https://www.codepreneur.io/) for helping me by reviewing this post.
 
-## 📘 References
+## References
 
 #### API Gateway
 

@@ -1,6 +1,8 @@
 import React from 'react'
 import Disqus from 'gatsby-plugin-disqus'
 
-export default ({ id, title, url }) => (
+const Comments = ({ id, title, url }) => (
   <Disqus identifier={id} title={title} url={url} />
 )
+
+export default Comments
