@@ -40,7 +40,8 @@ module.exports = {
           {
             resolve: `gatsby-remark-images`,
             options: {
-              maxWidth: 720
+              maxWidth: 780
+              // wrapperStyle: 'box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1)'
             }
           },
           {

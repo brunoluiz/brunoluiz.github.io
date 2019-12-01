@@ -1,7 +1,8 @@
 ---
 title: 'GRPC: A powerful way to improve your Golang APIs'
-date: '2019-11-17T08:00:00Z'
+date: '2019-12-05T17:00:00Z'
 cover: './cover.jpg'
+summary: 'Web APIs are everywhere, with REST being one of the most popular ways to distribute it. With recent technologies, there are better ways to implement them, GRPC been one of them.'
 ---
 
 ![Photo by Israel Palacio on Unsplash](cover.jpg)
@@ -163,6 +164,8 @@ UnaryInterceptors deal with requests which expect a single response back. Stream
 
 Most common interceptors, such as authorisation, validation, monitoring can be found at [go-grpc-middleware][4]. Remember, don't repeat yourself 😉
 
+_[Code of this part available at Github brunoluiz/grpc-example@master](https://github.com/brunoluiz/grpc-example)_
+
 # GRPC and REST together: What is this, a crossover episode?
 
 _[Code of this part available at Github brunoluiz/grpc-example@with-gateway](https://github.com/brunoluiz/grpc-example/pull/1)_
@@ -245,6 +248,8 @@ Any REST client should be able to request data from the Gateway. Server up, this
 Magic, isn't it? Having this REST set-up might put a smile on some faces. The service can be migrated to GRPC for internal usage, keeping compatibility with REST clients -- third-parties, non-techies and front-end applications.
 
 [There is an excellent talk][7] by Johan Brandhorst giving more details on GRPC Gateway.
+
+_[Code of this part available at Github brunoluiz/grpc-example@with-gateway](https://github.com/brunoluiz/grpc-example/pull/1)_
 
 # Fantastic debugging tools and where to find them
 
