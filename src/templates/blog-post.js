@@ -4,7 +4,7 @@ import { Link, graphql } from 'gatsby'
 import Comments from '../components/Comments'
 import Bio from '../components/Bio'
 import Layout from '../components/Layout'
-import SEO from '../components/seo'
+import SEO from '../components/Seo'
 import { rhythm, scale } from '../utils/typography'
 
 const getThumbnail = post =>
