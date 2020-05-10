@@ -2,7 +2,6 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import Helmet from 'react-helmet'
 import { StaticQuery, graphql } from 'gatsby'
-import sendAnalytics from '../utils/analytics'
 
 const detailsQuery = graphql`
   query DefaultSEOQuery {
@@ -27,8 +26,6 @@ const SEO = ({
   thumbnail,
   type
 }) => {
-  sendAnalytics()
-
   return (
     <StaticQuery
       query={detailsQuery}
