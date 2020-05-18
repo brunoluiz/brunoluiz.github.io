@@ -28,12 +28,12 @@ export default function HTML (props) {
       <script
         dangerouslySetInnerHTML={{
           __html: `
-  const path = "u=" + encodeURIComponent(window.location.href);
+  const path = "u=" + encodeURIComponent(window.location.pathname);
   const referrer = document.referrer ? "&r=" + encodeURIComponent(document.referrer) : ""
   const time = "&t=" + (new Date()).getTime()
 
   const _pixel = new Image(1, 1);
-  _pixel.src = 'https://goaccess.snapdiff.com/pixel?' + path + referrer + time;
+  _pixel.src = 'https://goaccess.brunoluiz.net/pixel?' + path + referrer + time;
               `
         }}
       />
