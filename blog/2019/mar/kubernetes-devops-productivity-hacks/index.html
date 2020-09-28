@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<title>Kubernetes devops productivity hacks - Bruno Luiz Silva</title>
+
+<meta name="description" content="Today, Kubernetes is the de facto container orchestration solution. Together with the devops culture, developers have to get familiarised to its tools, such as kubectl.
+After some point though, using kubectl for everything can get quite verbose, especially if you use many namespaces and contexts. The following tips try to minimise the pain of doing operations solely through it, sometimes even using other tools beside it.
+Kubectx: context and namespaces management Operations done in kubectl usually require two params: context and namespace.">
+<meta name="author" content="">
+<link rel="canonical" href="https://brunoluiz.net/blog/2019/mar/kubernetes-devops-productivity-hacks/" />
+
+<link href="https://brunoluiz.net/css/stylesheet.min.2c6d841b2e1281d63c99e42f35a3da2ab1ddb7995647ea9484ab121f02f8702f.css" integrity="sha256-LG2EGy4SgdY8meQvNaPaKrHdt5lWR&#43;qUhKsSHwL4cC8=" rel="preload stylesheet"
+    as="style">
+
+<link rel="apple-touch-icon" href="https://brunoluiz.net/apple-touch-icon.png">
+<link rel="icon" href="https://brunoluiz.net/favicon.ico">
+<meta name="generator" content="Hugo 0.68.3" />
+<meta property="og:title" content="Kubernetes devops productivity hacks" />
+<meta property="og:description" content="Today, Kubernetes is the de facto container orchestration solution. Together with the devops culture, developers have to get familiarised to its tools, such as kubectl. But how do we go beyond kubectl?" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://brunoluiz.net/blog/2019/mar/kubernetes-devops-productivity-hacks/" />
+<meta property="article:published_time" content="2019-03-14T21:37:37+00:00" />
+<meta property="article:modified_time" content="2019-03-14T21:37:37+00:00" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Kubernetes devops productivity hacks"/>
+<meta name="twitter:description" content="Today, Kubernetes is the de facto container orchestration solution. Together with the devops culture, developers have to get familiarised to its tools, such as kubectl. But how do we go beyond kubectl?"/>
+<meta itemprop="name" content="Kubernetes devops productivity hacks">
+<meta itemprop="description" content="Today, Kubernetes is the de facto container orchestration solution. Together with the devops culture, developers have to get familiarised to its tools, such as kubectl. But how do we go beyond kubectl?">
+<meta itemprop="datePublished" content="2019-03-14T21:37:37&#43;00:00" />
+<meta itemprop="dateModified" content="2019-03-14T21:37:37&#43;00:00" />
+<meta itemprop="wordCount" content="1075">
+
+
+
+<meta itemprop="keywords" content="" />
+
+</head>
+
+<body class="single" id="top">
+<script>
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+</script>
+<header class="header">
+    <nav class="nav">
+        <p class="logo"><a href="https://brunoluiz.net">Bruno Luiz Silva</a></p>
+        <ul class="menu" id="menu" onscroll="menu_on_scroll()">
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <h1 class="post-title">
+      Kubernetes devops productivity hacks
+    </h1>
+    <div class="post-meta">
+      <time>March 14, 2019</time>&nbsp;·&nbsp;6 min
+    </div>
+  </header>
+  <div class="post-content"><p><img src="header.jpeg" alt="Photo by Cameron Venti on Unsplash"></p>
+<p>Today, Kubernetes is the de facto container orchestration solution. Together with the devops culture, developers have to get familiarised to its tools, such as <code>kubectl</code>.</p>
+<p>After some point though, using <code>kubectl</code> for everything can get quite verbose, especially if you use many namespaces and contexts. The following tips try to minimise the pain of doing operations solely through it, sometimes even using other tools beside it.</p>
+<h2 id="kubectx-context-and-namespaces-management">Kubectx: context and namespaces management</h2>
+<p>Operations done in <code>kubectl</code> usually require two params: <strong>context</strong> and <strong>namespace</strong>. Any operation will result in something as <code>kubectl --context dev --namespace hello-world exec -it hello-world-app-0 sh</code>. It is fine for a one-time operation, but after some point, it can get quite cumbersome. One way to avoid these long command strings is by using <a href="https://github.com/ahmetb/kubectx"><code>kubectx</code></a>.</p>
+<p>After installing it, the context can be set by simply using <code>kubectx dev</code> and the namespace as <code>kubens hello-world</code>. To list the available contexts and namespaces, just run it without arguments. The above operation can be run by only using <code>kubectl exec -it hello-world-app-0 sh</code>.</p>
+<h2 id="terminal-aliases">Terminal aliases</h2>
+<p>Seasoned Unix developers are quite used to terminal aliases. Some are quite popular that are even grouped in packs, such as <a href="https://github.com/robbyrussell/oh-my-zsh/blob/master/plugins/git/git.plugin.zsh">oh-my-zsh git aliases</a>. With Kubernetes is not that different.</p>
+<p>Usually, having <code>alias k=&quot;kubectl&quot;</code> already make operations shorter. Using the same example, it would result in <code>k exec -it hello-world-app-0 sh</code>. But, most likely, one alias will not be enough. There are some options for this.</p>
+<p>The first one can be set-up in any terminal emulator (<code>zsh</code>, <code>bash</code>&hellip;). Get the <code>.kubectl_aliases</code> file from <a href="https://github.com/ahmetb/kubectl-aliases"><code>ahmetb/kubectl-aliases</code></a> and place it in your home directory. After sourcing it on <code>.zshrc</code> or <code>.bashrc</code>, 600 aliases will be available out-of-box, including the aforementioned <code>k</code>.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#f92672">[</span> -f ~/.kubectl_aliases <span style="color:#f92672">]</span> <span style="color:#f92672">&amp;&amp;</span> source ~/.kubectl_aliases
+</code></pre></div><p>If <a href="http://zsh.sourceforge.net/"><code>zsh</code></a> and <a href="https://ohmyz.sh/"><code>oh-my-zsh</code></a> are already set-up, an easier option would be to use the pre-installed <code>kubectl</code> plugin. To enable it, edit your <code>.zshrc</code> and add <code>kubectl</code> to the <code>plugins</code> variable (<a href="https://github.com/robbyrussell/oh-my-zsh#plugins">more details about oh-my-zsh plugins here</a>).</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">plugins<span style="color:#f92672">=(</span>git kubectl ...<span style="color:#f92672">)</span>
+</code></pre></div><p>There are fewer aliases compared to <code>ahmetb/kubectl-aliases</code>, making it easier to learn and faster to load. The list of <code>oh-my-zsh/kubectl</code> aliases is <a href="https://github.com/robbyrussell/oh-my-zsh/tree/master/plugins/kubectl"> available here </a></p>
+<p><code>kubectx</code> and <code>kubens</code> do not have aliases by default. To allow shorter calls for it, place the following on <code>.zshrc</code> or <code>.bashrc</code>.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">alias kns<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;kubens&#34;</span>
+alias kcx<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;kubectx&#34;</span>
+</code></pre></div><p>After all these aliases been set-up, the <code>hello-world-app-0 sh</code> can be accessed using a simple <code>keti hello-world-app-0 sh</code>. As games, it will be as learning combat combos, although it will not be as close as a Hadouken combo.</p>
+<h2 id="terminal-namespace-and-context-indicator">Terminal namespace and context indicator</h2>
+<p>Developers are humans (in case you did not know) and humans do not have bulletproof memory. One can forget that kubernetes context is set to production and then run <code>kubectl apply</code> there, instead of dev.</p>
+<p>To avoid this, an indicator can be used in the terminal to show what is the actual context and namespace. The easiest way to do it is by using <a href="https://github.com/jonmosco/kube-ps1"><code>kube-ps1</code></a>. It already comes with <code>oh-my-zsh</code>, requiring <code>kube-ps1</code> to be added to <code>.zshrc</code> plugins variable.</p>
+<p>After installing or enabling it, the PS1 needs to be changed to include the kubectl context and namespace information. This can be easily done by adding <code>export PS1='$(kube_ps1) '$PS1</code> to your <code>.bashrc/.zshrc</code> file. The final result will be something like the following.</p>
+<p><img src="kube-ps1.png" alt="kube-ps1 example"></p>
+<p>The only issue with <code>kube-ps1</code> is, when used with <code>git</code> plugin in zsh, it can generate really long PS1 strings. If <code>tmux</code> is used, it can be actually set-up in the status bar through <a href="https://github.com/jonmosco/kube-tmux"><code>kube-tmux</code></a> plugin, avoiding PS1 cluttering.</p>
+<p><img src="kube-tmux-ps1.png" alt="kube-tmux example"></p>
+<h2 id="investigating-logs-the-sane-way">Investigating logs: the sane way</h2>
+<p>Failures can happen, debugs are required and check-ups are sometimes necessary. For all of these, application logs are needed. The standard way to open them is:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kubectl --namespace dev --context labs get pods
+<span style="color:#75715e"># get the pod id</span>
+kubectl --namespace dev --context labs logs &lt;pod-id&gt; -f
+</code></pre></div><p>If the pod is killed and restarted, the process has to be repeated as the pod id will change. Besides, the <code>kubectl</code> logs tool is quite simple in terms of features. <a href="https://github.com/wercker/stern"><code>stern</code></a> is meant to be more powerful and allows to tail multiple pods and containers at once (even the whole namespace, if required).</p>
+<p>To tail pods, such as the hello-world example, <code>stern hello-world</code> will do. It would tail everything using the <code>*hello-world*</code> as an expression. If multiple pods were been run, it would log all hello-world pods.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">stern hello-world  <span style="color:#75715e"># tail all pods containing &#34;hello-world&#34; in its name</span>
+stern .            <span style="color:#75715e"># tail all pods in current namespace</span>
+stern --since 1h . <span style="color:#75715e"># tail logs from last one hour</span>
+</code></pre></div><p>Shorter calls can be done setting up an alias, such as <code>alias s='stern'</code>. If set, it uses the <code>kubectx</code> and <code>kubens</code> settings, while accepting <code>--namespace</code> and <code>--context</code> args as well.</p>
+<h2 id="automatic-deployments">Automatic deployments</h2>
+<p>A way to avoid touching prod environment using <code>kubectl</code> is by setting up <a href="https://github.com/box/kube-applier"><code>kube-applier</code></a>. This service auto-deploy changes on infrastructure changes, based on a git repository.</p>
+<p>It runs as a separate pod, watching and comparing kubernetes manifest repository with deployed services. If there is a difference between manifests, it will automatically apply what is in the git repository, making it the source of truth for kube manifests.</p>
+<p>After installing <code>kube-applier</code>, no deploys should be done through <code>kubectl</code>, as it will always revert to git manifests. This avoids confusions around deployments made in a rush, not merged and then rollbacked by a mistake.</p>
+<h2 id="add-safety-against-wrong-kubectl-apply">Add safety against wrong kubectl apply</h2>
+<p>If <code>kube-applier</code> is not an option, perhaps it would be good to have a protection before <code>kubectl apply</code> operations. There are many ways to do this, the following considers overwriting <code>kaf</code> from <code>oh-my-zsh</code> plugin. It adds a confirmation prompt and shows which context it will be applied to.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Confirm command to be executed</span>
+confirm<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+  echo -n <span style="color:#e6db74">&#34;\e[33mDo you want to run </span>$*<span style="color:#e6db74">? [N/yes] \e[m&#34;</span>
+  read REPLY
+
+  <span style="color:#75715e"># if test &#34;$REPLY&#34; = &#34;y&#34; -o &#34;$REPLY&#34; = &#34;Y&#34;; then</span>
+  <span style="color:#66d9ef">if</span> test <span style="color:#e6db74">&#34;</span>$REPLY<span style="color:#e6db74">&#34;</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;yes&#34;</span>; <span style="color:#66d9ef">then</span>
+    <span style="color:#e6db74">&#34;</span>$@<span style="color:#e6db74">&#34;</span>
+  <span style="color:#66d9ef">else</span>
+      echo <span style="color:#e6db74">&#34;Cancelled by user&#34;</span>
+  <span style="color:#66d9ef">fi</span>
+<span style="color:#f92672">}</span>
+
+safe_kubectlapply<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+  context<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>kubectl config current-context<span style="color:#66d9ef">)</span>
+  echo <span style="color:#e6db74">&#34;\n&#34;</span>
+  echo <span style="color:#e6db74">&#34;BECAREFUL!!! APPLYING TO \e[31m</span>$context<span style="color:#e6db74">\e[m&#34;</span>
+  confirm kubectl apply -f <span style="color:#e6db74">&#34;</span>$@<span style="color:#e6db74">&#34;</span>
+<span style="color:#f92672">}</span>
+
+alias kaf<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;safe_kubectlapply&#39;</span>
+</code></pre></div><p>This can pottentially save lifes. It can be modified to be used with other operations, such as <code>kdel</code> and <code>kdelf</code> (aliases for <code>kubectl delete</code>).</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>These are just some tricks I use in my daily kubernetes life. Have a good coding week! 😉</p>
+<h2 id="references">References</h2>
+<ul>
+<li>Cover photo by <a href="https://unsplash.com/photos/QtETdXXR7gs?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText">Cameron Venti</a> on Unsplash</li>
+<li><a href="https://github.com/ahmetb/kubectx"><code>kubectx</code> repo</a></li>
+<li><a href="https://github.com/ahmetb/kubectl-aliases"><code>ahmetb/kubectl-aliases</code> repo</a></li>
+<li><a href="https://github.com/robbyrussell/oh-my-zsh"><code>oh-my-zsh</code> repo</a></li>
+<li><a href="https://github.com/robbyrussell/oh-my-zsh/tree/master/plugins/kubectl"><code>oh-my-zsh</code> kubectl info</a></li>
+<li><a href="https://github.com/jonmosco/kube-ps1"><code>kube-ps1</code> repo</a></li>
+<li><a href="https://github.com/robbyrussell/oh-my-zsh/tree/master/plugins/kube-ps1"><code>oh-my-zsh</code> kube-ps1 info</a></li>
+<li><a href="https://github.com/jonmosco/kube-tmux"><code>kube-tmux</code> repo</a></li>
+<li><a href="https://github.com/wercker/stern"><code>stern</code> repo</a></li>
+<li><a href="https://github.com/box/kube-applier"><code>kube-applier</code> repo</a></li>
+</ul>
+</div>
+  <footer class="post-footer">
+  </footer>
+</article>
+    </main><footer class="footer">
+    <span>&copy; 2020 <a href="https://brunoluiz.net">Bruno Luiz Silva</a></span>
+    <span>&middot;</span>
+    <span>Powered by <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo️️</a>️</span>
+    <span>&middot;</span>
+    <span>Theme️ <a href="https://git.io/hugopapermod" rel="noopener" target="_blank">PaperMod</a></span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top">
+    <button class="top-link" id="top-link" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6">
+            <path d="M12 6H0l6-6z" /></svg>
+    </button>
+</a>
+<script src="https://brunoluiz.net/js/highlight.min.min.e7afc2928c0925d65c4732dfebe147014d91299a98e819e4b42f25c4fa68e91c.js" integrity="sha256-56/CkowJJdZcRzLf6&#43;FHAU2RKZqY6BnktC8lxPpo6Rw="></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+    window.onload = function () {
+        if (localStorage.getItem("menu-scroll-position")) {
+            document.getElementById('menu').scrollLeft = localStorage.getItem("menu-scroll-position");
+        }
+    }
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+
+            document.querySelector(this.getAttribute("href")).scrollIntoView({
+                behavior: "smooth"
+            });
+        });
+    });
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+    function menu_on_scroll() {
+        localStorage.setItem("menu-scroll-position", document.getElementById('menu').scrollLeft);
+    }
+</script>
+</body>
+
+</html>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Bruno Luiz Silva</title>
+    <link>https://brunoluiz.net/</link>
+    <description>Recent content on Bruno Luiz Silva</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 05 Dec 2019 17:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://brunoluiz.net/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>GRPC: A powerful way to improve your Golang APIs</title>
+      <link>https://brunoluiz.net/blog/2019/nov/grpc-a-powerful-way-to-improve-golang-apis/</link>
+      <pubDate>Thu, 05 Dec 2019 17:00:00 +0000</pubDate>
+      
+      <guid>https://brunoluiz.net/blog/2019/nov/grpc-a-powerful-way-to-improve-golang-apis/</guid>
+      <description>Web APIs are everywhere, with REST being one of the most popular ways to distribute it. With recent technologies, there are better ways to implement them, GRPC been one of them.
+Why REST is popular and what are its pitfalls? Companies used to write web-services in SOAP until REST got enough hype to be the next big thing, although the concept has been around since 2000. It was like a fresh breeze for developers.</description>
+    </item>
+    
+    <item>
+      <title>GraphQL feat API Gateway</title>
+      <link>https://brunoluiz.net/blog/graphql-as-a-gateway/</link>
+      <pubDate>Mon, 01 Jul 2019 08:00:00 +0000</pubDate>
+      
+      <guid>https://brunoluiz.net/blog/graphql-as-a-gateway/</guid>
+      <description>GraphQL, REST, gRPC, Thrift&amp;hellip; Have you ever imagined how to stick these together in a micro-services architecture and expose to the world? There are some common ways to do it, such as using Nginx or Kong. But, an alternative way to do this is by using GraphQL in front of all services.
+API Gateway pattern &amp;ndash; a quick introduction Consider two services: A and B. How a client would be able to request its data?</description>
+    </item>
+    
+    <item>
+      <title>Kubernetes devops productivity hacks</title>
+      <link>https://brunoluiz.net/blog/2019/mar/kubernetes-devops-productivity-hacks/</link>
+      <pubDate>Thu, 14 Mar 2019 21:37:37 +0000</pubDate>
+      
+      <guid>https://brunoluiz.net/blog/2019/mar/kubernetes-devops-productivity-hacks/</guid>
+      <description>Today, Kubernetes is the de facto container orchestration solution. Together with the devops culture, developers have to get familiarised to its tools, such as kubectl.
+After some point though, using kubectl for everything can get quite verbose, especially if you use many namespaces and contexts. The following tips try to minimise the pain of doing operations solely through it, sometimes even using other tools beside it.
+Kubectx: context and namespaces management Operations done in kubectl usually require two params: context and namespace.</description>
+    </item>
+    
+    <item>
+      <title>A guide on npm package publishing</title>
+      <link>https://brunoluiz.net/blog/2019/feb/a-guide-to-npm-package-publishing/</link>
+      <pubDate>Fri, 15 Feb 2019 19:44:37 +0000</pubDate>
+      
+      <guid>https://brunoluiz.net/blog/2019/feb/a-guide-to-npm-package-publishing/</guid>
+      <description>If you are not new in the JavaScript world, you might have already heard about npm. It is a package manager which lets developers easily add dependencies to projects, as npm install hello-world. But, have you ever asked, &amp;ldquo;How do I create and publish my own packages&amp;rdquo;?
+How a package is composed? Packages are quite simple to create in JavaScript. A package.json and index.js can already do the job. Look at dedupe for example:</description>
+    </item>
+    
+    <item>
+      <title>A Tale Of How To Not Deploy Two Months Old Features</title>
+      <link>https://brunoluiz.net/blog/2018/mar/a-tale-of-how-to-not-deploy-two-months-old-features/</link>
+      <pubDate>Wed, 07 Mar 2018 19:44:37 +0000</pubDate>
+      
+      <guid>https://brunoluiz.net/blog/2018/mar/a-tale-of-how-to-not-deploy-two-months-old-features/</guid>
+      <description>There is one big and very special date on the e-commerce and retail market and it&amp;rsquo;s called Black Friday. For many, it means &amp;ldquo;discount prices&amp;rdquo;, &amp;ldquo;sale!&amp;quot;, &amp;ldquo;50% off&amp;rdquo;, but for developers and IT people it is a challenging adventure.
+To begin with, two weeks before, feature deployments are frozen and everything passes through load tests. On the week, machines are scaled up and, at the event&amp;rsquo;s day, all eyes are on metrics and logs.</description>
+    </item>
+    
+    <item>
+      <title>Joi: validate input and define databases in JavaScript</title>
+      <link>https://brunoluiz.net/blog/2017/aug/joi-validate-input-and-define-databases-in-javascript/</link>
+      <pubDate>Wed, 30 Aug 2017 19:44:37 +0000</pubDate>
+      
+      <guid>https://brunoluiz.net/blog/2017/aug/joi-validate-input-and-define-databases-in-javascript/</guid>
+      <description>As the saying goes: never trust user input. People coming from PHP and Java have many validation libraries available. But what about JavaScript? There are some options, but none seems more interesting than Joi.
+Joi is maintained by Hapi.js project. Even though hapi.js is a web framework by itself, Joi is independent and can be used in any type of node project. This is great for people using express or restify, for example.</description>
+    </item>
+    
+    <item>
+      <title>Still using GitFlow? What about a simpler alternative?</title>
+      <link>https://brunoluiz.net/blog/2017/jul/still-using-gitflow-what-about-a-simpler-alternative/</link>
+      <pubDate>Tue, 18 Jul 2017 19:44:37 +0000</pubDate>
+      
+      <guid>https://brunoluiz.net/blog/2017/jul/still-using-gitflow-what-about-a-simpler-alternative/</guid>
+      <description>GitFlow is a branching model created by Vincent Driessen on 2010 (original article). Since it was published, many companies had tested and implemented it, which allows us to have many reviews about how well (or not) it works. After some discussions within our team, we decided to not go with GitFlow, but use a simpler model instead, together with a tightly defined workflow. Some of the discussed reasons of why not go with GitFlow are the same written on this blog post.</description>
+    </item>
+    
+    <item>
+      <title>Are you using git push force? Oh mate, you are doing it wrong!</title>
+      <link>https://brunoluiz.net/blog/2017/jun/are-you-using-git-push-force-oh-mate-you-are-doing-it-wrong/</link>
+      <pubDate>Sat, 03 Jun 2017 19:44:37 +0000</pubDate>
+      
+      <guid>https://brunoluiz.net/blog/2017/jun/are-you-using-git-push-force-oh-mate-you-are-doing-it-wrong/</guid>
+      <description>You are developing some feature together with your team. Most likely you have done the usual dance: checkout a branch from the master or development branch, done your commits, pushed this feature branch to the remote and opened a push request for peer review.
+In ideal cases, you will be able to just squash and merge after some reviews and fixes. But, the world is not ideal (as you might know), and maybe one of your mates modified the same files and already merged it.</description>
+    </item>
+    
+  </channel>
+</rss>
