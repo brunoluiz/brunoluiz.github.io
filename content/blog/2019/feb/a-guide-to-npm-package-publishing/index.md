@@ -1,8 +1,9 @@
 ---
 title: 'A guide on npm package publishing'
 date: '2019-02-15T19:44:37.121Z'
-cover: header.jpeg
-summary: 'If you are not new in the JavaScript world, you might have already heard about npm. It is a package manager which lets developers easily add dependencies to projects, as `npm install hello-world`. But, have you ever asked, How do I create and publish my own packages'
+description: 'If you are not new in the JavaScript world, you might have already heard about npm. It is a package manager which lets developers easily add dependencies to projects, as `npm install hello-world`. But, have you ever asked, How do I create and publish my own packages'
+aliases:
+  - /2019/feb/a-guide-to-npm-package-publishing/
 ---
 
 ![Photo by Paul Esch-Laurent on Unsplash](header.jpeg)

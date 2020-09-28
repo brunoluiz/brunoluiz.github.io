@@ -1,8 +1,9 @@
 ---
 title: 'A Tale Of How To Not Deploy Two Months Old Features'
 date: '2018-03-07T19:44:37.121Z'
-cover: header.jpeg
-summary: 'There is one big and very special date on the e-commerce and retail market and it is called Black Friday. For many, it means "discount prices", "sale!", "50% off", but for developers and IT people it is a challenging adventure.'
+description: 'There is one big and very special date on the e-commerce and retail market and it is called Black Friday. For many, it means "discount prices", "sale!", "50% off", but for developers and IT people it is a challenging adventure.'
+aliases:
+  - /2018/mar/a-tale-of-how-to-not-deploy-two-months-old-features/ 
 ---
 
 ![Photo by rawpixel.com on Unsplash](header.jpeg)

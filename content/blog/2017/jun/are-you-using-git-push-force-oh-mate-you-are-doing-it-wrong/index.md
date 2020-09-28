@@ -1,7 +1,8 @@
 ---
 title: 'Are you using git push force? Oh mate, you are doing it wrong!'
 date: '2017-06-03T19:44:37.121Z'
-cover: header.png
+aliases:
+  - /2017/jun/are-you-using-git-push-force-oh-mate-you-are-doing-it-wrong/
 ---
 
 ![Git branching](header.png)

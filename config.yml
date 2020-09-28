@@ -1,0 +1,22 @@
+baseurl: "https://brunoluiz.net"
+title: "Bruno Luiz Silva"
+theme: 'hugo-PaperMod'
+languageCode: "en-us"
+enableEmoji: true
+paginate: 7
+params:
+  description: A collection of random software engineering thoughts
+  defaultTheme: 'auto'
+  homeInfoParams:
+    Title: 👨‍💻 Bruno Luiz Silva
+    Content: A collection of random software engineering thoughts
+  socialIcons: # optional
+    - name: "email"
+      url: "mailto:contact@brunoluiz.net"
+    - name: "github"
+      url: "https://github.com/brunoluiz"
+    - name: "twitter"
+      url: "https://twitter.com/brunoluiz"
+    - name: "linkedin"
+      url: "https://uk.linkedin.com/in/brnluiz"
+  ShowReadingTime: true

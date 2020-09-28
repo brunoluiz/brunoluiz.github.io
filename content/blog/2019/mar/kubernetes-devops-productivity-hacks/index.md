@@ -1,8 +1,9 @@
 ---
 title: 'Kubernetes devops productivity hacks'
 date: '2019-03-14T21:37:37.121Z'
-cover: header.jpeg
-summary: 'Today, Kubernetes is the de facto container orchestration solution. Together with the devops culture, developers have to get familiarised to its tools, such as kubectl. But how do we go beyond kubectl?'
+description: 'Today, Kubernetes is the de facto container orchestration solution. Together with the devops culture, developers have to get familiarised to its tools, such as kubectl. But how do we go beyond kubectl?'
+aliases:
+  - /2019/mar/kubernetes-devops-productivity-hacks/
 ---
 
 ![Photo by Cameron Venti on Unsplash](header.jpeg)
