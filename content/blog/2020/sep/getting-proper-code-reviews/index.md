@@ -1,5 +1,5 @@
 ---
-title: 'Getting proper code reviews'
+title: 'Getting good code reviews from peers'
 date: '2020-09-28T19:00:00Z'
 description: "Every software developer, soon after pushing code to the repository, has this urge to ping the team to ask for code review. But, I dare to say: don't do it! Most likely the code will still have some issues, especially if this is your first push for this feature."
 aliases:
@@ -8,11 +8,11 @@ aliases:
 
 ![Photo by Glenn Carstens-Peters on Unsplash](cover.jpg)
 
-Every software developer, soon after pushing code to the repository, has this urge to ping the team to ask for code review. But, I dare to say: don't do it! Most likely the code will still have some issues, especially if this is your first push for this feature.
+Every software developer, soon after pushing code to the repository, has this urge to ping the team to ask for code review. But, I dare to say: don't do it! Most likely some adjusments and checks can still be done, especially if this is your first push for this feature.
 
 The following guidelines might help you to get better and faster code reviews.
 
-_Disclaimer: I am using some Github terminology (Pull Request, Draft PR), but it should apply to other repository hosting services._
+> _Disclaimer: I am using some Github terminology (Pull Request, Draft PR), but it should apply to other repository hosting services._
 
 # Be your first reviewer
 
@@ -20,7 +20,7 @@ As mentioned, many might be eager to ask for reviews straight away. But what if 
 
 It will already clear the way for teammates to focus on what matters for the feature.
 
-# Create small Pull Requests (if possible)
+# Create small Pull Requests, if possible
 
 Sometimes we might end-up including too much code in one Pull Request. Splitting it into small ones will make reviewers lives easier.
 
@@ -32,7 +32,7 @@ Examples of splittable code:
 -   Tooling updates (scripts or shared libs/SDK), as it might be of interest of other people outside the team
 -   If there is a story ticket with sub-tasks, use the sub-tasks as a guide for opening pull requests
 
-# Use comments to open early discussion
+# Use comments to open discussions
 
 Most repository hosting services have tools to allow developers to comment in pull requests. As you review your code, you might want to:
 
@@ -45,7 +45,7 @@ Most repository hosting services have tools to allow developers to comment in pu
 
 Of course, these are suggestions and not all pull requests need discussions.
 
-# If working with big teams, drafts might help
+# Drafts might help in big teams
 
 Sometimes, people get stuck in some part, and that is where asking your mates might be a good call. Push, open a pull request, label as "WIP" and send it to some people... right?
 
@@ -63,7 +63,7 @@ The team might exactly know what to expect for this feature, and there might be 
 
 If there is a ticket, replicating some bits in the description might be helpful as well. Someone might need to come back to it, or even other teams might want to peek into it. Most likely, just a few will remember details and this description could be of huge help in these moments.
 
-# Continuous integration: automation, automation...
+# Continuous integration: automation, automation, automation...
 
 ![Release automation](circleci-screenshot.png)
 
