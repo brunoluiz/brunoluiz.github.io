@@ -6,10 +6,21 @@
     <description>Recent content on Bruno Luiz Silva</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 05 Dec 2019 17:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 28 Sep 2020 19:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://brunoluiz.net/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Getting good code reviews from peers</title>
+      <link>https://brunoluiz.net/blog/2020/sep/getting-good-code-reviews/</link>
+      <pubDate>Mon, 28 Sep 2020 19:00:00 +0000</pubDate>
+      
+      <guid>https://brunoluiz.net/blog/2020/sep/getting-good-code-reviews/</guid>
+      <description>Every software developer, soon after pushing code to the repository, has this urge to ping the team to ask for code review. But, I dare to say: don&amp;rsquo;t do it! Most likely some adjusments and checks can still be done, especially if this is your first push for this feature.
+The following guidelines might help you to get better and faster code reviews.
+ Disclaimer: I am using some Github terminology (Pull Request, Draft PR), but it should apply to other repository hosting services.</description>
+    </item>
     
     <item>
       <title>GRPC: A powerful way to improve your Golang APIs</title>
