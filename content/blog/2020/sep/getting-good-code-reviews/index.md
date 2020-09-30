@@ -14,17 +14,19 @@ The following guidelines might help you to get better and faster code reviews.
 
 > _Disclaimer: I am using some Github terminology (Pull Request, Draft PR), but it should apply to other repository hosting services._
 
-# Be your first reviewer
+# Be your first reviewer and tester
 
-As mentioned, many might be eager to ask for reviews straight away. But what if your first reviewer was you? Check the code for usual issues, such as unnecessary comments, intricated logic or even some test script you wrote and committed by accident (who never?)
+As mentioned, many might be eager to ask for reviews straight away. But what if your first reviewer was you? Check the code for usual issues, such as unnecessary comments, intricated logic or even some test script you wrote and committed by accident (who never?).
 
-It will already clear the way for teammates to focus on what matters for the feature.
+Check your tests and run the test suite, if the team has one (if it doesn't, perhaps it is time to add one). Or even try it with a few manual tests. It will guarantee the feature doesn't contain a breaking change or any other funny behaviour.
 
-# Create small Pull Requests, if possible
+It will clear the way for teammates to focus on what matters for the feature.
+
+# Create small Pull Requests
 
 Sometimes we might end-up including too much code in one Pull Request. Splitting it into small ones will make reviewers lives easier.
 
-It will narrow down the feature scope, and it might raise some interesting discussions before going ahead with more implementations. Besides, smaller amounts of code are faster to review.
+It will narrow down the scope, and it might raise some interesting discussions before going ahead with more implementations. Besides, smaller amounts of code are faster to review and understand 🙂.
 
 Examples of splittable code:
 
@@ -34,7 +36,7 @@ Examples of splittable code:
 
 # Use comments to open discussions
 
-Most repository hosting services have tools to allow developers to comment in pull requests. As you review your code, you might want to:
+Most repository hosting services have tools to allow developers to comment in pull requests. As you review your code, these are some points you might want to discuss:
 
 1.  Discuss if an implementation is the best approach to the problem or if it is consistent with similar features
 2.  Discuss if [the code is idiomatic][1] for the language or framework
@@ -43,15 +45,13 @@ Most repository hosting services have tools to allow developers to comment in pu
 
 ![Is this idiomatic code?](idiomatic-screenshot.png)
 
-Of course, these are suggestions and not all pull requests need discussions.
-
 # Drafts might help in big teams
 
 Sometimes, people get stuck in some part, and that is where asking your mates might be a good call. Push, open a pull request, label as "WIP" and send it to some people... right?
 
 The problem with this approach is that, in big teams, many code owners might be associated with this project. Usually, members are automatically notified on pull requests, and some people might not like the noise (e-mails, Github bots and so on).
 
-Most services have the concept of "draft pull request", which do not automatically request reviews from the code owners. For work in progress pull requests, this is quite helpful and highly recommended.
+Most services have the concept of "draft pull request" ([Github](https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request), [Gitlab](https://docs.gitlab.com/ee/user/project/merge_requests/work_in_progress_merge_requests.html)), which do not automatically request reviews from the code owners. For work in progress pull requests, this is quite helpful and highly recommended.
 
 ![Is this idiomatic code?](draft-screenshot.png)
 
@@ -61,7 +61,7 @@ Once it is ready for review, you can convert from draft to pull request and prof
 
 The team might exactly know what to expect for this feature, and there might be even a ticket with more details. But humans tend to forget details, and a clear description of what is supposed to do might be helpful.
 
-If there is a ticket, replicating some bits in the description might be helpful as well. Someone might need to come back to it, or even other teams might want to peek into it. Most likely, just a few will remember details and this description could be of huge help in these moments.
+If there is a ticket, replicating some bits in the description might be helpful as well. Someone might need to come back to it after months, or even other teams might want to peek into it. Most likely, just a few will remember details and this description could be of huge help in these moments.
 
 # Continuous integration: automation, automation, automation...
 
@@ -74,7 +74,7 @@ With tools such as [CircleCI](https://circleci.com/) or [Github Actions](https:/
 Things that could be easily automated:
 
 -   Tests: if the project has them (it should), the commands to run them should be easy to include in the automation
--   Linting: checks if the code follows code guidelines decided by the team, enabling to catch bugs and other programming errors. Most languages have linting tools, with many available configurations (examples: ESLint, golangci-lint)
+-   [Linting](https://en.wikipedia.org/wiki/Lint_(software)): checks if the code follows code guidelines decided by the team, enabling to catch bugs and other programming errors. Most languages have linting tools, with many available configurations (examples: ESLint, golangci-lint)
 -   Building: from binaries to docker images, why not add this process to your automation pipeline?
 -   Deploying: depending on the team workflow, it might be even possible to deploy these straight to staging or production (continuous delivery)
 -   Publishing: if the project is some tool, it can publish in the specific platform (screenshot example)
