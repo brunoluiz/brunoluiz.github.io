@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on Bruno Luiz Silva</title>
@@ -7,8 +7,1050 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     
-	<atom:link href="https://brunoluiz.net/tags/index.xml" rel="self" type="application/rss+xml" />
-    
+        <atom:link href="https://brunoluiz.net/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Getting good code reviews from peers</title>
+      <link>https://brunoluiz.net/blog/2020/sep/getting-good-code-reviews/</link>
+      <pubDate>2020-09-28</pubDate>
+      
+      <guid>https://brunoluiz.net/blog/2020/sep/getting-good-code-reviews/</guid>
+      <description>&lt;p&gt;&lt;img src=&#34;cover.jpg&#34; alt=&#34;Photo by Glenn Carstens-Peters on Unsplash&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Every software developer, soon after pushing code to the repository, has this urge to ping the team to ask for code review. But, I dare to say: don&amp;rsquo;t do it! Most likely some adjusments and checks can still be done, especially if this is your first push for this feature.&lt;/p&gt;
+&lt;p&gt;The following guidelines might help you to get better and faster code reviews.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;em&gt;Disclaimer: I am using some Github terminology (Pull Request, Draft PR), but it should apply to other repository hosting services.&lt;/em&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h1 id=&#34;be-your-first-reviewer-and-tester&#34;&gt;Be your first reviewer and tester&lt;/h1&gt;
+&lt;p&gt;As mentioned, many might be eager to ask for reviews straight away. But what if your first reviewer was you? Check the code for usual issues, such as unnecessary comments, intricated logic or even some test script you wrote and committed by accident (who never?).&lt;/p&gt;
+&lt;p&gt;Check your tests and run the test suite, if the team has one (if it doesn&amp;rsquo;t, perhaps it is time to add one). Or even try it with a few manual tests. It will guarantee the feature doesn&amp;rsquo;t contain a breaking change or any other funny behaviour.&lt;/p&gt;
+&lt;p&gt;It will clear the way for teammates to focus on what matters for the feature.&lt;/p&gt;
+&lt;h1 id=&#34;create-small-pull-requests&#34;&gt;Create small Pull Requests&lt;/h1&gt;
+&lt;p&gt;Sometimes we might end-up including too much code in one Pull Request. Splitting it into small ones will make reviewers lives easier.&lt;/p&gt;
+&lt;p&gt;It will narrow down the scope, and it might raise some interesting discussions before going ahead with more implementations. Besides, smaller amounts of code are faster to review and understand 🙂.&lt;/p&gt;
+&lt;p&gt;Examples of splittable code:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Updates on schemas or any type model, as the team might want to discuss it before going ahead&lt;/li&gt;
+&lt;li&gt;Tooling updates (scripts or shared libs/SDK), as it might be of interest of other people outside the team&lt;/li&gt;
+&lt;li&gt;If there is a story ticket with sub-tasks, use the sub-tasks as a guide for opening pull requests&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;use-comments-to-open-discussions&#34;&gt;Use comments to open discussions&lt;/h1&gt;
+&lt;p&gt;Most repository hosting services have tools to allow developers to comment in pull requests. As you review your code, these are some points you might want to discuss:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Discuss if an implementation is the best approach to the problem or if it is consistent with similar features&lt;/li&gt;
+&lt;li&gt;Discuss if &lt;a href=&#34;https://en.wikipedia.org/wiki/Programming_idiom&#34;&gt;the code is idiomatic&lt;/a&gt; for the language or framework&lt;/li&gt;
+&lt;li&gt;Point-out to possible breaking changes or disruptive codes (example: possible data loss)&lt;/li&gt;
+&lt;li&gt;Point out relevant bits of the code, where much of the logic happens&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;img src=&#34;idiomatic-screenshot.png&#34; alt=&#34;Is this idiomatic code?&#34;&gt;&lt;/p&gt;
+&lt;h1 id=&#34;drafts-might-help-in-big-teams&#34;&gt;Drafts might help in big teams&lt;/h1&gt;
+&lt;p&gt;Sometimes, people get stuck in some part, and that is where asking your mates might be a good call. Push, open a pull request, label as &amp;ldquo;WIP&amp;rdquo; and send it to some people&amp;hellip; right?&lt;/p&gt;
+&lt;p&gt;The problem with this approach is that, in big teams, many code owners might be associated with this project. Usually, members are automatically notified on pull requests, and some people might not like the noise (e-mails, Github bots and so on).&lt;/p&gt;
+&lt;p&gt;Most services have the concept of &amp;ldquo;draft pull request&amp;rdquo; (&lt;a href=&#34;https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request&#34;&gt;Github&lt;/a&gt;, &lt;a href=&#34;https://docs.gitlab.com/ee/user/project/merge_requests/work_in_progress_merge_requests.html&#34;&gt;Gitlab&lt;/a&gt;), which do not automatically request reviews from the code owners. For work in progress pull requests, this is quite helpful and highly recommended.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;draft-screenshot.png&#34; alt=&#34;Is this idiomatic code?&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Once it is ready for review, you can convert from draft to pull request and profit 😉.&lt;/p&gt;
+&lt;h1 id=&#34;descriptions-always-help&#34;&gt;Descriptions always help&lt;/h1&gt;
+&lt;p&gt;The team might exactly know what to expect for this feature, and there might be even a ticket with more details. But humans tend to forget details, and a clear description of what is supposed to do might be helpful.&lt;/p&gt;
+&lt;p&gt;If there is a ticket, replicating some bits in the description might be helpful as well. Someone might need to come back to it after months, or even other teams might want to peek into it. Most likely, just a few will remember details and this description could be of huge help in these moments.&lt;/p&gt;
+&lt;h1 id=&#34;continuous-integration-automation-automation-automation&#34;&gt;Continuous integration: automation, automation, automation&amp;hellip;&lt;/h1&gt;
+&lt;p&gt;&lt;img src=&#34;circleci-screenshot.png&#34; alt=&#34;Release automation&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Humans make mistakes. Who never pushed code with inconsistent formatting, logging calls, skipping some tests and so on? Reviewing these mistakes is a bit annoying (although doable), mostly because usually they could be 100% avoided.&lt;/p&gt;
+&lt;p&gt;With tools such as &lt;a href=&#34;https://circleci.com/&#34;&gt;CircleCI&lt;/a&gt; or &lt;a href=&#34;https://github.com/features/actions&#34;&gt;Github Actions&lt;/a&gt;, a team can automate these tasks and mark the feature as &amp;ldquo;mergeable&amp;rdquo; only if all of those passed. It is what is called &lt;a href=&#34;https://martinfowler.com/articles/continuousIntegration.html&#34;&gt;continuous integration&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Things that could be easily automated:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Tests: if the project has them (it should), the commands to run them should be easy to include in the automation&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://en.wikipedia.org/wiki/Lint_(software)&#34;&gt;Linting&lt;/a&gt;: checks if the code follows code guidelines decided by the team, enabling to catch bugs and other programming errors. Most languages have linting tools, with many available configurations (examples: ESLint, golangci-lint)&lt;/li&gt;
+&lt;li&gt;Building: from binaries to docker images, why not add this process to your automation pipeline?&lt;/li&gt;
+&lt;li&gt;Deploying: depending on the team workflow, it might be even possible to deploy these straight to staging or production (continuous delivery)&lt;/li&gt;
+&lt;li&gt;Publishing: if the project is some tool, it can publish in the specific platform (screenshot example)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;These are just examples. Your team might have different requirements and tasks, which could be configured into your continuous integration.&lt;/p&gt;
+&lt;h1 id=&#34;dont-be-the-rockstar-coder&#34;&gt;Don&amp;rsquo;t be &amp;ldquo;the rockstar&amp;rdquo; coder&lt;/h1&gt;
+&lt;p&gt;Besides all the above, be honest and genuine when asking questions, discussing topics or bringing new things (tooling, models, ways of code). Consider that people will spend some time to check your progress, and give feedback and recommendations. They are doing this genuinely, and so should you.&lt;/p&gt;
+&lt;p&gt;Don&amp;rsquo;t be &amp;ldquo;that guy&amp;rdquo;, the one who knows everything and whos opinion is the only that matters.&lt;/p&gt;
+&lt;h1 id=&#34;conclusion&#34;&gt;Conclusion&lt;/h1&gt;
+&lt;p&gt;I hope these steps are small enough to be easily integrated into your workflow. At some point, you might be able to convince other team members to use some of these as well. Integrate it in steps, to make it smoother to everyone 😉.&lt;/p&gt;
+</description>
+    </item>
+    <item>
+      <title>GRPC: A powerful way to improve your Golang APIs</title>
+      <link>https://brunoluiz.net/blog/2019/nov/grpc-a-powerful-way-to-improve-golang-apis/</link>
+      <pubDate>2019-12-05</pubDate>
+      
+      <guid>https://brunoluiz.net/blog/2019/nov/grpc-a-powerful-way-to-improve-golang-apis/</guid>
+      <description>&lt;p&gt;&lt;img src=&#34;cover.jpg&#34; alt=&#34;Photo by Israel Palacio on Unsplash&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Web APIs are everywhere, with REST being one of the most popular ways to distribute it. With recent technologies, there are better ways to implement them, GRPC been one of them.&lt;/p&gt;
+&lt;h1 id=&#34;why-rest-is-popular-and-what-are-its-pitfalls&#34;&gt;Why REST is popular and what are its pitfalls?&lt;/h1&gt;
+&lt;p&gt;Companies used to write web-services in SOAP until REST got enough hype to be the next big thing, although the concept has been around since 2000. It was like a fresh breeze for developers. It had a low learning curve, simplified payload (usually JSON instead of XML), schema-less approach and no need for specific clients/server generators.&lt;/p&gt;
+&lt;p&gt;At a certain point, some of its strengths shown to be some of its weaknesses. Not having a schema initially seemed a good idea, but developers eventually realised it is required. It can be useful for validation, documentation, contract agreement between teams and code-generation, to mention a few. Initiatives such as Swagger, RAML and most recently OpenAPI popped up trying to fill these gaps.&lt;/p&gt;
+&lt;p&gt;Even though, a lack of an official standard to guide through decision processes usually ended up in analysis paralysis in big projects. Besides, code generation in most of these tools was not as good and ready to use (example: swagger-tools).&lt;/p&gt;
+&lt;p&gt;JSON is the preferred way to return data from REST APIs. It is an excellent choice for public services used by front-end applications and third-parties. Due to its overhead on transporting and decoding, it is not well optimised for communication between internal services.&lt;/p&gt;
+&lt;p&gt;Even with these issues, it doesn&amp;rsquo;t mean REST is a bad choice. It is by far the simplest way to implement an API, but there are known pitfalls due to its simplicity. Technologies such as GraphQL, Thrift and GRPC come to fill these gaps.&lt;/p&gt;
+&lt;h1 id=&#34;enters-grpc-and-protocol-buffers&#34;&gt;Enters GRPC and Protocol Buffers&lt;/h1&gt;
+&lt;p&gt;GRPC is a modern Remote Procedure Call (RPC) framework built on top-off HTTP 2.0, using Protocol Buffers as its interface definition language (IDL). These help it to be a low latency, high performance and scalable option to REST.&lt;/p&gt;
+&lt;p&gt;The strict use of HTTP 2.0 enables developers to embrace some of its features, mainly streaming (client-side and server-side). For example:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;A client can send a bulk of messages through a stream, instead of sending one request each or one with all of them&lt;/li&gt;
+&lt;li&gt;A client can send a request and receive a stream of responses, instead of waiting for the server to finish the processing and send a huge payload&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Protocol Buffers are a simpler and optimised way to define and serialise structured data. It can be used not only with GRPC but for other use cases, such as event modelling and data storage.&lt;/p&gt;
+&lt;p&gt;Think Swagger (REST) or WSDL (SOAP), but lightweight due to the fact the payloads are binary, allowing faster serialisation and smaller footprint. Being generated by tools such as &lt;code&gt;protoc&lt;/code&gt;, it brings some benefits such as type checking in compile-time and auto-completion in IDEs.&lt;/p&gt;
+&lt;p&gt;In the snippet below, a GRPC service is defined using Protobuf. Generating a client and server requires a simple &lt;code&gt;protoc&lt;/code&gt; call. Easy right?&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-protobuf&#34; data-lang=&#34;protobuf&#34;&gt;syntax &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;proto3&amp;#34;&lt;/span&gt;;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;package&lt;/span&gt; api;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// Defines where your go package will be placed after compilation
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;option&lt;/span&gt; go_package &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;api&amp;#34;&lt;/span&gt;;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;service&lt;/span&gt; Identity {&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;rpc&lt;/span&gt; GetUser (GetUserRequest) &lt;span style=&#34;color:#66d9ef&#34;&gt;returns&lt;/span&gt; (GetUserResponse) {}&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;rpc&lt;/span&gt; GetUsers (GetUsersRequest) &lt;span style=&#34;color:#66d9ef&#34;&gt;returns&lt;/span&gt; (GetUsersResponse) {}&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;}&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;message&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;User&lt;/span&gt; {&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;string&lt;/span&gt; user_id &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;string&lt;/span&gt; name &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;bool&lt;/span&gt; active &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;3&lt;/span&gt;;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;}&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;message&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;GetUserRequest&lt;/span&gt; {&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;string&lt;/span&gt; user_id &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;}&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;message&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;GetUserResponse&lt;/span&gt; {&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;  User user &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;}&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;message&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;GetUsersRequest&lt;/span&gt; {}&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;message&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;GetUsersResponse&lt;/span&gt; {&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;  &lt;span style=&#34;color:#75715e&#34;&gt;// Defines an array of users
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;repeated&lt;/span&gt; User users &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;}&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;In any protobuf file, each field has a number associated with it. These uniquely identify a position of a field in the binary message, so they shouldn’t be changed. If one of these gets deprecated, they can&amp;rsquo;t be re-used. It helps on avoiding breaking changes, allowing a progressive model evolution. Developers don&amp;rsquo;t need to worry about fields being re-used and clashing with previous payloads of the message.&lt;/p&gt;
+&lt;h1 id=&#34;creating-a-simple-grpc-server-and-client-in-golang&#34;&gt;Creating a simple GRPC server and client in Golang&lt;/h1&gt;
+&lt;p&gt;&lt;em&gt;&lt;a href=&#34;https://github.com/brunoluiz/grpc-example&#34;&gt;Code of this part available at Github brunoluiz/grpc-example@master&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;It is possible to create a simple GRPC server and client based on the previous protobuf definition. The following tools need to be installed:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/protocolbuffers/protobuf&#34;&gt;Protocol buffers compiler&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/golang/protobuf&#34;&gt;Golang protoc plugin&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In a Golang project, running &lt;code&gt;protoc -I. --go_out=plugins=grpc:./generated api/api.proto&lt;/code&gt; will generate both server and client. The &lt;code&gt;go_package&lt;/code&gt; option in the protobuf specifies the generated code output path. In this case it will be &lt;code&gt;./generated/api&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;To create a server, all methods defined by the proto need to be implemented by a Golang type. Peaking into the generated files, this is the interface generated from &lt;code&gt;service Identity&lt;/code&gt;. A type which implements this interface should be enough to implement the server.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// File: api/generated/api.pb.go
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
+&lt;span style=&#34;color:#66d9ef&#34;&gt;type&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;IdentityServer&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;interface&lt;/span&gt; {
+	&lt;span style=&#34;color:#a6e22e&#34;&gt;GetUser&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;context&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;Context&lt;/span&gt;, &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;GetUserRequest&lt;/span&gt;) (&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;GetUserResponse&lt;/span&gt;, &lt;span style=&#34;color:#66d9ef&#34;&gt;error&lt;/span&gt;)
+	&lt;span style=&#34;color:#a6e22e&#34;&gt;GetUsers&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;context&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;Context&lt;/span&gt;, &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;GetUsersRequest&lt;/span&gt;) (&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;GetUsersResponse&lt;/span&gt;, &lt;span style=&#34;color:#66d9ef&#34;&gt;error&lt;/span&gt;)
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// File: service/service.go
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
+&lt;span style=&#34;color:#66d9ef&#34;&gt;type&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;GRPCServer&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;struct&lt;/span&gt; {}
+
+&lt;span style=&#34;color:#66d9ef&#34;&gt;func&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;g&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;GRPCServer&lt;/span&gt;) &lt;span style=&#34;color:#a6e22e&#34;&gt;GetUser&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;_&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;context&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;Context&lt;/span&gt;, &lt;span style=&#34;color:#a6e22e&#34;&gt;_&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;api&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;GetUserRequest&lt;/span&gt;) (&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;api&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;GetUserResponse&lt;/span&gt;, &lt;span style=&#34;color:#66d9ef&#34;&gt;error&lt;/span&gt;) { &lt;span style=&#34;color:#f92672&#34;&gt;...&lt;/span&gt; }
+&lt;span style=&#34;color:#66d9ef&#34;&gt;func&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;g&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;GRPCServer&lt;/span&gt;) &lt;span style=&#34;color:#a6e22e&#34;&gt;GetUsers&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;_&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;context&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;Context&lt;/span&gt;, &lt;span style=&#34;color:#a6e22e&#34;&gt;_&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;api&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;GetUsersRequest&lt;/span&gt;) (&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;api&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;GetUsersResponse&lt;/span&gt;, &lt;span style=&#34;color:#66d9ef&#34;&gt;error&lt;/span&gt;) { &lt;span style=&#34;color:#f92672&#34;&gt;...&lt;/span&gt; }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;With its implementation, the following code will be enough to run it as a server.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// File: cmd/server/main.go
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;// Create a new GRPC Server
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;s&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;:=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;grpc&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;NewServer&lt;/span&gt;()
+
+&lt;span style=&#34;color:#75715e&#34;&gt;// Register our service implementation against the GRPC service
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;api&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;RegisterIdentityServer&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;s&lt;/span&gt;, &lt;span style=&#34;color:#a6e22e&#34;&gt;service&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;NewServer&lt;/span&gt;())
+
+&lt;span style=&#34;color:#75715e&#34;&gt;// Listen to a specific port
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;lis&lt;/span&gt;, &lt;span style=&#34;color:#a6e22e&#34;&gt;err&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;:=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;net&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;Listen&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;tcp&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#a6e22e&#34;&gt;os&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;Getenv&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;GRPC_ADDRESS&amp;#34;&lt;/span&gt;))
+&lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;err&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;nil&lt;/span&gt; {
+  &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;err&lt;/span&gt;
+}
+
+&lt;span style=&#34;color:#75715e&#34;&gt;// Start serving
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;s&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;Serve&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;lis&lt;/span&gt;)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;A client will be generated by &lt;code&gt;protoc&lt;/code&gt; as well. It can be created through &lt;code&gt;NewIdentityClient&lt;/code&gt;, returning an &lt;code&gt;IdentityClient&lt;/code&gt; implementation.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// File: api/generated/api.pb.go
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
+&lt;span style=&#34;color:#66d9ef&#34;&gt;type&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;IdentityClient&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;interface&lt;/span&gt; {
+	&lt;span style=&#34;color:#a6e22e&#34;&gt;GetUser&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;ctx&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;context&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;Context&lt;/span&gt;, &lt;span style=&#34;color:#a6e22e&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;GetUserRequest&lt;/span&gt;, &lt;span style=&#34;color:#a6e22e&#34;&gt;opts&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;...&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;grpc&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;CallOption&lt;/span&gt;) (&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;GetUserResponse&lt;/span&gt;, &lt;span style=&#34;color:#66d9ef&#34;&gt;error&lt;/span&gt;)
+	&lt;span style=&#34;color:#a6e22e&#34;&gt;GetUsers&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;ctx&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;context&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;Context&lt;/span&gt;, &lt;span style=&#34;color:#a6e22e&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;GetUsersRequest&lt;/span&gt;, &lt;span style=&#34;color:#a6e22e&#34;&gt;opts&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;...&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;grpc&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;CallOption&lt;/span&gt;) (&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;GetUsersResponse&lt;/span&gt;, &lt;span style=&#34;color:#66d9ef&#34;&gt;error&lt;/span&gt;)
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// File: cmd/client/main.go
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;// Set up a connection to the server.
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;conn&lt;/span&gt;, &lt;span style=&#34;color:#a6e22e&#34;&gt;err&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;:=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;grpc&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;Dial&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;c&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;String&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;grpc-address&amp;#34;&lt;/span&gt;), &lt;span style=&#34;color:#a6e22e&#34;&gt;grpc&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;WithInsecure&lt;/span&gt;(), &lt;span style=&#34;color:#a6e22e&#34;&gt;grpc&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;WithBlock&lt;/span&gt;())
+&lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;err&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;nil&lt;/span&gt; {
+  &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;err&lt;/span&gt;
+}
+&lt;span style=&#34;color:#66d9ef&#34;&gt;defer&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;conn&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;Close&lt;/span&gt;()
+
+&lt;span style=&#34;color:#75715e&#34;&gt;// Create GRPC Client
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;client&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;:=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;api&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;NewIdentityClient&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;conn&lt;/span&gt;)
+
+&lt;span style=&#34;color:#75715e&#34;&gt;// Call GRPC Service and Get User
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;u&lt;/span&gt;, &lt;span style=&#34;color:#a6e22e&#34;&gt;err&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;:=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;client&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;GetUser&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;context&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;Background&lt;/span&gt;(), &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;api&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;GetUserRequest&lt;/span&gt;{
+  &lt;span style=&#34;color:#a6e22e&#34;&gt;UserId&lt;/span&gt;: &lt;span style=&#34;color:#a6e22e&#34;&gt;c&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;Args&lt;/span&gt;().&lt;span style=&#34;color:#a6e22e&#34;&gt;Get&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;),
+})
+&lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;err&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;nil&lt;/span&gt; {
+  &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;errors&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;Wrap&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;err&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;issue on retrieving users&amp;#34;&lt;/span&gt;)
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Of course, this is the bare minimum set-up for a client and server. Interceptors can be added on both client and server, adding custom hooks to any method call and applying some transformations.&lt;/p&gt;
+&lt;p&gt;UnaryInterceptors deal with requests which expect a single response back. StreamInterceptors applies to any streamed response or request. &lt;a href=&#34;https://davidsbond.github.io/2019/06/14/creating-grpc-interceptors-in-go.html&#34;&gt;In this article&lt;/a&gt; by David Bond, there is more information about interceptors and how to implement custom ones.&lt;/p&gt;
+&lt;p&gt;Most common interceptors, such as authorisation, validation, monitoring can be found at &lt;a href=&#34;https://github.com/grpc-ecosystem/go-grpc-middleware&#34;&gt;go-grpc-middleware&lt;/a&gt;. Remember, don&amp;rsquo;t repeat yourself 😉&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;&lt;a href=&#34;https://github.com/brunoluiz/grpc-example&#34;&gt;Code of this part available at Github brunoluiz/grpc-example@master&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;h1 id=&#34;grpc-and-rest-together-what-is-this-a-crossover-episode&#34;&gt;GRPC and REST together: What is this, a crossover episode?&lt;/h1&gt;
+&lt;p&gt;&lt;em&gt;&lt;a href=&#34;https://github.com/brunoluiz/grpc-example/pull/1&#34;&gt;Code of this part available at Github brunoluiz/grpc-example@with-gateway&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;As previously mentioned, REST simplicity and low learning curve are some of its selling points. It allows quick testing, without the need to set-up a client binary &amp;ndash; who never did a quick &lt;code&gt;curl&lt;/code&gt; to check some API? Besides, it is easier for non-developers to play with it. As it is web services &lt;em&gt;lingua franca,&lt;/em&gt; it might be required for third-party or front-end integrations as well.&lt;/p&gt;
+&lt;p&gt;GRPC might be more efficient and better in some cases, but it is not as straightforward to use as REST. What if both could be used together, within the same service? That is where &lt;a href=&#34;https://github.com/grpc-ecosystem/grpc-gateway&#34;&gt;GRPC Gateway&lt;/a&gt; shines, integrating both worlds in one.&lt;/p&gt;
+&lt;p&gt;Through annotations, a service can define which methods will be exposed as REST. Using the previous GRPC protobuf, here is an example &amp;ndash; note the &lt;code&gt;google.api.http&lt;/code&gt; options:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-protobuf&#34; data-lang=&#34;protobuf&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;google/api/annotations.proto&amp;#34;&lt;/span&gt;;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;service&lt;/span&gt; Identity {&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;rpc&lt;/span&gt; GetUser (GetUserRequest) &lt;span style=&#34;color:#66d9ef&#34;&gt;returns&lt;/span&gt; (GetUserResponse) {&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#75715e&#34;&gt;// Maps GetUser to an HTTP GET request, with the param `user_id`
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#75715e&#34;&gt;// been mapped to GetUserRequest.user_id
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;option&lt;/span&gt; (google.api.http) &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; {&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;      get&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;/v1/users/{user_id}&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;    };&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;  }&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;rpc&lt;/span&gt; GetUsers (GetUsersRequest) &lt;span style=&#34;color:#66d9ef&#34;&gt;returns&lt;/span&gt; (GetUsersResponse) {&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#75715e&#34;&gt;// Maps GetUsers to an HTTP GET request
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;option&lt;/span&gt; (google.api.http) &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; {&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;      get&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;/v1/users&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;    };&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;  }&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;}&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;With annotations in place, &lt;code&gt;protoc&lt;/code&gt; needs to be changed to use the &lt;code&gt;grpc-gateway&lt;/code&gt; plugin.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/grpc-ecosystem/grpc-gateway#installation&#34;&gt;Install grpc-gateway locally&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Add GRPC Gateway paths to import paths (&lt;code&gt;-I$(GOPATH)/src/github.com/grpc-ecosystem/grpc-gateway/third\_party/googleapis&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;Add &lt;code&gt;--grpc-gateway_out=logtostderr=true:./generated&lt;/code&gt; to generate gateway code. It will place at &lt;code&gt;go_package&lt;/code&gt; path&lt;/li&gt;
+&lt;li&gt;Add &lt;code&gt;--grpc-swagger_out=logtostderr=true:.&lt;/code&gt; to generate Swagger definitions. It will place it in the same folder as the proto file.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-makefile&#34; data-lang=&#34;makefile&#34;&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;protoc&lt;/span&gt; &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;-I.&lt;/span&gt; &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;\&lt;/span&gt;
+  &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;-I&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;$(&lt;/span&gt;GOPATH&lt;span style=&#34;color:#66d9ef&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;/src&lt;/span&gt; &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;\&lt;/span&gt;
+  &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;-I&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;$(&lt;/span&gt;GOPATH&lt;span style=&#34;color:#66d9ef&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis&lt;/span&gt; &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;\&lt;/span&gt;
+  --grpc-gateway_out&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;logtostderr&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;true:./generated &lt;span style=&#34;color:#ae81ff&#34;&gt;\
+&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;&lt;/span&gt;  --swagger_out&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;logtostderr&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;true:. &lt;span style=&#34;color:#ae81ff&#34;&gt;\
+&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;&lt;/span&gt;  --go_out&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;plugins&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;grpc:./generated &lt;span style=&#34;color:#ae81ff&#34;&gt;\
+&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;&lt;/span&gt;  api/api.proto
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;After running &lt;code&gt;protoc&lt;/code&gt;, the reverse-proxy code will be available for use. It is just a matter of creating an HTTP server for it. The following implementation is running it in a separate server.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// File: cmd/gateway/main.go
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;// Note: Make sure the gRPC server is running properly and accessible
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
+&lt;span style=&#34;color:#a6e22e&#34;&gt;mux&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;:=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;runtime&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;NewServeMux&lt;/span&gt;()
+&lt;span style=&#34;color:#a6e22e&#34;&gt;opts&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;:=&lt;/span&gt; []&lt;span style=&#34;color:#a6e22e&#34;&gt;grpc&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;DialOption&lt;/span&gt;{&lt;span style=&#34;color:#a6e22e&#34;&gt;grpc&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;WithInsecure&lt;/span&gt;()}
+
+&lt;span style=&#34;color:#75715e&#34;&gt;// Register gRPC server endpoint
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;err&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;:=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;api&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;RegisterIdentityHandlerFromEndpoint&lt;/span&gt;(
+  &lt;span style=&#34;color:#a6e22e&#34;&gt;context&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;Background&lt;/span&gt;(), &lt;span style=&#34;color:#a6e22e&#34;&gt;mux&lt;/span&gt;, &lt;span style=&#34;color:#a6e22e&#34;&gt;c&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;String&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;grpc-address&amp;#34;&lt;/span&gt;), &lt;span style=&#34;color:#a6e22e&#34;&gt;opts&lt;/span&gt;)
+); &lt;span style=&#34;color:#a6e22e&#34;&gt;err&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;nil&lt;/span&gt; {
+  &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;err&lt;/span&gt;
+}
+
+&lt;span style=&#34;color:#75715e&#34;&gt;// Start HTTP reverse proxy: sends calls to GRPC server
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;http&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;ListenAndServe&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;c&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;String&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;gateway-address&amp;#34;&lt;/span&gt;), &lt;span style=&#34;color:#a6e22e&#34;&gt;mux&lt;/span&gt;)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Any REST client should be able to request data from the Gateway. Server up, this is curl&amp;rsquo;s output:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;➜  ~ curl localhost:8080/v1/users
+&lt;span style=&#34;color:#f92672&#34;&gt;{&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;users&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#f92672&#34;&gt;[{&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;user_id&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;xyz&amp;#34;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;name&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Pelican Steve&amp;#34;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;active&amp;#34;&lt;/span&gt;:true&lt;span style=&#34;color:#f92672&#34;&gt;}&lt;/span&gt;,&lt;span style=&#34;color:#f92672&#34;&gt;{&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;user_id&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;foo&amp;#34;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;name&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;John Doe&amp;#34;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;active&amp;#34;&lt;/span&gt;:true&lt;span style=&#34;color:#f92672&#34;&gt;}&lt;/span&gt;,&lt;span style=&#34;color:#f92672&#34;&gt;{&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;user_id&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;bar&amp;#34;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;name&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Chauffina Carr&amp;#34;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;active&amp;#34;&lt;/span&gt;:true&lt;span style=&#34;color:#f92672&#34;&gt;}]}&lt;/span&gt;
+➜  ~ curl localhost:8080/v1/users/xyz
+&lt;span style=&#34;color:#f92672&#34;&gt;{&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;user&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#f92672&#34;&gt;{&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;user_id&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;xyz&amp;#34;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;name&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Pelican Steve&amp;#34;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;active&amp;#34;&lt;/span&gt;:true&lt;span style=&#34;color:#f92672&#34;&gt;}}&lt;/span&gt;
+➜  ~ curl localhost:8080/v1/users/aaa
+&lt;span style=&#34;color:#f92672&#34;&gt;{&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;error&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;resource was not found&amp;#34;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;code&amp;#34;&lt;/span&gt;:5,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;message&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;resource was not found&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;}&lt;/span&gt;%
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Magic, isn&amp;rsquo;t it? Having this REST set-up might put a smile on some faces. The service can be migrated to GRPC for internal usage, keeping compatibility with REST clients &amp;ndash; third-parties, non-techies and front-end applications.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.gophercon.co.uk/videos/2019/writing-rest-services-for-the-grpc-curious/&#34;&gt;There is an excellent talk&lt;/a&gt; by Johan Brandhorst giving more details on GRPC Gateway.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;&lt;a href=&#34;https://github.com/brunoluiz/grpc-example/pull/1&#34;&gt;Code of this part available at Github brunoluiz/grpc-example@with-gateway&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;h1 id=&#34;fantastic-debugging-tools-and-where-to-find-them&#34;&gt;Fantastic debugging tools and where to find them&lt;/h1&gt;
+&lt;p&gt;Sooner or later, a quick peek into the service will be required, for debugging or scriptting purposes. In REST this can be done through tools such as curl, Insomnia or Postman. In GRPC, a different set of tools is required.&lt;/p&gt;
+&lt;p&gt;For the Graphical Interface lovers, the most popular one is &lt;a href=&#34;https://github.com/uw-labs/bloomrpc&#34;&gt;BloomRPC&lt;/a&gt;. It only requires the proto files to be loaded and then it works similarly to any other REST client.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://github.com/uw-labs/bloomrpc/raw/873953c6b00906a69f165c332634b946c7724fe9/resources/editor-preview.gif&#34; alt=&#34;BloomRPC demo&#34;&gt;&lt;/p&gt;
+&lt;p&gt;For mouse avoiders &amp;ndash; or terminal lovers 😅 &amp;ndash; there are two quite useful tools. &lt;a href=&#34;https://github.com/fullstorydev/grpcurl&#34;&gt;GRPCurl&lt;/a&gt; is an awesome CLI tool, resembling curl and allow easy GRPC automation and scripting. A simple example of its usage follows:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;grpcurl --plaintext --proto api/api.proto localhost:5000 api.Identity/GetUsers&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/ktr0731/evans&#34;&gt;Evans&lt;/a&gt; goes a little bit further, as it has a REPL mode as well, allowing easier resource inspections (my favourite).&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://github.com/ktr0731/evans/raw/97d1de81aa4ea471a14f4db56bf04830c6d79c39/evans1.gif&#34; alt=&#34;Evan REPL Demo&#34;&gt;&lt;/p&gt;
+&lt;p&gt;These tools, GUI or not, are quite useful while testing and inspecting GRPC services. Try them and find the one which fits your needs better 😉&lt;/p&gt;
+&lt;h1 id=&#34;my-experience-using-it&#34;&gt;My experience using it&lt;/h1&gt;
+&lt;p&gt;In my workplace GRPC has proved quite useful for connecting services, especially internal ones. Protocol Buffers came to be our main IDL when defining contracts for APIs and Stream Events. Due to these contracts, communicating implementations and changes are easier.&lt;/p&gt;
+&lt;p&gt;Implementing service clients and servers had been easier and faster. The most common issue is due to include paths errors, which sometimes get messy. But this is more due to our learnings around it than the technology itself. Some of the boilerplate, such as registering the server or dialing the client, can be tackled by creating custom protoc plugins. This proved quite useful, specially when the team is more product-oriented.&lt;/p&gt;
+&lt;p&gt;For Golang, it proved to work quite well in most cases, with good community support. But, &lt;code&gt;protoc&lt;/code&gt; can generate code to other languages as well, such as NodeJS and Java. Although, in our NodeJS services, we felt GRPC support is still lacking behind Golang.&lt;/p&gt;
+&lt;p&gt;In general, GRPC has been a good choice for our services. Hopefully, it will be good for your team as well.&lt;/p&gt;
+</description>
+    </item>
+    <item>
+      <title>GraphQL feat API Gateway</title>
+      <link>https://brunoluiz.net/blog/graphql-as-a-gateway/</link>
+      <pubDate>2019-07-01</pubDate>
+      
+      <guid>https://brunoluiz.net/blog/graphql-as-a-gateway/</guid>
+      <description>&lt;p&gt;&lt;img src=&#34;cover.jpg&#34; alt=&#34;Photo by Christian Stahl on Unsplash&#34;&gt;&lt;/p&gt;
+&lt;p&gt;GraphQL, REST, gRPC, Thrift&amp;hellip; Have you ever imagined how to stick these together in a micro-services architecture and expose to the world? There are some common ways to do it, such as using Nginx or Kong. But, an alternative way to do this is by using GraphQL in front of all services.&lt;/p&gt;
+&lt;h2 id=&#34;api-gateway-pattern----a-quick-introduction&#34;&gt;API Gateway pattern &amp;ndash; a quick introduction&lt;/h2&gt;
+&lt;p&gt;Consider two services: A and B. How a client would be able to request its data? The easiest way would be to make a request to service A and then another to B, each pointing to a different host (eg: &lt;code&gt;a.service/orders&lt;/code&gt; and &lt;code&gt;b.service/users&lt;/code&gt;).&lt;/p&gt;
+&lt;p&gt;As the number of services grows, it is quite laborious to keep using this strategy. Since there could be too many services and requests to coordinate. To solve this, an API proxy can be used, where the client will request to only one service instead of multiple. This proxy will orchestrate where this request should go, glueing all services in one place.&lt;/p&gt;
+&lt;p&gt;While proxies just forward requests, API Gateways encapsulate more of the application&amp;rsquo;s internal architecture. Working as a Facade with some other responsibilities, such as:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Request/Response Transformation: requests made by a client can be reshaped before being sent to internal services, with the same applying to responses.&lt;/li&gt;
+&lt;li&gt;Request routing: as a proxy, it routes requests to specific services, translating to other protocols if required.&lt;/li&gt;
+&lt;li&gt;Composition: one request to the gateway can actually be mapped to multiple internal ones.&lt;/li&gt;
+&lt;li&gt;Throttling: limit user requests up to a determined threshold.&lt;/li&gt;
+&lt;li&gt;Security: protect some endpoints with some sort of authentication (JWT token, basic, API tokens etc).&lt;/li&gt;
+&lt;li&gt;Metrics and Logs: as all requests would pass through it, many metrics and logs will be collected through this service.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;For more information on the API gateway pattern, take a look at &lt;a href=&#34;https://www.nginx.com/blog/building-microservices-using-an-api-gateway/&#34;&gt;Nginx micro-services article&lt;/a&gt; and on this &lt;a href=&#34;https://freecontent.manning.com/the-api-gateway-pattern/&#34;&gt;Chris Richardson article&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;why-graphql-and-not-rest&#34;&gt;Why GraphQL and not REST?&lt;/h2&gt;
+&lt;p&gt;GraphQL was initially developed by Facebook and &lt;a href=&#34;https://code.fb.com/core-data/graphql-a-data-query-language/&#34;&gt;was open-sourced in 2015&lt;/a&gt;. Many companies started using it for internal APIs, but some are already exposing it as its public API (eg: GitHub, Shopify, Yelp and Contentful).&lt;/p&gt;
+&lt;h3 id=&#34;schema-validation-and-documentation&#34;&gt;Schema validation and documentation&lt;/h3&gt;
+&lt;p&gt;With GraphQL, in contrast to from REST, a schema is always required, following &lt;a href=&#34;https://graphql.org&#34;&gt;GraphQL Foundation&lt;/a&gt; directives. This allows not only schema validation from day one, but documentation too. Typed languages can benefit from the schema and generate type definitions through it (eg: &lt;a href=&#34;https://github.com/dotansimha/graphql-code-generator&#34;&gt;typescript graphql-code-generator&lt;/a&gt;).&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-graphql&#34; data-lang=&#34;graphql&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;type&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Query&lt;/span&gt; {
+  &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&amp;#34;&amp;#34;
+&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;  Fetch posts by user, allowing custom filtering
+&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;  &amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;
+  posts(&lt;span style=&#34;color:#66d9ef&#34;&gt;input&lt;/span&gt;: &lt;span style=&#34;color:#a6e22e&#34;&gt;PostQueryInput&lt;/span&gt;): [&lt;span style=&#34;color:#a6e22e&#34;&gt;Post&lt;/span&gt;]
+}
+
+&lt;span style=&#34;color:#a6e22e&#34;&gt;input&lt;/span&gt; PostQueryInput {
+  categoryId: &lt;span style=&#34;color:#a6e22e&#34;&gt;String&lt;/span&gt;
+}
+
+&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&amp;#34;&amp;#34;
+&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;Post bla bla bla
+&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#66d9ef&#34;&gt;type&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Post&lt;/span&gt; {
+  title: &lt;span style=&#34;color:#a6e22e&#34;&gt;String&lt;/span&gt;
+  categories: [&lt;span style=&#34;color:#a6e22e&#34;&gt;Category&lt;/span&gt;]
+}
+
+&lt;span style=&#34;color:#66d9ef&#34;&gt;type&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Category&lt;/span&gt; {
+  name: &lt;span style=&#34;color:#a6e22e&#34;&gt;String&lt;/span&gt;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;In theory, the same could be done with REST by using OpenAPI/Swagger, especially for documentation &lt;del&gt;but YAML, yikes&lt;/del&gt;. But, the code generation tools are not exactly the best and sometimes the schema validation does not work properly, requiring extra middleware and tweaks around it. As GraphQL is standardised in this sense, it doesn&amp;rsquo;t suffer from these issues.&lt;/p&gt;
+&lt;h3 id=&#34;one-endpoint-to-rule-them-all&#34;&gt;One endpoint to rule them all&lt;/h3&gt;
+&lt;p&gt;GraphQL only exposes one endpoint. Instead of having N client requests, only one is needed. The server orchestrates everything required to fulfil the whole request, such as: calling multiple micro-services (with any protocol), mapping outputs to the expected schema and logging requests/responses. Besides, this solves &lt;a href=&#34;https://stackoverflow.com/questions/44564905/what-is-over-fetching-or-under-fetching/44568365&#34;&gt;under-fetching issues&lt;/a&gt;.&lt;/p&gt;
+&lt;h3 id=&#34;out-of-box-standards&#34;&gt;Out-of-box standards&lt;/h3&gt;
+&lt;p&gt;REST has been around for a long time, and during this period developers started to have specific necessities, such as sparse fieldsets, versioning, pagination. There are many ways to implement these features but there aren&amp;rsquo;t really any standards (the closest solution is &lt;a href=&#34;https://jsonapi.org/&#34;&gt;JSONAPI&lt;/a&gt;). GraphQL comes with some of these specs out-of-box:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://graphql.org/learn/queries/#fields&#34;&gt;Sparse fieldset&lt;/a&gt;: while making the request, all the required fields need to be specified, avoiding over-fetching&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://graphql.org/learn/best-practices/#versioning&#34;&gt;Versioning&lt;/a&gt;: route versioning is not a good practice in GraphQL instead, the schema should continually evolve. New capabilities can be inserted on new types and fields, allowing the client to plan and decide when to change to new resolvers. If a field needs to be deprecated, one can use a directive such as &lt;a href=&#34;https://www.apollographql.com/docs/graphql-tools/schema-directives&#34;&gt;&lt;code&gt;@deprecated&lt;/code&gt;&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://graphql.org/learn/pagination/&#34;&gt;Pagination&lt;/a&gt;: there are some conventions and, for more complex implementations, there is the Connection model pattern.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Of course, there is other stuff that one can compare against REST, but the idea is to show that GraphQL can be an option.&lt;/p&gt;
+&lt;h3 id=&#34;developer-experience&#34;&gt;Developer experience&lt;/h3&gt;
+&lt;p&gt;Front-end and back-end developers can easily settle on a schema and, in a question of minutes, have stubs built around it. Besides, code generation, IDE auto-completion, easy documentation/schema discovery and good API exploring tools (such as GraphQL Playground and GraphiQL) makes the development experience way nicer when compared to REST.&lt;/p&gt;
+&lt;h2 id=&#34;graphql-as-your-api-gateway&#34;&gt;GraphQL as your API Gateway&lt;/h2&gt;
+&lt;p&gt;High hopes that you are convinced on trying GraphQL 🙌 Implementing a GraphQL server is not complicated and there are many guides on the web talking about it. The official website &lt;a href=&#34;https://graphql.org/code&#34;&gt;has a list with many server frameworks and libraries&lt;/a&gt; (comes in many flavours).&lt;/p&gt;
+&lt;p&gt;As mentioned in the first section, an API Gateway has some specific responsibilities. As GraphQL is implemented on top of a normal web server application, one can easily add some of these to it, such as authorisation, metrics and logging. Things such as requests/response transformation, routing and composition are done in the GraphQL resolver level, mapping calls to the right services, using the right communication protocols.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Even before going full micro-services and using it as a real API Gateway, companies can easily develop everything on top of a GraphQL monolith &lt;del&gt;wait, don&amp;rsquo;t leave yet&lt;/del&gt; and then, with more time and planning, redirect the resolvers to micro-services. This is particularly useful for small companies, which are still testing ideas. During the migration, back-end might change a lot, but front-end will be able to continue requesting the same stuff.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;As teams develop micro-services, a strategy is required to expose and change the public-facing GraphQL schema. There are some known strategies for it:&lt;/p&gt;
+&lt;h3 id=&#34;remote-schema-stitching&#34;&gt;Remote schema stitching&lt;/h3&gt;
+&lt;p&gt;The gateway will get the schema from other GraphQL services and then stitch them together as the public-facing schema. This allows more freedom for teams, but it will disperse the API schema through multiple places, making it harder to test and easier to break, with a chance to have merge/stitching conflict.&lt;/p&gt;
+&lt;p&gt;Although this can be a problem, teams can do releases without even touching the API Gateway, making the deploys isolated instead of requiring constant API Gateways deploys.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Recently, Apollo Server implemented &lt;a href=&#34;https://www.apollographql.com/docs/apollo-server/federation/introduction/&#34;&gt;Federation&lt;/a&gt;, which will replace remote schema stitching. Bear in mind it is still Apollo specific.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;api-gateway-owns-schemas&#34;&gt;API Gateway owns schemas&lt;/h3&gt;
+&lt;p&gt;The Schema is contained locally on the gateway. This makes development and testing easier, as everything will be in the same place. The caveat is that the service will constantly be modified by multiple teams (resolvers, schemas), requiring constant gateway releases.&lt;/p&gt;
+&lt;p&gt;As this service will be constantly modified by multiple people, rules around code formatting and style should be agreed through all teams to make the code uniform.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Personally, I prefer this one as it keeps everything in one place, gives high visibility on what is happening and allows easy discovery of other resolvers.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;combination-of-both-above&#34;&gt;Combination of both above&lt;/h3&gt;
+&lt;p&gt;It is possible to mix both strategies, which is especially useful if the team wants to use remote schema stitching but have some services using gRPC or HTTP. Another way to tackle those non-GraphQL services is to put a server in front of it, allowing schema stitching and giving more flexibility for the responsible team.&lt;/p&gt;
+&lt;h2 id=&#34;caveats-of-using-graphql&#34;&gt;Caveats of using GraphQL&lt;/h2&gt;
+&lt;h3 id=&#34;services-can-get-a-bit-chatty&#34;&gt;Services can get a bit chatty&lt;/h3&gt;
+&lt;p&gt;On the request below, a user wants all posts with its associated author.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-graphql&#34; data-lang=&#34;graphql&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;query&lt;/span&gt; {
+  &lt;span style=&#34;color:#a6e22e&#34;&gt;posts&lt;/span&gt;(authorId: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;bruno&amp;#34;&lt;/span&gt;) {
+    &lt;span style=&#34;color:#a6e22e&#34;&gt;title&lt;/span&gt;
+    author {
+      name
+    }
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The issue is, due to the nature of GraphQL, each resolved &lt;code&gt;post&lt;/code&gt; will call the &lt;code&gt;author&lt;/code&gt; resolver, resulting in &lt;code&gt;N-1&lt;/code&gt; unnecessary calls. Using SQL, it would give us:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Query.posts&lt;/code&gt; are resolved: &lt;code&gt;SELECT title, author_id FROM posts&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Query.posts&lt;/code&gt; still have un-resolved data about &lt;code&gt;Post.author.name&lt;/code&gt;. For each item, GraphQL will call &lt;code&gt;Post.author&lt;/code&gt; resolver&lt;/li&gt;
+&lt;li&gt;Post A calls &lt;code&gt;Post.author&lt;/code&gt; resolver: &lt;code&gt;SELECT * FROM authors WHERE author_id = &#39;bruno&#39;&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Post B calls &lt;code&gt;Post.author&lt;/code&gt; resolver again with the same query&lt;/li&gt;
+&lt;li&gt;Post C calls &lt;code&gt;Post.author&lt;/code&gt; resolver again with the same query&lt;/li&gt;
+&lt;li&gt;&amp;hellip;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The two first selects would have returned the required data, but due to how GraphQL resolvers work &amp;ndash; each resolved item with missing data calls the subsequent resolver &amp;ndash; all these extra calls are made. This is where the &lt;a href=&#34;https://github.com/graphql/dataloader&#34;&gt;DataLoader&lt;/a&gt; pattern shines.&lt;/p&gt;
+&lt;p&gt;Using batching and a cache (per-request only), it will lead your back-end only needing to make the right amount of calls. Probably even saving you from more calls, as the &lt;code&gt;author&lt;/code&gt; could have other resolvers to be called. In the previous example it would do something like:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Query.posts&lt;/code&gt; are resolved: &lt;code&gt;SELECT title, author_id FROM posts&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Query.posts&lt;/code&gt; still have un-resolved data about &lt;code&gt;Post.author.name&lt;/code&gt;. For each item, the service would add a call to DataLoader with the required &lt;code&gt;author_id&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;After passing through all items, DataLoader would only execute &lt;code&gt;SELECT * FROM authors WHERE author_id = &#39;bruno&#39;&lt;/code&gt; query and return the response.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The JavaScript implementation is under 400 LOC, making it easier to explore and understand how it actually works. &lt;a href=&#34;https://github.com/graphql/dataloader/blob/master/README.md#other-implementations&#34;&gt;There are implementations in other languages as well&lt;/a&gt;.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;MPJ, from FunFunFunction, released a &lt;a href=&#34;https://www.youtube.com/watch?v=lAJWHHUz8_8&amp;amp;list=PL0zVEGEvSaeEjIDdbK1KfR7V9XBCVAr0P&#34;&gt;video series&lt;/a&gt; on how to implement GraphQL in NodeJS. &lt;a href=&#34;https://www.youtube.com/watch?v=--AguZ20lLA&amp;amp;list=PL0zVEGEvSaeEjIDdbK1KfR7V9XBCVAr0P&amp;amp;index=3&#34;&gt;Watch the DataLoader video here&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;throttling-is-not-easy-as-rest&#34;&gt;Throttling is not easy as REST&lt;/h3&gt;
+&lt;p&gt;Having everything in one endpoint makes harder to properly implement rate limits because the queries can be quite complex with multiple underlying requests but still one client request. This means an API user can&amp;rsquo;t be limited through its number of calls to a certain endpoint anymore.&lt;/p&gt;
+&lt;p&gt;An approach to tackle this is by calculating the query complexity and using it as a rate limit score. &lt;a href=&#34;https://developer.github.com/v4/guides/resource-limitations/&#34;&gt;On GitHub API docs&lt;/a&gt;, there are examples of how it works. But, this doesn&amp;rsquo;t come out-of-box in most server implementations 😞 There are some packages such as &lt;a href=&#34;https://github.com/4Catalyzer/graphql-validation-complexity&#34;&gt;&lt;code&gt;graphql-validation-complexity&lt;/code&gt;&lt;/a&gt; and &lt;a href=&#34;https://github.com/pa-bru/graphql-cost-analysis&#34;&gt;&lt;code&gt;graphql-cost-analysis&lt;/code&gt;&lt;/a&gt;, where the latter is more advanced, with more options to limit the upcoming queries.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-graphql&#34; data-lang=&#34;graphql&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# Usage example of graphql-cost-analysis&lt;/span&gt;
+&lt;span style=&#34;color:#66d9ef&#34;&gt;type&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Query&lt;/span&gt; {
+  &lt;span style=&#34;color:#75715e&#34;&gt;# the cost will depend on the `limit` parameter passed to the field&lt;/span&gt;
+  &lt;span style=&#34;color:#75715e&#34;&gt;# then the multiplier will be added to the `parent multipliers` array&lt;/span&gt;
+  customCostWithResolver(limit: &lt;span style=&#34;color:#a6e22e&#34;&gt;Int&lt;/span&gt;): &lt;span style=&#34;color:#a6e22e&#34;&gt;Int&lt;/span&gt;
+    &lt;span style=&#34;color:#a6e22e&#34;&gt;@cost&lt;/span&gt;(multipliers: [&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;limit&amp;#34;&lt;/span&gt;], &lt;span style=&#34;color:#a6e22e&#34;&gt;complexity&lt;/span&gt;: &lt;span style=&#34;color:#a6e22e&#34;&gt;4&lt;/span&gt;)
+
+  &lt;span style=&#34;color:#75715e&#34;&gt;# for recursive cost&lt;/span&gt;
+  first(limit: &lt;span style=&#34;color:#a6e22e&#34;&gt;Int&lt;/span&gt;): &lt;span style=&#34;color:#a6e22e&#34;&gt;First&lt;/span&gt;
+    &lt;span style=&#34;color:#a6e22e&#34;&gt;@cost&lt;/span&gt;(multipliers: [&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;limit&amp;#34;&lt;/span&gt;], &lt;span style=&#34;color:#a6e22e&#34;&gt;useMultipliers&lt;/span&gt;: &lt;span style=&#34;color:#a6e22e&#34;&gt;true&lt;/span&gt;, complexity: &lt;span style=&#34;color:#a6e22e&#34;&gt;2&lt;/span&gt;)
+
+  &lt;span style=&#34;color:#75715e&#34;&gt;# You can specify several field parameters in the `multipliers` array&lt;/span&gt;
+  &lt;span style=&#34;color:#75715e&#34;&gt;# then the values of the corresponding parameters will be added together.&lt;/span&gt;
+  &lt;span style=&#34;color:#75715e&#34;&gt;# here, the cost will be `parent multipliers` * (`first` + `last`) * `complexity&lt;/span&gt;
+  severalMultipliers(first: &lt;span style=&#34;color:#a6e22e&#34;&gt;Int&lt;/span&gt;, last: &lt;span style=&#34;color:#a6e22e&#34;&gt;Int&lt;/span&gt;): &lt;span style=&#34;color:#a6e22e&#34;&gt;Int&lt;/span&gt;
+    &lt;span style=&#34;color:#a6e22e&#34;&gt;@cost&lt;/span&gt;(multipliers: [&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;first&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;last&amp;#34;&lt;/span&gt;])
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;caching-is-magic-until-it-isnt&#34;&gt;Caching is magic until it isn&amp;rsquo;t&lt;/h3&gt;
+&lt;p&gt;Most clients do caching automatically, but sometimes it doesn&amp;rsquo;t work as expected, requiring some manual cleaning on the client. Besides, each request might ask for different fields, which makes a bit trickier to cache a resource on the server-side. One might request the whole resource, cache it in memory (eg: Redis), and then allow the API to use it as a reference to select specific fields.&lt;/p&gt;
+&lt;h2 id=&#34;conclusion&#34;&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;Hopefully, this might have clarified some details of using GraphQL as an API gateway. For those who want to go deeper, there are some references below, from where I took notes for this post.&lt;/p&gt;
+&lt;p&gt;Many thanks for &lt;a href=&#34;https://www.southcla.ws/&#34;&gt;@southclaws&lt;/a&gt;, &lt;a href=&#34;http://michalbock.com/&#34;&gt;@SpeedyCoder&lt;/a&gt;, &lt;a href=&#34;https://github.com/cassiobock&#34;&gt;@cassiobock&lt;/a&gt; and &lt;a href=&#34;https://www.codepreneur.io/&#34;&gt;@codepreneur&lt;/a&gt; for helping me by reviewing this post.&lt;/p&gt;
+&lt;h2 id=&#34;references&#34;&gt;References&lt;/h2&gt;
+&lt;h4 id=&#34;api-gateway&#34;&gt;API Gateway&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.nginx.com/blog/building-microservices-using-an-api-gateway/&#34;&gt;Ngnix micro-services book chapter about API Gateway&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://freecontent.manning.com/the-api-gateway-pattern/&#34;&gt;Chris Richardson article about API Gateway&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://stoplight.io/blog/api-proxy-vs-api-gateway-c008c942a02d/&#34;&gt;API Proxy vs API Gateway&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://microservices.io/patterns/apigateway.html&#34;&gt;Pattern: API Gateway / Back-end for Front-End&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;graphql&#34;&gt;GraphQL&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://graphql.org/learn/&#34;&gt;GraphQL Documentation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://developer.github.com/v4/guides/resource-limitations/&#34;&gt;GitHub GraphQL Resource Limitations Documentation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://tomasalabes.me/blog/graphql/node/microservices/2018/08/11/graphql-architectures.html&#34;&gt;GraphQL Gateway Architectures&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.robinwieruch.de/why-graphql-advantages-disadvantages-alternatives/&#34;&gt;Why GraphQL: Advantages, Disadvantages &amp;amp; Alternatives&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://webapplog.com/graphql/&#34;&gt;Why GraphQL is Taking Over APIs&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.apollographql.com/docs/graphql-tools/schema-stitching&#34;&gt;Schema stitching &amp;ndash; Combining multiple GraphQL APIs into one&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://blog.apollographql.com/apollo-federation-f260cf525d21&#34;&gt;Apollo Federation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.youtube.com/watch?v=lAJWHHUz8_8&amp;amp;list=PL0zVEGEvSaeEjIDdbK1KfR7V9XBCVAr0P&#34;&gt;FunFunFunction GraphQL Videos&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;tools&#34;&gt;Tools&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/dotansimha/graphql-code-generator&#34;&gt;Typescript &lt;code&gt;graphql-code-generator&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/graphql/dataloader&#34;&gt;DataLoader&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/4Catalyzer/graphql-validation-complexity&#34;&gt;&lt;code&gt;graphql-validation-complexity&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/pa-bru/graphql-cost-analysis&#34;&gt;&lt;code&gt;graphql-cost-analysis&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;images&#34;&gt;Images&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://unsplash.com/photos/8S96OpxSlvg&#34;&gt;Cover Photo by Christian Stahl on Unsplash&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;other&#34;&gt;Other&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://jsonapi.org/&#34;&gt;JSONAPI: REST alternative to GraphQL&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://stackoverflow.com/questions/44564905/what-is-over-fetching-or-under-fetching/44568365&#34;&gt;What is over and under-fetching&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    <item>
+      <title>Kubernetes devops productivity hacks</title>
+      <link>https://brunoluiz.net/blog/2019/mar/kubernetes-devops-productivity-hacks/</link>
+      <pubDate>2019-03-14</pubDate>
+      
+      <guid>https://brunoluiz.net/blog/2019/mar/kubernetes-devops-productivity-hacks/</guid>
+      <description>&lt;p&gt;&lt;img src=&#34;header.jpeg&#34; alt=&#34;Photo by Cameron Venti on Unsplash&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Today, Kubernetes is the de facto container orchestration solution. Together with the devops culture, developers have to get familiarised to its tools, such as &lt;code&gt;kubectl&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;After some point though, using &lt;code&gt;kubectl&lt;/code&gt; for everything can get quite verbose, especially if you use many namespaces and contexts. The following tips try to minimise the pain of doing operations solely through it, sometimes even using other tools beside it.&lt;/p&gt;
+&lt;h2 id=&#34;kubectx-context-and-namespaces-management&#34;&gt;Kubectx: context and namespaces management&lt;/h2&gt;
+&lt;p&gt;Operations done in &lt;code&gt;kubectl&lt;/code&gt; usually require two params: &lt;strong&gt;context&lt;/strong&gt; and &lt;strong&gt;namespace&lt;/strong&gt;. Any operation will result in something as &lt;code&gt;kubectl --context dev --namespace hello-world exec -it hello-world-app-0 sh&lt;/code&gt;. It is fine for a one-time operation, but after some point, it can get quite cumbersome. One way to avoid these long command strings is by using &lt;a href=&#34;https://github.com/ahmetb/kubectx&#34;&gt;&lt;code&gt;kubectx&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;After installing it, the context can be set by simply using &lt;code&gt;kubectx dev&lt;/code&gt; and the namespace as &lt;code&gt;kubens hello-world&lt;/code&gt;. To list the available contexts and namespaces, just run it without arguments. The above operation can be run by only using &lt;code&gt;kubectl exec -it hello-world-app-0 sh&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;terminal-aliases&#34;&gt;Terminal aliases&lt;/h2&gt;
+&lt;p&gt;Seasoned Unix developers are quite used to terminal aliases. Some are quite popular that are even grouped in packs, such as &lt;a href=&#34;https://github.com/robbyrussell/oh-my-zsh/blob/master/plugins/git/git.plugin.zsh&#34;&gt;oh-my-zsh git aliases&lt;/a&gt;. With Kubernetes is not that different.&lt;/p&gt;
+&lt;p&gt;Usually, having &lt;code&gt;alias k=&amp;quot;kubectl&amp;quot;&lt;/code&gt; already make operations shorter. Using the same example, it would result in &lt;code&gt;k exec -it hello-world-app-0 sh&lt;/code&gt;. But, most likely, one alias will not be enough. There are some options for this.&lt;/p&gt;
+&lt;p&gt;The first one can be set-up in any terminal emulator (&lt;code&gt;zsh&lt;/code&gt;, &lt;code&gt;bash&lt;/code&gt;&amp;hellip;). Get the &lt;code&gt;.kubectl_aliases&lt;/code&gt; file from &lt;a href=&#34;https://github.com/ahmetb/kubectl-aliases&#34;&gt;&lt;code&gt;ahmetb/kubectl-aliases&lt;/code&gt;&lt;/a&gt; and place it in your home directory. After sourcing it on &lt;code&gt;.zshrc&lt;/code&gt; or &lt;code&gt;.bashrc&lt;/code&gt;, 600 aliases will be available out-of-box, including the aforementioned &lt;code&gt;k&lt;/code&gt;.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt; -f ~/.kubectl_aliases &lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; source ~/.kubectl_aliases
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;If &lt;a href=&#34;http://zsh.sourceforge.net/&#34;&gt;&lt;code&gt;zsh&lt;/code&gt;&lt;/a&gt; and &lt;a href=&#34;https://ohmyz.sh/&#34;&gt;&lt;code&gt;oh-my-zsh&lt;/code&gt;&lt;/a&gt; are already set-up, an easier option would be to use the pre-installed &lt;code&gt;kubectl&lt;/code&gt; plugin. To enable it, edit your &lt;code&gt;.zshrc&lt;/code&gt; and add &lt;code&gt;kubectl&lt;/code&gt; to the &lt;code&gt;plugins&lt;/code&gt; variable (&lt;a href=&#34;https://github.com/robbyrussell/oh-my-zsh#plugins&#34;&gt;more details about oh-my-zsh plugins here&lt;/a&gt;).&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;plugins&lt;span style=&#34;color:#f92672&#34;&gt;=(&lt;/span&gt;git kubectl ...&lt;span style=&#34;color:#f92672&#34;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;There are fewer aliases compared to &lt;code&gt;ahmetb/kubectl-aliases&lt;/code&gt;, making it easier to learn and faster to load. The list of &lt;code&gt;oh-my-zsh/kubectl&lt;/code&gt; aliases is &lt;a href=&#34;https://github.com/robbyrussell/oh-my-zsh/tree/master/plugins/kubectl&#34;&gt; available here &lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;kubectx&lt;/code&gt; and &lt;code&gt;kubens&lt;/code&gt; do not have aliases by default. To allow shorter calls for it, place the following on &lt;code&gt;.zshrc&lt;/code&gt; or &lt;code&gt;.bashrc&lt;/code&gt;.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;alias kns&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;kubens&amp;#34;&lt;/span&gt;
+alias kcx&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;kubectx&amp;#34;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;After all these aliases been set-up, the &lt;code&gt;hello-world-app-0 sh&lt;/code&gt; can be accessed using a simple &lt;code&gt;keti hello-world-app-0 sh&lt;/code&gt;. As games, it will be as learning combat combos, although it will not be as close as a Hadouken combo.&lt;/p&gt;
+&lt;h2 id=&#34;terminal-namespace-and-context-indicator&#34;&gt;Terminal namespace and context indicator&lt;/h2&gt;
+&lt;p&gt;Developers are humans (in case you did not know) and humans do not have bulletproof memory. One can forget that kubernetes context is set to production and then run &lt;code&gt;kubectl apply&lt;/code&gt; there, instead of dev.&lt;/p&gt;
+&lt;p&gt;To avoid this, an indicator can be used in the terminal to show what is the actual context and namespace. The easiest way to do it is by using &lt;a href=&#34;https://github.com/jonmosco/kube-ps1&#34;&gt;&lt;code&gt;kube-ps1&lt;/code&gt;&lt;/a&gt;. It already comes with &lt;code&gt;oh-my-zsh&lt;/code&gt;, requiring &lt;code&gt;kube-ps1&lt;/code&gt; to be added to &lt;code&gt;.zshrc&lt;/code&gt; plugins variable.&lt;/p&gt;
+&lt;p&gt;After installing or enabling it, the PS1 needs to be changed to include the kubectl context and namespace information. This can be easily done by adding &lt;code&gt;export PS1=&#39;$(kube_ps1) &#39;$PS1&lt;/code&gt; to your &lt;code&gt;.bashrc/.zshrc&lt;/code&gt; file. The final result will be something like the following.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;kube-ps1.png&#34; alt=&#34;kube-ps1 example&#34;&gt;&lt;/p&gt;
+&lt;p&gt;The only issue with &lt;code&gt;kube-ps1&lt;/code&gt; is, when used with &lt;code&gt;git&lt;/code&gt; plugin in zsh, it can generate really long PS1 strings. If &lt;code&gt;tmux&lt;/code&gt; is used, it can be actually set-up in the status bar through &lt;a href=&#34;https://github.com/jonmosco/kube-tmux&#34;&gt;&lt;code&gt;kube-tmux&lt;/code&gt;&lt;/a&gt; plugin, avoiding PS1 cluttering.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;kube-tmux-ps1.png&#34; alt=&#34;kube-tmux example&#34;&gt;&lt;/p&gt;
+&lt;h2 id=&#34;investigating-logs-the-sane-way&#34;&gt;Investigating logs: the sane way&lt;/h2&gt;
+&lt;p&gt;Failures can happen, debugs are required and check-ups are sometimes necessary. For all of these, application logs are needed. The standard way to open them is:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;kubectl --namespace dev --context labs get pods
+&lt;span style=&#34;color:#75715e&#34;&gt;# get the pod id&lt;/span&gt;
+kubectl --namespace dev --context labs logs &amp;lt;pod-id&amp;gt; -f
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;If the pod is killed and restarted, the process has to be repeated as the pod id will change. Besides, the &lt;code&gt;kubectl&lt;/code&gt; logs tool is quite simple in terms of features. &lt;a href=&#34;https://github.com/wercker/stern&#34;&gt;&lt;code&gt;stern&lt;/code&gt;&lt;/a&gt; is meant to be more powerful and allows to tail multiple pods and containers at once (even the whole namespace, if required).&lt;/p&gt;
+&lt;p&gt;To tail pods, such as the hello-world example, &lt;code&gt;stern hello-world&lt;/code&gt; will do. It would tail everything using the &lt;code&gt;*hello-world*&lt;/code&gt; as an expression. If multiple pods were been run, it would log all hello-world pods.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;stern hello-world  &lt;span style=&#34;color:#75715e&#34;&gt;# tail all pods containing &amp;#34;hello-world&amp;#34; in its name&lt;/span&gt;
+stern .            &lt;span style=&#34;color:#75715e&#34;&gt;# tail all pods in current namespace&lt;/span&gt;
+stern --since 1h . &lt;span style=&#34;color:#75715e&#34;&gt;# tail logs from last one hour&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Shorter calls can be done setting up an alias, such as &lt;code&gt;alias s=&#39;stern&#39;&lt;/code&gt;. If set, it uses the &lt;code&gt;kubectx&lt;/code&gt; and &lt;code&gt;kubens&lt;/code&gt; settings, while accepting &lt;code&gt;--namespace&lt;/code&gt; and &lt;code&gt;--context&lt;/code&gt; args as well.&lt;/p&gt;
+&lt;h2 id=&#34;automatic-deployments&#34;&gt;Automatic deployments&lt;/h2&gt;
+&lt;p&gt;A way to avoid touching prod environment using &lt;code&gt;kubectl&lt;/code&gt; is by setting up &lt;a href=&#34;https://github.com/box/kube-applier&#34;&gt;&lt;code&gt;kube-applier&lt;/code&gt;&lt;/a&gt;. This service auto-deploy changes on infrastructure changes, based on a git repository.&lt;/p&gt;
+&lt;p&gt;It runs as a separate pod, watching and comparing kubernetes manifest repository with deployed services. If there is a difference between manifests, it will automatically apply what is in the git repository, making it the source of truth for kube manifests.&lt;/p&gt;
+&lt;p&gt;After installing &lt;code&gt;kube-applier&lt;/code&gt;, no deploys should be done through &lt;code&gt;kubectl&lt;/code&gt;, as it will always revert to git manifests. This avoids confusions around deployments made in a rush, not merged and then rollbacked by a mistake.&lt;/p&gt;
+&lt;h2 id=&#34;add-safety-against-wrong-kubectl-apply&#34;&gt;Add safety against wrong kubectl apply&lt;/h2&gt;
+&lt;p&gt;If &lt;code&gt;kube-applier&lt;/code&gt; is not an option, perhaps it would be good to have a protection before &lt;code&gt;kubectl apply&lt;/code&gt; operations. There are many ways to do this, the following considers overwriting &lt;code&gt;kaf&lt;/code&gt; from &lt;code&gt;oh-my-zsh&lt;/code&gt; plugin. It adds a confirmation prompt and shows which context it will be applied to.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# Confirm command to be executed&lt;/span&gt;
+confirm&lt;span style=&#34;color:#f92672&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;{&lt;/span&gt;
+  echo -n &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;\e[33mDo you want to run &lt;/span&gt;$*&lt;span style=&#34;color:#e6db74&#34;&gt;? [N/yes] \e[m&amp;#34;&lt;/span&gt;
+  read REPLY
+
+  &lt;span style=&#34;color:#75715e&#34;&gt;# if test &amp;#34;$REPLY&amp;#34; = &amp;#34;y&amp;#34; -o &amp;#34;$REPLY&amp;#34; = &amp;#34;Y&amp;#34;; then&lt;/span&gt;
+  &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; test &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;$REPLY&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;yes&amp;#34;&lt;/span&gt;; &lt;span style=&#34;color:#66d9ef&#34;&gt;then&lt;/span&gt;
+    &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;$@&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;
+  &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt;
+      echo &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Cancelled by user&amp;#34;&lt;/span&gt;
+  &lt;span style=&#34;color:#66d9ef&#34;&gt;fi&lt;/span&gt;
+&lt;span style=&#34;color:#f92672&#34;&gt;}&lt;/span&gt;
+
+safe_kubectlapply&lt;span style=&#34;color:#f92672&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;{&lt;/span&gt;
+  context&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;$(&lt;/span&gt;kubectl config current-context&lt;span style=&#34;color:#66d9ef&#34;&gt;)&lt;/span&gt;
+  echo &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;\n&amp;#34;&lt;/span&gt;
+  echo &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;BECAREFUL!!! APPLYING TO \e[31m&lt;/span&gt;$context&lt;span style=&#34;color:#e6db74&#34;&gt;\e[m&amp;#34;&lt;/span&gt;
+  confirm kubectl apply -f &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;$@&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#f92672&#34;&gt;}&lt;/span&gt;
+
+alias kaf&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;safe_kubectlapply&amp;#39;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This can pottentially save lifes. It can be modified to be used with other operations, such as &lt;code&gt;kdel&lt;/code&gt; and &lt;code&gt;kdelf&lt;/code&gt; (aliases for &lt;code&gt;kubectl delete&lt;/code&gt;).&lt;/p&gt;
+&lt;h2 id=&#34;conclusion&#34;&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;These are just some tricks I use in my daily kubernetes life. Have a good coding week! 😉&lt;/p&gt;
+&lt;h2 id=&#34;references&#34;&gt;References&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Cover photo by &lt;a href=&#34;https://unsplash.com/photos/QtETdXXR7gs?utm_source=unsplash&amp;amp;utm_medium=referral&amp;amp;utm_content=creditCopyText&#34;&gt;Cameron Venti&lt;/a&gt; on Unsplash&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/ahmetb/kubectx&#34;&gt;&lt;code&gt;kubectx&lt;/code&gt; repo&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/ahmetb/kubectl-aliases&#34;&gt;&lt;code&gt;ahmetb/kubectl-aliases&lt;/code&gt; repo&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/robbyrussell/oh-my-zsh&#34;&gt;&lt;code&gt;oh-my-zsh&lt;/code&gt; repo&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/robbyrussell/oh-my-zsh/tree/master/plugins/kubectl&#34;&gt;&lt;code&gt;oh-my-zsh&lt;/code&gt; kubectl info&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/jonmosco/kube-ps1&#34;&gt;&lt;code&gt;kube-ps1&lt;/code&gt; repo&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/robbyrussell/oh-my-zsh/tree/master/plugins/kube-ps1&#34;&gt;&lt;code&gt;oh-my-zsh&lt;/code&gt; kube-ps1 info&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/jonmosco/kube-tmux&#34;&gt;&lt;code&gt;kube-tmux&lt;/code&gt; repo&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/wercker/stern&#34;&gt;&lt;code&gt;stern&lt;/code&gt; repo&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/box/kube-applier&#34;&gt;&lt;code&gt;kube-applier&lt;/code&gt; repo&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    <item>
+      <title>A guide on npm package publishing</title>
+      <link>https://brunoluiz.net/blog/2019/feb/a-guide-to-npm-package-publishing/</link>
+      <pubDate>2019-02-15</pubDate>
+      
+      <guid>https://brunoluiz.net/blog/2019/feb/a-guide-to-npm-package-publishing/</guid>
+      <description>&lt;p&gt;&lt;img src=&#34;header.jpeg&#34; alt=&#34;Photo by Paul Esch-Laurent on Unsplash&#34;&gt;&lt;/p&gt;
+&lt;p&gt;If you are not new in the JavaScript world, you might have already heard about &lt;a href=&#34;https://www.npmjs.com/&#34;&gt;npm&lt;/a&gt;. It is a package manager which lets developers easily add dependencies to projects, as &lt;code&gt;npm install hello-world&lt;/code&gt;. But, have you ever asked, &amp;ldquo;How do I create and publish my own packages&amp;rdquo;?&lt;/p&gt;
+&lt;h2 id=&#34;how-a-package-is-composed&#34;&gt;How a package is composed?&lt;/h2&gt;
+&lt;p&gt;Packages are quite simple to create in JavaScript. A &lt;code&gt;package.json&lt;/code&gt; and &lt;code&gt;index.js&lt;/code&gt; can already do the job. Look at &lt;code&gt;dedupe&lt;/code&gt; for example:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;dedupe.png&#34; alt=&#34;dedupe repository&#34;&gt;&lt;/p&gt;
+&lt;p&gt;There are other useful files such as &lt;code&gt;.gitignore&lt;/code&gt;, &lt;code&gt;.npmignore&lt;/code&gt;, &lt;code&gt;LICENSE&lt;/code&gt; and &lt;code&gt;README.md&lt;/code&gt;, but the main ones are there: &lt;code&gt;package.json&lt;/code&gt; and &lt;code&gt;index.js&lt;/code&gt;. Having these, the package just needs to be published in a repository, such as the &lt;a href=&#34;https://www.npmjs.com/&#34;&gt;npm public&lt;/a&gt;. Through this guide, you will be able to have a simple package published on npm.&lt;/p&gt;
+&lt;h2 id=&#34;create-an-npm-package&#34;&gt;Create an npm package&lt;/h2&gt;
+&lt;p&gt;While doing &lt;a href=&#34;https://apimock.in&#34;&gt;apimock.in&lt;/a&gt;, I had to create multiple serverless stacks. Each had error handlers and, as most of the errors are quite the same, a good practice would be to extract these definitions into a package and just install it on each serverless stack. This use case will be used as an example through this post.&lt;/p&gt;
+&lt;h3 id=&#34;create-an-npmjscom-account&#34;&gt;Create an npmjs.com account&lt;/h3&gt;
+&lt;p&gt;Before doing anything, an account on &lt;a href=&#34;https://npmjs.com&#34;&gt;npmjs.com&lt;/a&gt; is required for publishing a package. This is the website for the npm public repository, used when &lt;code&gt;npm install ...&lt;/code&gt; is executed.&lt;/p&gt;
+&lt;p&gt;To create an account, go to the &lt;a href=&#34;https://www.npmjs.com/signup&#34;&gt;npm signup page&lt;/a&gt; and fill up the form. After finishing the process, a test can be done using &lt;code&gt;npm login&lt;/code&gt; and &lt;code&gt;npm whoami&lt;/code&gt;. Has it output your username? Great! It is working!&lt;/p&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;h3 id=&#34;some-words-about-scopes&#34;&gt;Some words about scopes&lt;/h3&gt;
+&lt;p&gt;Scopes are useful in many ways, although not strictly required to publish an npm package. Every user has its own scope, defined as the npm user name.&lt;/p&gt;
+&lt;p&gt;As only the developer/company can publish to its own scope, it is quite useful to indicate it is an official package. For example, one can publish a package called &lt;code&gt;xyz-sdk&lt;/code&gt;, but another called &lt;code&gt;xyz&lt;/code&gt; might already exist. How to know which to install? What if &lt;code&gt;xyz&lt;/code&gt; mimics &lt;code&gt;xyz-sdk&lt;/code&gt;, but with malicious code?&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Each npm user/organisation has their own scope, and only you can add packages in your scope. This means you don’t have to worry about someone taking your package name ahead of you. Thus it is also a good way to signal official packages for organisations. (&lt;a href=&#34;https://docs.npmjs.com/misc/scope&#34;&gt;from npm-scopes documentation&lt;/a&gt;)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;A scoped package would have an &lt;code&gt;@account&lt;/code&gt; prefix. It would be published as &lt;code&gt;@account/xyz-sdk&lt;/code&gt;, hence easily identifiable as from a specific developer. Besides, the developer doesn&amp;rsquo;t have to worry about name clashing, as the scope is account specific. It can be configured to point to a private repository as well, making it especially useful for companies.&lt;/p&gt;
+&lt;p&gt;There is &lt;a href=&#34;https://docs.npmjs.com/misc/scope&#34;&gt;more information about scopes here&lt;/a&gt;. Keep in mind it is a good practice to scope packages.&lt;/p&gt;
+&lt;h3 id=&#34;create-a-simple-structure&#34;&gt;Create a simple structure&lt;/h3&gt;
+&lt;p&gt;In an empty folder, run &lt;code&gt;npm init —-scope=@your-npm-user&lt;/code&gt;. This will setup a &lt;code&gt;package.json&lt;/code&gt; and ask for some information, such as name, version, main entry file and author. The end result will be something like the following.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;{
+  &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;name&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;@brunoluiz/jsonapi-errors&amp;#34;&lt;/span&gt;,
+  &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;version&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;1.0.0&amp;#34;&lt;/span&gt;,
+  &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;description&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;JSONAPI Common Errors&amp;#34;&lt;/span&gt;,
+  &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;main&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;index.js&amp;#34;&lt;/span&gt;,
+  &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;scripts&amp;#34;&lt;/span&gt;: {
+    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;test&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;jest&amp;#34;&lt;/span&gt;
+  },
+  &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;author&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Bruno Luiz da Silva &amp;lt;contact@brunoluiz.net&amp;gt; (http://brunoluiz.net/)&amp;#34;&lt;/span&gt;,
+  &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;license&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;MIT&amp;#34;&lt;/span&gt;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;After having it initialised, is time to code something. Develop a basic implementation of it in the specified main file on &lt;code&gt;npm init&lt;/code&gt; setup (usually &lt;code&gt;index.js&lt;/code&gt;). If the package requires dependencies or there are files to be ignored on publishing, specify it on a &lt;code&gt;.gitignore&lt;/code&gt; file (eg: &lt;code&gt;node_modules&lt;/code&gt;).&lt;/p&gt;
+&lt;p&gt;It is suggested to add a &lt;code&gt;LICENSE.md&lt;/code&gt; and a &lt;code&gt;README.md&lt;/code&gt;, as other developers might use this package. Usually, MIT or ISC licenses are fine to open-source projects, but &lt;a href=&#34;https://choosealicense.com/&#34;&gt;choosealicense.com&lt;/a&gt; can help on choosing another license.&lt;/p&gt;
+&lt;h3 id=&#34;publish-the-package&#34;&gt;Publish the package&lt;/h3&gt;
+&lt;p&gt;The basic implementation is done and now is time to deploy it! On the first time, a &lt;code&gt;npm publish --access=public&lt;/code&gt; is required. The &lt;code&gt;access=public&lt;/code&gt; param is needed because scoped are &lt;code&gt;restricted&lt;/code&gt; by default. On following publishings, a &lt;code&gt;npm publish&lt;/code&gt; will do the job.&lt;/p&gt;
+&lt;p&gt;Congratulations! You published your first package on npm. It should be available at &lt;code&gt;https://npmjs.com/package/@your-npm-user/package-name&lt;/code&gt; and ready to be installed through &lt;code&gt;npm install @your-npm-user/package-name&lt;/code&gt;.&lt;/p&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;&lt;img src=&#34;npm_published_module.png&#34; alt=&#34;Published package&#34;&gt;&lt;/p&gt;
+&lt;h3 id=&#34;releasing-new-versions&#34;&gt;Releasing new versions&lt;/h3&gt;
+&lt;p&gt;After some iterations, the package might need new features and, therefore a new version. NPM packages use semantic versioning (&lt;a href=&#34;https://semver.org/&#34;&gt;SEMVER&lt;/a&gt;), but in a nutshell:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;MAJOR version when you make incompatible API changes,&lt;/p&gt;
+&lt;p&gt;MINOR version when you add functionality in a backwards-compatible manner, and&lt;/p&gt;
+&lt;p&gt;PATCH version when you make backwards-compatible bug fixes.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;In the &lt;code&gt;jsonapi-errors&lt;/code&gt; example, a minor version increment is required. To do this, a &lt;code&gt;npm version minor&lt;/code&gt; can be used, where it will bump the &lt;code&gt;package.json&lt;/code&gt; version and add a tagged git commit. Then, a &lt;code&gt;npm publish&lt;/code&gt; will take care of pushing it (no need for &lt;code&gt;access&lt;/code&gt; parameter now). The version tags can be checked using &lt;code&gt;git log --decorate --oneline&lt;/code&gt;.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;b874866 &lt;span style=&#34;color:#f92672&#34;&gt;(&lt;/span&gt;HEAD -&amp;gt; master, tag: v0.2.0&lt;span style=&#34;color:#f92672&#34;&gt;)&lt;/span&gt; 0.2.0
+c5af2df chore: add new implementations
+b8571cc &lt;span style=&#34;color:#f92672&#34;&gt;(&lt;/span&gt;tag: v0.1.0&lt;span style=&#34;color:#f92672&#34;&gt;)&lt;/span&gt; 0.1.0
+c5bf2ef chore: initial commit
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;There are &lt;a href=&#34;https://docs.npmjs.com/cli/version.html&#34;&gt;more information about the versioning process here&lt;/a&gt;.&lt;/p&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;h3 id=&#34;using-in-local-projects-through-linking&#34;&gt;Using in local projects through linking&lt;/h3&gt;
+&lt;p&gt;A simple way to test the new shiny package is through &lt;code&gt;npm install&lt;/code&gt;. It will work as expected but, if a change is required, a new version has to be published and the project dependency has to be upgraded to use the new one.&lt;/p&gt;
+&lt;p&gt;This is unproductive, especially when a package is new and changes happen quite often. A way to solve it is through &lt;code&gt;npm link&lt;/code&gt;: it creates a symbolic link inside the project &lt;code&gt;node_modules&lt;/code&gt; folder, replacing the installed version with the local one.&lt;/p&gt;
+&lt;p&gt;In the module folder, run &lt;code&gt;npm link&lt;/code&gt;, which will enable a global link for it. On the project folder, run &lt;code&gt;npm link &amp;lt;name&amp;gt;&lt;/code&gt;. If the module is modified, projects using it through a link will have the latest version of it.&lt;/p&gt;
+&lt;p&gt;After testing, two steps are required to remove it. The first is running &lt;code&gt;npm unlink --no-save &amp;lt;name&amp;gt;&lt;/code&gt;, which removes the link from the project without touching &lt;code&gt;package.json&lt;/code&gt;. The second is &lt;code&gt;npm install&lt;/code&gt;, as the module is removed from &lt;code&gt;node_modules&lt;/code&gt; after unlinking.&lt;/p&gt;
+&lt;p&gt;Removing the global link is not required, especially because it can be used later. If still needed, a &lt;code&gt;npm unlink&lt;/code&gt; in the module folder will do it.&lt;/p&gt;
+&lt;h2 id=&#34;automate-publishing-process-using-circleci&#34;&gt;Automate publishing process using CircleCI&lt;/h2&gt;
+&lt;p&gt;If a package has many people collaborating to it, or the deploy process requires extra steps beside publishing it, an automated setup can improve the workflow. There are plenty of options, such as CircleCI, Travis and GitLab CI.&lt;/p&gt;
+&lt;p&gt;On CircleCI Blog there is an &lt;a href=&#34;https://circleci.com/blog/publishing-npm-packages-using-circleci-2-0/&#34;&gt;article explaining in details how to do it&lt;/a&gt;, where:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;On feature branches, it will just run tests (eg: run tests on pull requests)&lt;/li&gt;
+&lt;li&gt;On git &lt;code&gt;v*.*.*&lt;/code&gt; tag pushes, it will run tests and then publish to the NPM repository — remembering, a git version tag is generated by &lt;code&gt;npm version&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;More configurations can be added, such as saving coverage reports to a bucket or triggering specific web hooks after the jobs (eg: Slack).&lt;/p&gt;
+&lt;h2 id=&#34;setup-default-npm-init-configs&#34;&gt;Setup default npm init configs&lt;/h2&gt;
+&lt;p&gt;Starting a package with &lt;code&gt;npm init&lt;/code&gt; is fine, but repeating the same information over and over can get quite boring. &lt;code&gt;npm config&lt;/code&gt; can be used to setup some default configs:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;npm config set init-author-name&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;Bruno Luiz da Silva&amp;#39;&lt;/span&gt;
+npm config set init-author-email&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;contact@brunoluiz.net&amp;#39;&lt;/span&gt;
+npm config set init-author-url&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;https://brunoluiz.net&amp;#39;&lt;/span&gt;
+npm config set init-license&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;MIT&amp;#39;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;These are saved at &lt;code&gt;~/.npmrc&lt;/code&gt;, together with other user configs.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# ~/.npmrc&lt;/span&gt;
+
+init-author-name&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;Bruno Luiz da Silva
+init-author-email&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;contact@brunoluiz.net
+init-author-url&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;http://brunoluiz.net/
+init-version&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;1.0.0
+...
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Now, a simple &lt;code&gt;npm init -y&lt;/code&gt; can be used to create packages. It will not ask for user input, using the npm configs instead and &lt;code&gt;@&amp;lt;scope&amp;gt;/&amp;lt;folder-name&amp;gt;&lt;/code&gt; as the name.&lt;/p&gt;
+&lt;p&gt;There are many other configs available through it. Besides, projects can have their own specific configs and even environment variables can be used for it. Check &lt;a href=&#34;https://docs.npmjs.com/misc/config&#34;&gt;the npm documentation&lt;/a&gt; for more details.&lt;/p&gt;
+&lt;h2 id=&#34;where-to-go-now&#34;&gt;Where to go now?&lt;/h2&gt;
+&lt;p&gt;The steps shown in this article will cover most basic necessities on npm package publishing, but there are some specifics I haven&amp;rsquo;t covered in this article.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Publish the package as TypeScript:&lt;/strong&gt; this allows code typing, more robust codes and, in editors such as VS Code, it enables a batter IntelliSense. &lt;a href=&#34;https://itnext.io/step-by-step-building-and-publishing-an-npm-typescript-package-44fe7164964c&#34;&gt;There is a quite complete article on
+ITNext&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Publish it to a private repository:&lt;/strong&gt; there are some small different configurations, as pointing the package scope to the private repository. &lt;a href=&#34;https://docs.npmjs.com/creating-and-publishing-private-packages&#34;&gt;Give a look in this npm article&lt;/a&gt;.&lt;/li&gt;
+&lt;/ol&gt;
+</description>
+    </item>
+    <item>
+      <title>A Tale Of How To Not Deploy Two Months Old Features</title>
+      <link>https://brunoluiz.net/blog/2018/mar/a-tale-of-how-to-not-deploy-two-months-old-features/</link>
+      <pubDate>2018-03-07</pubDate>
+      
+      <guid>https://brunoluiz.net/blog/2018/mar/a-tale-of-how-to-not-deploy-two-months-old-features/</guid>
+      <description>&lt;p&gt;&lt;img src=&#34;header.jpeg&#34; alt=&#34;Photo by rawpixel.com on Unsplash&#34;&gt;&lt;/p&gt;
+&lt;p&gt;There is one big and very special date on the e-commerce and retail market and it&amp;rsquo;s called Black Friday. For many, it means &amp;ldquo;discount prices&amp;rdquo;, &amp;ldquo;sale!&amp;quot;, &amp;ldquo;50% off&amp;rdquo;, but for developers and IT people it is a challenging adventure.&lt;/p&gt;
+&lt;p&gt;To begin with, two weeks before, feature deployments are frozen and everything passes through load tests. On the week, machines are scaled up and, at the event&amp;rsquo;s day, all eyes are on metrics and logs.&lt;/p&gt;
+&lt;p&gt;But there is a catch in this whole story: the feature development can&amp;rsquo;t stop. This means features will begin to stack up soon after the feature deployment freeze and usually it continues a bit after the event, especially when your software is multi-tenant and each client has its own Black Friday agenda.&lt;/p&gt;
+&lt;p&gt;In the case which gave this article its title, the deploy was delayed until close Christmas and, as it was Christmas, the team preferred to not deploy until the next year.&lt;/p&gt;
+&lt;p&gt;January came by and, at some point, the delayed deploys would have to start. As four sprints have been passed since Black Friday, the usual process would be to deploy each sprint package atomically, monitoring its results in the production environment. But this, this is not an ideal world.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;surprises.jpeg&#34; alt=&#34;Photo by rawpixel.com on Unsplash&#34;&gt;&lt;/p&gt;
+&lt;h2 id=&#34;product-development-life-is-full-of-surprises&#34;&gt;Product Development Life Is Full Of Surprises&lt;/h2&gt;
+&lt;p&gt;When a product is just in its early days, the first clients are tech early adopters and the development team have to be close to them, as their inputs are valuable.&lt;/p&gt;
+&lt;p&gt;At some day in January, one of the major platform&amp;rsquo;s clients informed they would launch more shops on the system. Besides the fact that, usually, some preparation is required, the biggest issue was that a specific feature was required. It had been developed at some point, but it was not well tested yet.&lt;/p&gt;
+&lt;p&gt;Even worse, this feature depended on others, implemented in late November and early December, which means &amp;ldquo;Goodbye atomic deploys&amp;rdquo;: the team will have to prepare a deploy package with all four sprint features. Dangerous, isn&amp;rsquo;t it? Remember the &lt;em&gt;challenging adventure&lt;/em&gt; part?&lt;/p&gt;
+&lt;p&gt;While finishing and polishing the required feature, the QA team had to work deliberately to test all features again to be sure that everything would be pretty smooth. Even those which were already tested as, since November, some hotfixes were made on the production environment and who knows if they could have affected one of the already tested features.&lt;/p&gt;
+&lt;p&gt;With the feature finished, the QA and management teams got together to test it. After a period of tests, they confirmed it was working as expected, with no bugs or business rules flaws. Even though this surprise feature made us work insanely, the deploy looked like it would be a walk in the park.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;deploy.jpeg&#34; alt=&#34;Photo by SpaceX on Unsplash&#34;&gt;&lt;/p&gt;
+&lt;h2 id=&#34;deploy-day&#34;&gt;D(eploy)-Day&lt;/h2&gt;
+&lt;p&gt;It was 2 am when the whole deploy started. Low traffic and not that many orders flooding the system made it the perfect time to deploy the application. While deploying it, everything seemed fine, even though minor adjustments and migrations were needed. As soon as the clock hit 3h30 am, the team members were already wishing &amp;ldquo;Good Night&amp;rdquo; to each other.&lt;/p&gt;
+&lt;p&gt;For a package with a lot of features and one quite critical, it was quite smooth… and this is when things started to fall apart. At 4 pm, one of the clients started to complain about some orders not being registered due to HTTP 400 errors and some inventory not being updated for no reason. &lt;em&gt;&amp;ldquo;WHAT THE F&lt;/em&gt;CK IS GOING ON!&amp;rdquo; *everybody said, in despair.&lt;/p&gt;
+&lt;p&gt;All developers stopped to investigate the problem and, of course, hidden in the middle of one of the sprint release packages, there were two bugs: one related to how the application dealt with the inventory queue producer and the other related to how addresses were validated. Ten lines of code worth of trouble.&lt;/p&gt;
+&lt;p&gt;After roughly one hour of stress, everything was calm again, but the results of this deploy changed the entire team.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;postmortem.jpeg&#34; alt=&#34;Photo by Dustin Lee on Unsplash&#34;&gt;&lt;/p&gt;
+&lt;h2 id=&#34;that-post-mortem-and-its-results&#34;&gt;THAT Post-Mortem And Its Results&lt;/h2&gt;
+&lt;p&gt;Soon after, a post-mortem had been written. Everybody collaborated: developers, managers, and QAs. The information contained in this single document would allow the team to learn, grow and know better how to deal with problems like this in the future.&lt;/p&gt;
+&lt;p&gt;At the other day, a morning meeting was scheduled to discuss the points written in the post-mortem. Besides the issues from the deploy itself, many other problems arose in the heat of the discussion. All members agreed on the pointed issues and suggested some actions to tackle them.&lt;/p&gt;
+&lt;h3 id=&#34;deploy-age&#34;&gt;Deploy age&lt;/h3&gt;
+&lt;p&gt;One could point to the code and say it was a bug, but it was not only that. Deploys that are too many weeks old are a problem, as it has features developed way too long ago, where devs and testers probably don&amp;rsquo;t remember all specifics for these. This can lead to database issues (if a migration was forgotten), schema validation problems, business rules flaws, and so on.&lt;/p&gt;
+&lt;p&gt;The best way to tackle this is to deploy the feature package not too long after the sprint has been finished. Everything will be fresh for all team members and no git gimmicks will be required for this (rebase hell mostly).&lt;/p&gt;
+&lt;h3 id=&#34;rushed-deploys&#34;&gt;Rushed deploys&lt;/h3&gt;
+&lt;p&gt;Never do rush deploys, especially big ones. The team will get stressed, communication probably will not be the best, documents (such as the release notes) can have errors or miss information. In this deploy, one of the features was not specified on the JIRA Release Board, but it was on the GitHub release. A developer with more time would have noticed that some stuff was missing.&lt;/p&gt;
+&lt;p&gt;These release notes usually will not only be used by the clients, but by the QAs as well, as it will have which features will be deployed. As these have impacts on everybody, the best thing to do is to have a consensus on what can be fully delivered (developer side) and well tested (QA side). The idea is to avoid features which can have bugs or not well tested because they were made in a rush.&lt;/p&gt;
+&lt;h3 id=&#34;create-processes&#34;&gt;Create Processes&lt;/h3&gt;
+&lt;p&gt;Usually, people love to complain about &amp;ldquo;processes&amp;rdquo;. Some people even say they love startups because of the lack of them. But they exist for a reason and, in this case, it would have helped if everything followed a well-defined process.&lt;/p&gt;
+&lt;p&gt;There was already a process, but it was not that specific. After the incident, the team got together and wrote a document describing each step of the product feature development, with a pipe of what should be done on each step of it: feature discussions and development, peer reviews metrics, deploy and release notes for tests environments, test processes and finally, the production deploy.&lt;/p&gt;
+&lt;p&gt;Is it more bureaucratic? For sure! But until now, there were no complains by the team members and, especially, the client.&lt;/p&gt;
+&lt;h3 id=&#34;more-automated-tests&#34;&gt;More Automated Tests&lt;/h3&gt;
+&lt;p&gt;Each sprint feature package is tested by QAs in a staging environment. The best scenario is to have a lot of different automated test scenarios, which would give 100% guarantee that nothing will break the APIs.&lt;/p&gt;
+&lt;p&gt;But, this isn&amp;rsquo;t a perfect world. The usual is to have part of it automated and part of it is tested by humans. But, as this aging deploy was urgent and made in a rush, some features passed through without being well tested.&lt;/p&gt;
+&lt;p&gt;How to solve this problem? Well, one side of the problem is organization: a board tool would help with this but, as aging deploys such as this one have too many tasks, the best thing to do is organize THAT release note. The QA team will be able then to plan how to do its tests.&lt;/p&gt;
+&lt;p&gt;The other side, which is a bit more complicated, is to create more automated tests. Not only QAs but developers as well. Everybody knows someone who wants to skip the test development, but this can help to avoid countless problems (especially in the future). The other developers should not allow a feature to go on without automated tests for it. The same applies for QAs.&lt;/p&gt;
+&lt;h3 id=&#34;error-metrics-monitoring-and-alerts&#34;&gt;Error Metrics Monitoring and Alerts&lt;/h3&gt;
+&lt;p&gt;Soon after the deploy, the team has checked some error metrics on &lt;a href=&#34;https://www.graylog.org&#34;&gt;Graylog&lt;/a&gt; and &lt;a href=&#34;https://aws.amazon.com/cloudwatch/&#34;&gt;CloudWatch&lt;/a&gt;, but these error metrics were just for a part of the system, not its whole. If more metrics had been monitored, probably the problem would have been discovered way before and the impact would have been smaller.&lt;/p&gt;
+&lt;p&gt;The team should monitor at least some of these metrics manually, through dashboards or even the application log, but the best way to tackle this is through automated alerts. Nowadays, all major IaaS providers have a service for metrics and logs. With CloudWatch (AWS), the team can set alerts for when too many error HTTP responses are given by the applications on a certain determined period. It can send e-mails, SMS and even be integrated with mobile apps such as &lt;a href=&#34;https://www.opsgenie.com/&#34;&gt;OpsGenie&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;There are other tools besides these, such as &lt;a href=&#34;https://newrelic.com/&#34;&gt;NewRelic&lt;/a&gt; and &lt;a href=&#34;https://www.librato.com/&#34;&gt;Librato&lt;/a&gt;, but they are a bit more specific and the team should analyze if they are really required.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;noproblems.jpeg&#34; alt=&#34;Photo by Kupono Kuwamura on Unsplash&#34;&gt;&lt;/p&gt;
+&lt;h2 id=&#34;end-of-problems&#34;&gt;End Of Problems?&lt;/h2&gt;
+&lt;p&gt;This will not be the last problem the team will have to struggle with. Stressful moments like these will appear but this is when the team will learn and grow, being able to rise and aim towards high stakes through time.&lt;/p&gt;
+</description>
+    </item>
+    <item>
+      <title>Joi: validate input and define databases in JavaScript</title>
+      <link>https://brunoluiz.net/blog/2017/aug/joi-validate-input-and-define-databases-in-javascript/</link>
+      <pubDate>2017-08-30</pubDate>
+      
+      <guid>https://brunoluiz.net/blog/2017/aug/joi-validate-input-and-define-databases-in-javascript/</guid>
+      <description>&lt;p&gt;&lt;img src=&#34;header.jpeg&#34; alt=&#34;Photo by Rayi Christian Wicaksono&#34;&gt;&lt;/p&gt;
+&lt;p&gt;As the saying goes: &lt;em&gt;never trust user input&lt;/em&gt;. People coming from PHP and Java have many validation libraries available. But what about JavaScript? There are some options, but none seems more interesting than Joi.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/hapijs/joi&#34;&gt;Joi&lt;/a&gt; is maintained by &lt;a href=&#34;https://hapijs.com/&#34;&gt;Hapi.js project&lt;/a&gt;. Even though hapi.js is a web framework by itself, Joi is independent and can be used in any type of node project. This is great for people using express or restify, for example.&lt;/p&gt;
+&lt;p&gt;What makes it even more interesting is that, besides user validation, it can be used to define database schemas as well. This post will introduce a quick start guide, with some usage cases and general tweaks.&lt;/p&gt;
+&lt;h2 id=&#34;how-to-use-it&#34;&gt;How to use it?&lt;/h2&gt;
+&lt;p&gt;First things first: it has to be installed on the project. Considering an already initiated node project, the command to install it is: npm install joi. After being installed, a schema is required to use it, such as the file &lt;code&gt;rating-schema.js&lt;/code&gt; below:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// rating-schema.js
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Joi&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;require&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;joi&amp;#39;&lt;/span&gt;)
+
+&lt;span style=&#34;color:#a6e22e&#34;&gt;module&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;exports&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Joi&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;object&lt;/span&gt;().&lt;span style=&#34;color:#a6e22e&#34;&gt;keys&lt;/span&gt;({
+  &lt;span style=&#34;color:#a6e22e&#34;&gt;username&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Joi&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;string&lt;/span&gt;(),
+  &lt;span style=&#34;color:#a6e22e&#34;&gt;rating&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Joi&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;number&lt;/span&gt;()
+    .&lt;span style=&#34;color:#a6e22e&#34;&gt;integer&lt;/span&gt;()
+    .&lt;span style=&#34;color:#a6e22e&#34;&gt;min&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;)
+    .&lt;span style=&#34;color:#a6e22e&#34;&gt;max&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;5&lt;/span&gt;)
+    .&lt;span style=&#34;color:#66d9ef&#34;&gt;default&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;5&lt;/span&gt;),
+  &lt;span style=&#34;color:#a6e22e&#34;&gt;email&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Joi&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;string&lt;/span&gt;()
+    .&lt;span style=&#34;color:#a6e22e&#34;&gt;email&lt;/span&gt;()
+    .&lt;span style=&#34;color:#a6e22e&#34;&gt;required&lt;/span&gt;()
+})
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This defines a model where an username, a rating (from 1 to 5) and an email (which is a required field) are expected. This is a simple example, but there are way more validation options, which can be found on the &lt;a href=&#34;https://github.com/hapijs/joi/blob/v10.6.0/API.md&#34;&gt;API reference&lt;/a&gt;. To use the defined schema, consider a file called &lt;code&gt;rating-test.js&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// rating-test.js
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
+&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;schema&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;require&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;./rating-schema&amp;#39;&lt;/span&gt;)
+
+&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;result&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;schema&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;validate&lt;/span&gt;({
+  &lt;span style=&#34;color:#a6e22e&#34;&gt;username&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;brunoluiz&amp;#39;&lt;/span&gt;,
+  &lt;span style=&#34;color:#a6e22e&#34;&gt;rating&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;5&lt;/span&gt;,
+  &lt;span style=&#34;color:#a6e22e&#34;&gt;email&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;contact@brunoluiz.net&amp;#39;&lt;/span&gt;
+})
+&lt;span style=&#34;color:#a6e22e&#34;&gt;console&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;log&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;result&lt;/span&gt;) &lt;span style=&#34;color:#75715e&#34;&gt;// result.error will be null
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;// result.error will show an error due to missing e-mail
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;resultWithError&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;schema&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;validate&lt;/span&gt;({
+  &lt;span style=&#34;color:#a6e22e&#34;&gt;username&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;brunoluiz&amp;#39;&lt;/span&gt;,
+  &lt;span style=&#34;color:#a6e22e&#34;&gt;rating&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;5&lt;/span&gt;
+})
+&lt;span style=&#34;color:#a6e22e&#34;&gt;console&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;log&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;resultWithError&lt;/span&gt;) &lt;span style=&#34;color:#75715e&#34;&gt;// result.error will have an error message
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;a href=&#34;https://github.com/hapijs/joi/blob/v10.6.0/API.md#errors&#34;&gt;More about Joi errors&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;real-project-usage&#34;&gt;Real project usage&lt;/h2&gt;
+&lt;h3 id=&#34;validation-middleware&#34;&gt;Validation middleware&lt;/h3&gt;
+&lt;p&gt;In a real project, Joi can be used on a middleware layer. On &lt;a href=&#34;http://expressjs.com&#34;&gt;&lt;code&gt;express&lt;/code&gt;&lt;/a&gt;, for example, this can be done using:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// ratings-validor.js
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
+&lt;span style=&#34;color:#a6e22e&#34;&gt;module&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;exports&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;req&lt;/span&gt;, &lt;span style=&#34;color:#a6e22e&#34;&gt;res&lt;/span&gt;, &lt;span style=&#34;color:#a6e22e&#34;&gt;next&lt;/span&gt;) =&amp;gt; {
+  &lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;ratings&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Ratings&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;schema&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;validate&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;req&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;body&lt;/span&gt;)
+  &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;ratings&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;error&lt;/span&gt;) {
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;next&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;ratings&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;error&lt;/span&gt;)
+  }
+  &lt;span style=&#34;color:#a6e22e&#34;&gt;req&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;parsed&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;ratings&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;value&lt;/span&gt;
+  &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;next&lt;/span&gt;()
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// ....
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// routes.js
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
+&lt;span style=&#34;color:#a6e22e&#34;&gt;app&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;post&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;/ratings&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#a6e22e&#34;&gt;ratingsValidator&lt;/span&gt;, &lt;span style=&#34;color:#a6e22e&#34;&gt;ratingsCreateController&lt;/span&gt;)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;In this case, if the &lt;code&gt;ratingsValidator&lt;/code&gt; returns an error due to validation, express will stop the request before even reaching the controller.&lt;/p&gt;
+&lt;h3 id=&#34;database-schema-mongodb-and-dynamodb&#34;&gt;Database schema (MongoDB and DynamoDB)&lt;/h3&gt;
+&lt;p&gt;Some tools can use it to define their database schema (keep in mind that Joi is not an ORM). For MongoDB, &lt;code&gt;mongoose&lt;/code&gt; can be used together with &lt;a href=&#34;https://github.com/yoitsro/joigoose&#34;&gt;&lt;code&gt;joigoose&lt;/code&gt;&lt;/a&gt;, which easily converts a Joi schema. For example:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// rating.js
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;mongoose&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;require&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;mongoose&amp;#39;&lt;/span&gt;)
+&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;joigoose&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;require&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;joigoose&amp;#39;&lt;/span&gt;)(&lt;span style=&#34;color:#a6e22e&#34;&gt;mongoose&lt;/span&gt;)
+
+&lt;span style=&#34;color:#75715e&#34;&gt;// Require the &amp;#39;ratings&amp;#39; schema
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;schema&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;require&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;./rating-schema&amp;#39;&lt;/span&gt;)
+
+&lt;span style=&#34;color:#75715e&#34;&gt;// Convert joi to mongoose schema
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;mongooseSchema&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;joigoose&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;convert&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;schema&lt;/span&gt;)
+
+&lt;span style=&#34;color:#75715e&#34;&gt;// Modify some fields with database specific instructions
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;mongooseSchema&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;email&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;unique&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;true&lt;/span&gt;
+
+&lt;span style=&#34;color:#75715e&#34;&gt;// Add fields which don&amp;#39;t make sense on the schema validator
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;mongooseSchema&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;updatedAt&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; { &lt;span style=&#34;color:#a6e22e&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; Date, &lt;span style=&#34;color:#66d9ef&#34;&gt;default&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; Date.&lt;span style=&#34;color:#a6e22e&#34;&gt;now&lt;/span&gt; }
+&lt;span style=&#34;color:#a6e22e&#34;&gt;mongooseSchema&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;createdAt&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; { &lt;span style=&#34;color:#a6e22e&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; Date, &lt;span style=&#34;color:#66d9ef&#34;&gt;default&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; Date.&lt;span style=&#34;color:#a6e22e&#34;&gt;now&lt;/span&gt; }
+
+&lt;span style=&#34;color:#75715e&#34;&gt;// Define mongoose model
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Ratings&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;mongoose&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;model&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;Ratings&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#a6e22e&#34;&gt;mongooseSchema&lt;/span&gt;)
+
+&lt;span style=&#34;color:#a6e22e&#34;&gt;module&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;exports&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Ratings&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Through &lt;a href=&#34;https://github.com/ryanfitz/vogels&#34;&gt;&lt;code&gt;vogels&lt;/code&gt;&lt;/a&gt;, the same can be done in projects using DynamoDB. By default, it accepts Joi as its schema definition. The following example is based on &lt;code&gt;vogels&lt;/code&gt; documentation:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// blog-post-schema.js
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
+&lt;span style=&#34;color:#a6e22e&#34;&gt;module&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;exports&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; {
+  &lt;span style=&#34;color:#a6e22e&#34;&gt;email&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Joi&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;string&lt;/span&gt;().&lt;span style=&#34;color:#a6e22e&#34;&gt;email&lt;/span&gt;(),
+  &lt;span style=&#34;color:#a6e22e&#34;&gt;title&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Joi&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;string&lt;/span&gt;(),
+  &lt;span style=&#34;color:#a6e22e&#34;&gt;content&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Joi&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;binary&lt;/span&gt;(),
+  &lt;span style=&#34;color:#a6e22e&#34;&gt;tags&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;vogels&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;types&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;stringSet&lt;/span&gt;()
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// blog-post.js
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;schema&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;require&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;./blog-post-schema.js&amp;#39;&lt;/span&gt;)
+
+&lt;span style=&#34;color:#a6e22e&#34;&gt;module&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;exports&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;vogels&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;define&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;BlogPost&amp;#39;&lt;/span&gt;, {
+  &lt;span style=&#34;color:#a6e22e&#34;&gt;hashKey&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;email&amp;#39;&lt;/span&gt;,
+  &lt;span style=&#34;color:#a6e22e&#34;&gt;rangeKey&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;‘&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;title&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;’&lt;/span&gt;,
+  &lt;span style=&#34;color:#a6e22e&#34;&gt;schema&lt;/span&gt;
+})
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;exchangeability-for-front-end-validation&#34;&gt;Exchangeability for front-end validation&lt;/h3&gt;
+&lt;p&gt;Some developers prefer to define the schema once and then use everywhere, including on browsers. Today &lt;a href=&#34;https://github.com/hapijs/joi/#browsers&#34;&gt;Joi doesn&amp;rsquo;t support browser usage&lt;/a&gt;, but a package called &lt;a href=&#34;https://github.com/jeffbski/joi-browser&#34;&gt;&lt;code&gt;joi-browser&lt;/code&gt; does this job&lt;/a&gt;, enabling the usage of exactly the same schema on the front-end as well.&lt;/p&gt;
+&lt;h2 id=&#34;useful-tweaks&#34;&gt;Useful tweaks&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&#34;tweaking.jpeg&#34; alt=&#34;Photo by chuttersnap on Unsplash&#34;&gt;&lt;/p&gt;
+&lt;h3 id=&#34;1-disable-joi-number-convert&#34;&gt;#1 Disable Joi number() convert&lt;/h3&gt;
+&lt;p&gt;By default, Joi allows users to pass numbers formatted as strings, in cases of number() fields. This is specially bad if the validate() result is only used to check if there was an error, but not for it&amp;rsquo;s value field. To solve this, there are two possible solutions&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;On &lt;code&gt;schema.validate(value)&lt;/code&gt;, an extra parameter can be passed to disable it, as: &lt;code&gt;schema.validate(value, { convert: false })&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Put a &lt;code&gt;strict()&lt;/code&gt; at the end of the desired number field, as: &lt;code&gt;Joi.number().strict()&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Both of them are quite annoying, because either all fields or all function calls require a specific config. One way to solve this is by extending Joi…&lt;/p&gt;
+&lt;h3 id=&#34;2-extend-joi-defaults&#34;&gt;#2 Extend Joi defaults&lt;/h3&gt;
+&lt;p&gt;In cases such as the above, or for new field types, or even when the behavior of a default field has to be changed, &lt;code&gt;Joi.extend()&lt;/code&gt; can be an option.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// joi.js
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
+&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Joi&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;require&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;joi&amp;#39;&lt;/span&gt;)
+
+&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;ukzip&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;/^[A-Z]{1,2}[0-9]{1,2}[A-Z]{0,1} ?[0-9][A-Z]{2}$/i&lt;/span&gt;
+
+&lt;span style=&#34;color:#a6e22e&#34;&gt;module&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;exports&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Joi&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;extend&lt;/span&gt;(
+  {
+    &lt;span style=&#34;color:#a6e22e&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;number&amp;#39;&lt;/span&gt;,
+    &lt;span style=&#34;color:#a6e22e&#34;&gt;base&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Joi&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;number&lt;/span&gt;().&lt;span style=&#34;color:#a6e22e&#34;&gt;strict&lt;/span&gt;()
+  },
+  {
+    &lt;span style=&#34;color:#a6e22e&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;zipcode&amp;#39;&lt;/span&gt;,
+    &lt;span style=&#34;color:#a6e22e&#34;&gt;base&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Joi&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;regex&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;ukzip&lt;/span&gt;).&lt;span style=&#34;color:#a6e22e&#34;&gt;description&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;UK Zipcode&amp;#39;&lt;/span&gt;)
+  }
+)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;When using Joi through this file, all number fields will be on the strict mode — which solves the issue of applying tweak #1 everywhere — and a &lt;code&gt;zipcode()&lt;/code&gt; validator is created, based on a pre-defined regex.&lt;/p&gt;
+&lt;p&gt;More rules can be added and, actually, the Joi API enables &lt;a href=&#34;https://github.com/hapijs/joi/blob/v10.6.0/API.md#extendextension&#34;&gt;much more customisation&lt;/a&gt; on &lt;code&gt;Joi.extend&lt;/code&gt;.&lt;/p&gt;
+&lt;h3 id=&#34;3-create-default-fields&#34;&gt;#3 Create default fields&lt;/h3&gt;
+&lt;p&gt;In some projects, a lot of models will have some default fields, such as an &lt;code&gt;extensionAttributes&lt;/code&gt;, where custom vendor data will be put into (as Magento already does) or &lt;code&gt;updatedAt&lt;/code&gt;. In these cases, the &lt;code&gt;Joi.object&lt;/code&gt; can be extended to include default fields:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// joi.js
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
+&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Joi&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;require&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;joi&amp;#39;&lt;/span&gt;)
+
+&lt;span style=&#34;color:#a6e22e&#34;&gt;module&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;exports&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Joi&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;extend&lt;/span&gt;({
+  &lt;span style=&#34;color:#a6e22e&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;object&amp;#39;&lt;/span&gt;,
+  &lt;span style=&#34;color:#a6e22e&#34;&gt;base&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Joi&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;object&lt;/span&gt;().&lt;span style=&#34;color:#a6e22e&#34;&gt;keys&lt;/span&gt;({
+    &lt;span style=&#34;color:#a6e22e&#34;&gt;extensionAttributes&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Joi&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;object&lt;/span&gt;(),
+    &lt;span style=&#34;color:#a6e22e&#34;&gt;updatedAt&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Joi&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;date&lt;/span&gt;().&lt;span style=&#34;color:#66d9ef&#34;&gt;default&lt;/span&gt;(Date.&lt;span style=&#34;color:#a6e22e&#34;&gt;now&lt;/span&gt;)
+  })
+})
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;4-show-all-validation-errors&#34;&gt;#4 Show all validation errors&lt;/h3&gt;
+&lt;p&gt;Usually Joi validation dies on the first error, returning on it&amp;rsquo;s message which field failed. This is an issue when an input have many fields with problems. The user will have to do many requests to discover all problematic fields. To fix this issue, the following option can be added on the function call:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;const result = schema.validate(value, { abortEarly: false })&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;With this config, if an error occurs, the &lt;code&gt;result.error&lt;/code&gt; will return all validation failures.&lt;/p&gt;
+&lt;h3 id=&#34;5-built-in-joi-conditional-validations&#34;&gt;#5 Built-in Joi conditional validations&lt;/h3&gt;
+&lt;p&gt;If a field depends on values from another field, the conditional when() can be used.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// joi-from-doc.js
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
+&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Joi&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;require&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;joi&amp;#39;&lt;/span&gt;)
+
+&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;schema&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Joi&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;object&lt;/span&gt;().&lt;span style=&#34;color:#a6e22e&#34;&gt;keys&lt;/span&gt;({
+  &lt;span style=&#34;color:#a6e22e&#34;&gt;a&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Joi&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;any&lt;/span&gt;()
+    .&lt;span style=&#34;color:#a6e22e&#34;&gt;valid&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;x&amp;#39;&lt;/span&gt;)
+    .&lt;span style=&#34;color:#a6e22e&#34;&gt;when&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;b&amp;#39;&lt;/span&gt;, {
+      &lt;span style=&#34;color:#a6e22e&#34;&gt;is&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;5&lt;/span&gt;,
+      &lt;span style=&#34;color:#a6e22e&#34;&gt;then&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Joi&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;valid&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;y&amp;#39;&lt;/span&gt;),
+      &lt;span style=&#34;color:#a6e22e&#34;&gt;otherwise&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Joi&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;valid&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;z&amp;#39;&lt;/span&gt;)
+    }),
+  &lt;span style=&#34;color:#a6e22e&#34;&gt;b&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Joi&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;any&lt;/span&gt;()
+})
+
+&lt;span style=&#34;color:#a6e22e&#34;&gt;console&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;log&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;schema&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;validate&lt;/span&gt;({ &lt;span style=&#34;color:#a6e22e&#34;&gt;a&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;x&amp;#39;&lt;/span&gt; }).&lt;span style=&#34;color:#a6e22e&#34;&gt;error&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;===&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;null&lt;/span&gt;) &lt;span style=&#34;color:#75715e&#34;&gt;// valid
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;console&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;log&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;schema&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;validate&lt;/span&gt;({ &lt;span style=&#34;color:#a6e22e&#34;&gt;a&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;z&amp;#39;&lt;/span&gt; }).&lt;span style=&#34;color:#a6e22e&#34;&gt;error&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;===&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;null&lt;/span&gt;) &lt;span style=&#34;color:#75715e&#34;&gt;// valid
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;console&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;log&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;schema&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;validate&lt;/span&gt;({ &lt;span style=&#34;color:#a6e22e&#34;&gt;a&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;z&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#a6e22e&#34;&gt;b&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt; }).&lt;span style=&#34;color:#a6e22e&#34;&gt;error&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;===&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;null&lt;/span&gt;) &lt;span style=&#34;color:#75715e&#34;&gt;// valid
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;console&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;log&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;schema&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;validate&lt;/span&gt;({ &lt;span style=&#34;color:#a6e22e&#34;&gt;a&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;y&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#a6e22e&#34;&gt;b&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt; }).&lt;span style=&#34;color:#a6e22e&#34;&gt;error&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;!==&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;null&lt;/span&gt;) &lt;span style=&#34;color:#75715e&#34;&gt;// invalid
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;console&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;log&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;schema&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;validate&lt;/span&gt;({ &lt;span style=&#34;color:#a6e22e&#34;&gt;a&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;y&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#a6e22e&#34;&gt;b&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;5&lt;/span&gt; }).&lt;span style=&#34;color:#a6e22e&#34;&gt;error&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;===&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;null&lt;/span&gt;) &lt;span style=&#34;color:#75715e&#34;&gt;// valid
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;In this case, the field &lt;code&gt;a&lt;/code&gt; accepts the values &lt;code&gt;x, y, z&lt;/code&gt;. But, to accept &lt;code&gt;y&lt;/code&gt; as a value, the field b have to be equals 5, otherwise only &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;z&lt;/code&gt; will be accepted.&lt;/p&gt;
+&lt;p&gt;Of course, this is a simple and fictitious conditional validation, but it is quite useful in cases where some field requires a specific validator when some other had a specific input.&lt;/p&gt;
+&lt;h2 id=&#34;are-you-ready-to-use-it&#34;&gt;Are you ready to use it?&lt;/h2&gt;
+&lt;p&gt;I hope this post convinced you to use some validation tool such as Joi, instead of validating everything by hand (or not validating at all). But, if you are using it already: do you know any other cool trick or tweak? Let me know in the comments section below.&lt;/p&gt;
+&lt;h2 id=&#34;references&#34;&gt;References&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Joi repo: &lt;a href=&#34;https://github.com/hapijs/joi&#34;&gt;https://github.com/hapijs/joi&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Joi API Reference: &lt;a href=&#34;https://github.com/hapijs/joi/blob/v10.6.0/API.md&#34;&gt;https://github.com/hapijs/joi/blob/v10.6.0/API.md&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Joigoose repo: &lt;a href=&#34;https://github.com/yoitsro/joigoose&#34;&gt;https://github.com/yoitsro/joigoose&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Joi-browser repo: &lt;a href=&#34;https://github.com/jeffbski/joi-browser&#34;&gt;https://github.com/jeffbski/joi-browser&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Mongoose website: &lt;a href=&#34;http://mongoosejs.com&#34;&gt;http://mongoosejs.com&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Vogels repo: &lt;a href=&#34;https://github.com/ryanfitz/vogels&#34;&gt;https://github.com/ryanfitz/vogels&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    <item>
+      <title>Still using GitFlow? What about a simpler alternative?</title>
+      <link>https://brunoluiz.net/blog/2017/jul/still-using-gitflow-what-about-a-simpler-alternative/</link>
+      <pubDate>2017-07-18</pubDate>
+      
+      <guid>https://brunoluiz.net/blog/2017/jul/still-using-gitflow-what-about-a-simpler-alternative/</guid>
+      <description>&lt;p&gt;&lt;img src=&#34;header.jpeg&#34; alt=&#34;Alternative on sight&#34;&gt;&lt;/p&gt;
+&lt;p&gt;GitFlow is a branching model created by Vincent Driessen on 2010 (&lt;a href=&#34;http://nvie.com/posts/a-successful-git-branching-model/&#34;&gt;original article&lt;/a&gt;). Since it was published, many companies had tested and implemented it, which allows us to have many reviews about how well (or not) it works. After some discussions within our team, we decided to not go with GitFlow, but use a simpler model instead, together with a tightly defined workflow. Some of the discussed reasons of why not go with GitFlow are the same written on &lt;a href=&#34;http://endoflineblog.com/gitflow-considered-harmful&#34;&gt;this blog post&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;the-feature-branch-model&#34;&gt;The Feature Branch Model&lt;/h2&gt;
+&lt;p&gt;Compared to GitFlow, it is easier to implement and does not require any plugins to be properly used. The step-by-step of this model would be:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Create a branch from the master (feature-x), which is where the feature will be developed: &lt;code&gt;git checkout -b feature-x&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Push the branch to the remote: &lt;code&gt;git push -u origin feature-x&lt;/code&gt;. With the branch in the remote repo, a pull request should be opened with it (&lt;a href=&#34;https://help.github.com/articles/creating-a-pull-request/&#34;&gt;How to open it in GitHub&lt;/a&gt;). A pull request is where all modifications are available to other members and they will be able to review it&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Fix the reviewed code and wait for approval. If a new release on the master generates a conflict, a best practice would be to rebase it (instead of merging)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;(optional) If a rebase is needed: checkout to master &lt;code&gt;git checkout master&lt;/code&gt;, pull the changes &lt;code&gt;git pull&lt;/code&gt;, go back to the feature branch &lt;code&gt;git checkout feature-x&lt;/code&gt;, do the rebase &lt;code&gt;git rebase master&lt;/code&gt; and then sync the rebased branch &lt;code&gt;git push --force-with-lease&lt;/code&gt;. &lt;a href=&#34;https://www.atlassian.com/git/tutorials/merging-vs-rebasing&#34;&gt;A good tutorial about merging x rebasing is available on this Atlassian article&lt;/a&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;If there are no conflicts and it was approved ⇒ &lt;strong&gt;squash + merge&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.atlassian.com/git/tutorials/comparing-workflows#feature-branch-workflow&#34;&gt;This Atlassian article have a more detailed view on the feature branch model&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id=&#34;why-squash--merge-instead-of-just-merge&#34;&gt;Why Squash + Merge instead of just Merge?&lt;/h3&gt;
+&lt;p&gt;The squash and merge is made up of two processes: the squash, which compact all commits in one big commit/patch, and then the merge itself. After squashing + merging, you will have only one commit in the target branch (usually master) containing all your modifications. This enables two things:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;It is easier to move this feature, as the whole patch/feature will be on one commit hash&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The target branch will be cleaner, less messy and more readable — without those 67 commits you have made to finish the feature.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;There are more information about &lt;a href=&#34;https://softwareengineering.stackexchange.com/questions/263164/why-squash-git-commits-for-pull-requests&#34;&gt;about why devs prefers squash and merge, instead of only merging, on this article&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;managing-release-versions-with-git-tags&#34;&gt;Managing release versions with git tags&lt;/h2&gt;
+&lt;p&gt;In the feature branch model, a merge is considered a new version release. To track each release version, tags can be used. These will be used as reference to choose which version should be deployed at the servers.&lt;/p&gt;
+&lt;p&gt;To manage these tags/release, a good practice is the usage of &lt;a href=&#34;http://semver.org&#34;&gt;*semantic versioning&lt;/a&gt;:*&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Given a version number &lt;strong&gt;MAJOR.MINOR.PATCH&lt;/strong&gt;, increment the:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;MAJOR version when you make incompatible API changes,&lt;/li&gt;
+&lt;li&gt;MINOR version when you add functionality in a backwards-compatible manner, and&lt;/li&gt;
+&lt;li&gt;PATCH version when you make backwards-compatible bug fixes.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;The process to create the releases can be automated using &lt;a href=&#34;https://github.com/geddski/grunt-release&#34;&gt;&lt;code&gt;grunt-release&lt;/code&gt;&lt;/a&gt; or &lt;a href=&#34;https://github.com/lfender6445/gulp-release-tasks&#34;&gt;&lt;code&gt;gulp-release-tasks&lt;/code&gt;&lt;/a&gt;. But, following the steps bellow, it can be easily done by hand:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Checkout to the master branch: &lt;code&gt;git checkout master&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Pull changes from the remote &lt;code&gt;git pull&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Get the most recent tag using &lt;code&gt;git describe --abbrev=0&lt;/code&gt; (let&amp;rsquo;s say it returns v0.1.0)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Create a tag using &lt;code&gt;git tag -a &amp;lt;version&amp;gt;&lt;/code&gt;⇒&lt;code&gt;git tag -a v0.2.0&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Push the modifications and the tag: &lt;code&gt;git push origin v0.2.0 --follow-tags&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Done!&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;deploying&#34;&gt;Deploying&lt;/h2&gt;
+&lt;p&gt;In many PaaS, such as AWS Beanstalk or Heroku, a remote repository is set-up where, when changes are pushed (eg. git push heroku master), a deploy is triggered using the latest commits on master. In these cases, a simple push force using the release tag will deploy the desired version: &lt;code&gt;git push -f &amp;lt;deploy/env-remote&amp;gt; v0.2.0:master&lt;/code&gt;. Easy, eh?&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;NOTE: At Chaordic New Offers Team, a grunt script was developed where we publish which tag should be deployed: &lt;code&gt;grunt deploy:&amp;lt;version&amp;gt;:&amp;lt;env&amp;gt;:all&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;what-happens-if-a-hot-fix-is-needed&#34;&gt;What happens if a hot-fix is needed?&lt;/h2&gt;
+&lt;p&gt;At some point, an issue will be raised and the production version will need a hot-fix &lt;em&gt;ASAP&lt;/em&gt;. A feature branch can&amp;rsquo;t just be opened to develop a fix, as the master will probably be ahead of the production version. In this case, the fix needs to be done directly on the production version:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Checkout to the production version tag &lt;code&gt;git checkout v0.10.0&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Create a new branch from this tag &lt;code&gt;git checkout -b hotfix-v0.10.1-weirdbehavior&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Create the fix and commit it&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Create a tag for this new release &lt;code&gt;git tag -a v0.10.1&lt;/code&gt; (notice the SEMVER pattern)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Push the branch and tag to remote &lt;code&gt;git push -u origin hotfix-v0.10.1-weirdbehavior --follow-tags&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Deploy the tag &lt;code&gt;v0.10.1&lt;/code&gt; to the production environment&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;A push request should be opened, as the fix should be applied at the master afterwards&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;If more patches are needed, this process can be repeated on the same version, incrementing only the patch version.&lt;/p&gt;
+&lt;h3 id=&#34;what-about-applying-it-to-other-environments&#34;&gt;What about applying it to other environments?&lt;/h3&gt;
+&lt;p&gt;This patch probably should be applied to other environments as well, which can be done through &lt;a href=&#34;http://think-like-a-git.net/sections/rebase-from-the-ground-up/cherry-picking-explained.html&#34;&gt;git cherry-pick&lt;/a&gt; &lt;!-- raw HTML omitted --&gt; . It basically applies the chosen commit to the actual HEAD.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Checkout to the environment version tag &lt;code&gt;git checkout v0.13.0&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Create a new branch for the patch &lt;code&gt;git checkout -b hotfix-v0.13.1&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Do a &lt;code&gt;git cherry-pick v0.10.1&lt;/code&gt; or a &lt;code&gt;git cherry-pick &amp;lt;commit-hash&amp;gt;&lt;/code&gt; to apply the desired commit&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;git tag -a v0.13.1&lt;/code&gt; and &lt;code&gt;git push origin v0.13.1&lt;/code&gt; (push just the tag)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Deploy it&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;what-if-i-want-to-get-a-modification-from-master-and-sent-to-one-of-the-environments&#34;&gt;What if I want to get a modification from master and sent to one of the environments?&lt;/h3&gt;
+&lt;p&gt;It is very similar to the above one: a &lt;code&gt;git cherry-pick&lt;/code&gt; should be done using a commit hash from the master as, after &lt;strong&gt;squash + merge&lt;/strong&gt; a push request, a new commit is generated with all changes (big patch of commits condensed in one).&lt;/p&gt;
+&lt;h2 id=&#34;just-keep-in-mind&#34;&gt;Just keep in mind…&lt;/h2&gt;
+&lt;p&gt;The gap between the environments versions should be as short as possible. Otherwise, some issues may appear:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;If the production is on &lt;code&gt;v0.1.10&lt;/code&gt;, the latest release is &lt;code&gt;v0.10&lt;/code&gt;, but the version &lt;code&gt;v0.3&lt;/code&gt; will be deployed: the team members will have to check if some of the production patches are still required and then apply them, one by one.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;If some feature was only finished on &lt;code&gt;v0.10.0&lt;/code&gt;, and it is required for the roll-out, but the &lt;code&gt;v0.7.0&lt;/code&gt; is still not well tested: the release should be hold until the &lt;code&gt;v0.7.0&lt;/code&gt; has been tested&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Usually, these version gaps occur when the producing capacity is higher than the testing capacity (developers x testers ratio).&lt;/p&gt;
+&lt;h2 id=&#34;conclusion&#34;&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;The model is still being tested but, until now, it has been working well. The only faced drawbacks were the ones pointed on the session above.&lt;/p&gt;
+</description>
+    </item>
+    <item>
+      <title>Are you using git push force? Oh mate, you are doing it wrong!</title>
+      <link>https://brunoluiz.net/blog/2017/jun/are-you-using-git-push-force-oh-mate-you-are-doing-it-wrong/</link>
+      <pubDate>2017-06-03</pubDate>
+      
+      <guid>https://brunoluiz.net/blog/2017/jun/are-you-using-git-push-force-oh-mate-you-are-doing-it-wrong/</guid>
+      <description>&lt;p&gt;&lt;img src=&#34;header.png&#34; alt=&#34;Git branching&#34;&gt;&lt;/p&gt;
+&lt;p&gt;You are developing some feature together with your team. Most likely you have done the usual dance: checkout a branch from the master or development branch, done your commits, pushed this feature branch to the remote and opened a push request for peer review.&lt;/p&gt;
+&lt;p&gt;In ideal cases, you will be able to just squash and merge after some reviews and fixes. But, the world is not ideal (as you might know), and maybe one of your mates modified the same files and already merged it. So, surprise surprise, you got a merge conflict to resolve!&lt;/p&gt;
+&lt;p&gt;This usually means you will need to do a &lt;em&gt;git rebase&lt;/em&gt; before merging. After doing it, this new rebased branch need to be pushed back to the remote. And here is one of the steps that people usually do wrong:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;git push —-force
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;You might be thinking: what is the problem with this?&lt;/p&gt;
+&lt;p&gt;Well, &lt;strong&gt;push force&lt;/strong&gt; ignore everything on the remote and override it with local changes. This is &amp;ldquo;kinda&amp;rdquo; what you want, but what if you did some mistake in the rebase but didn&amp;rsquo;t notice? Or someone pushed more modifications while you were rebasing? Yes, you thought right: kaputt, gone. One safer way to do this is using:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;git push --force-with-lease
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This simple command will not push force your modifications until it checked if everything that is in the remote is also in your rebased version. It is the same as a &lt;em&gt;push force&lt;/em&gt;, but safer.&lt;/p&gt;
+&lt;p&gt;If you want to know more about it, checkout &lt;a href=&#34;https://developer.atlassian.com/blog/2015/04/force-with-lease/&#34;&gt;this article&lt;/a&gt;. But the basic idea is: &lt;strong&gt;start to use &lt;em&gt;force-with-lease&lt;/em&gt; instead of &lt;em&gt;force&lt;/em&gt;&lt;/strong&gt;.&lt;/p&gt;
+</description>
+    </item>
     
   </channel>
 </rss>
+
