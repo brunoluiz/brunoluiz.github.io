@@ -25,6 +25,12 @@ jobs:
         run: hugo --minify
 
       - 
+        name: Generate
+        uses: brunoluiz/urlzap-github-action@v1
+        with:
+          config: urlzap.yml
+
+      - 
         name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
