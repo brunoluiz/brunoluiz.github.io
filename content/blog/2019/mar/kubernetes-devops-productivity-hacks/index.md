@@ -6,7 +6,7 @@ aliases:
   - /2019/mar/kubernetes-devops-productivity-hacks/
 ---
 
-![Photo by Cameron Venti on Unsplash](header.jpeg)
+![Photo by Cameron Venti on Unsplash](cover.jpg)
 
 Today, Kubernetes is the de facto container orchestration solution. Together with the devops culture, developers have to get familiarised to its tools, such as `kubectl`.
 

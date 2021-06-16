@@ -6,7 +6,7 @@ aliases:
   - /2017/aug/joi-validate-input-and-define-databases-in-javascript/
 ---
 
-![Photo by Rayi Christian Wicaksono](header.jpeg)
+![Photo by Rayi Christian Wicaksono](cover.jpg)
 
 As the saying goes: _never trust user input_. People coming from PHP and Java have many validation libraries available. But what about JavaScript? There are some options, but none seems more interesting than Joi.
 
