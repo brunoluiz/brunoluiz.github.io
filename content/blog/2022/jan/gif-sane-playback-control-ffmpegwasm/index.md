@@ -21,7 +21,7 @@ Not having this feature always annoyed me a bit. I always _secretly_ hoped that 
 
 Some time ago, I was a bit annoyed with Grammarly. As a non-native English speaker, it helps me a lot when writing technical documents or blog posts. But these documents had to be exported to Markdown.
 
-At some point, I got annoyed by the lack of this feature, and I decided to create a browser extension to solve that: [Grammarly to Markdown][4] ([Github][5]). This was 2019, and I still use this nowadays.
+At some point, I got annoyed by the lack of this feature, and I decided to create a browser extension to solve that: [Grammarly to Markdown][4] ([GitHub][5]). This was 2019, and I still use it nowadays.
 
 Then, last year, James Long published [_A future for SQL on the web_][6], where he describes how to use SQLite in the browser. "SQLite, in the browser!? How!?" you may ask. Well, dear friend, there is this magical thing called [_WebAssembly_][7]. In this case, it allows JavaScript to interoperate with libraries and programs written in other languages, such as SQLite.
 
