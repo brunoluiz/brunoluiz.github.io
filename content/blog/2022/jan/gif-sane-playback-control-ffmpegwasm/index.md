@@ -84,7 +84,7 @@ You can build manually by heading to [https://github.com/ffmpegwasm/ffmpeg.wasm-
 - Fork the project: [https://github.com/ffmpegwasm/ffmpeg.wasm-core][22]
 - Enable the GitHub Actions (just go to the Actions tab)
 - Push a dummy commit
-- There should be two workflows running in your GitHub Actions: go to `Build FFmpeg.wasm (Single Thread)`
+- There should be two workflows running in your GitHub Actions: select `Build FFmpeg.wasm (Single Thread)`
 - It will take ages to compile: go make a coffee ☕️
 - Once finished, download the artefacts (bottom of the page)
 
