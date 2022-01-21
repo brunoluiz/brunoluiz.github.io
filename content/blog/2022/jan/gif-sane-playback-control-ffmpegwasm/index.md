@@ -79,7 +79,7 @@ As of January 2022, there is no "pre-packaged" FFMPEG.wasm available with single
 
 **Build `ffmpeg.wasm-core`**
 
-You can build manually by heading to [https://github.com/ffmpegwasm/ffmpeg.wasm-core][21] and following the instructions. Or, you can use Github Actions in your favour:
+You can build manually by heading to [https://github.com/ffmpegwasm/ffmpeg.wasm-core][21] and following the instructions. Or, you can use GitHub Actions in your favour:
 
 - Fork the project: [https://github.com/ffmpegwasm/ffmpeg.wasm-core][22]
 - Enable the Github Actions (just go to the Actions tab)
