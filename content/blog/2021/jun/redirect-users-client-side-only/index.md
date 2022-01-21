@@ -1,7 +1,7 @@
 ---
 title: 'The forgotten art of HTML redirects, without either HTTP 301 or JavaScript'
 date: '2021-06-17T12:00:00Z'
-description: "One of the first things API developers learn is HTTP codes. From these 3xx are special, as they redirect users from A to B. But what if I told you there is a way to do it without HTTP codes?"
+summary: "One of the first things API developers learn is HTTP codes. From these 3xx are special, as they redirect users from A to B. But what if I told you there is a way to do it without HTTP codes?"
 aliases:
   - /2021/jun/redirect-users-without-http-301-or-js/
 ---

@@ -1,7 +1,7 @@
 ---
 title: 'GRPC: A powerful way to improve your Golang APIs'
 date: '2019-12-05T17:00:00Z'
-description: 'Web APIs are everywhere, with REST being one of the most popular ways to distribute it. With recent technologies, there are better ways to implement them, GRPC been one of them.'
+summary: 'Web APIs are everywhere, with REST being one of the most popular ways to distribute it. With recent technologies, there are better ways to implement them, GRPC been one of them.'
 aliases:
   - /2019/nov/grpc-a-powerful-way-to-improve-golang-apis/
 ---

@@ -1,7 +1,7 @@
 ---
 title: 'Getting good code reviews from peers'
 date: '2020-09-28T19:00:00Z'
-description: "Every software developer, soon after pushing code to the repository, has this urge to ping the team to ask for code review. But, I dare to say: don't do it! Most likely the code will still have some issues, especially if this is your first push for this feature."
+summary: "Every software developer, soon after pushing code to the repository, has this urge to ping the team to ask for code review. But, I dare to say: don't do it! Most likely the code will still have some issues, especially if this is your first push for this feature."
 aliases:
   - /2020/sep/getting-proper-code-reviews/
 ---
