@@ -69,7 +69,11 @@ The caveat is that, on Firefox, [extensions can't use `SharedArrayBuffer`][18]. 
 
 ### Single-threaded FFmpeg.wasm is possible 🚀
 
-On the bright side: WASM applications can be compiled to single-threaded, and FFMPEG.wasm is no different 🎉. It removes the need for `SharedArrayBuffer` with the only caveat being it will be certainly slower.
+![Photo by Michael Dziedzic on Unsplash](./fixing.jpg)
+<!-- Photo by <a href="https://unsplash.com/@lazycreekimages?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Michael Dziedzic</a> on <a href="https://unsplash.com/s/photos/fix?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a> -->
+
+
+On the bright side: WASM applications can be compiled to single-threaded, and FFMPEG.wasm is no different. It removes the need for `SharedArrayBuffer` with the only caveat being it will be certainly slower.
 
 As of January 2022, there is no "pre-packaged" FFMPEG.wasm available with single-threaded support. But [@jeromewu][20] already pushed the required changes to compile it. This means you will need to get your hands a little bit dirty.
 
@@ -134,6 +138,8 @@ But, even with this workaround, I couldn't inject the blob into the page. Some w
 With this API, the `onHeadersReceived` is called once the page HTTP Headers are received. GIFSane reads them and changes them just a tiny bit: [it adds `blob:` to the CSP `media-src`][33]. After that, the GIFSane content script is able to replace the GIF with the FFmpeg output. I am not sure if this is a reason for security concerns, but it was my only way around it (please, [ping me on Twitter][34] if it is).
 
 ## Final words
+
+![Photo by Javier Allegue Barros on Unsplash](./conclusion.jpg)
 
 Creating GIFSane was an interesting challenge. I now want to go deeper into WASM and perhaps convert a project myself (I am open to ideas).
 
