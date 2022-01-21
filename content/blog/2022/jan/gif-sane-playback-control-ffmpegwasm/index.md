@@ -47,7 +47,7 @@ Creating extensions, however, can always be tricky. There are lots of caveats, t
 
 Differently from frontend and backend, where there are lots of materials, tutorials and frameworks, extensions are quite the opposite.
 
-I will not go through the whole implementation. Instead, I will go through my main learnings in this project, mostly around WASM and FFmpeg. The extension itself is simply architected, and you can [explore it at Github][10].
+I will not go through the whole implementation. Instead, I will go through my main learnings in this project, mostly around WASM and FFmpeg. The extension itself is simply architected, and you can [explore it at GitHub][10].
 
 ### Manifest V3 vs V2 (January 2022): limitations everywhere
 
