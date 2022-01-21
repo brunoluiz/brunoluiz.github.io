@@ -37,7 +37,7 @@ With my "_fresh"_ knowledge about WASM, I thought: wait a second, what if I crea
 
 _Fun fact: the demo above is in WebP, so GIF wouldn't be able to convert 🤷_
 
-After a couple of weeks of hacking things, I managed to put together [GIFSane][9]. It allows users to either convert and replace the image component or download the converted result straight (QuickTime can't open it though).
+After a couple of weeks of hacking things, I managed to put together [GIFSane][9]. It allows users to either convert and replace the image component or download the converted result straight (QuickTime can't open it though). For now, I can't publish in Chrome Web Store (more details on sections ahead), but you can still load it manually (instructions on the repository).
 
 It is not as fast as a "bare-metal" FFmpeg (no hardware acceleration) but is way more convenient. Besides, it was a great opportunity to learn more about WebAssembly.
 
@@ -55,7 +55,7 @@ Manifest V3 will be a requirement from January 2023 onwards. If you want to publ
 
 Chrome-based engines are the only ones supporting it, while Firefox is still on Manifest V2. This means that you might have to support two versions of the same extension. [Mozilla is supposed to release its implementation soon][11], but it seems there will be divergences.
 
-For GIFSane though, I couldn't even use Manifest V3. As of January 2022, [it still does not support WASM][12]. Developers who want to build on top of WASM still need to wait.
+For GIFSane though, I couldn't even use Manifest V3. As of January 2022, [it still does not support WASM][12]. Developers who want to build on top of WASM still need to wait. Hence why it is not available on Chrome Web Store.
 
 Besides, background scripts [need to be migrated to service workers.][13] Depending on the implementation, this might be tricky. FFmpeg.wasm, for one, uses `[URL.createObjectURL()][14]` and `document.\*` in its browser version, both not available in workers.
 
@@ -131,11 +131,11 @@ Initially, GIFSane used a content script to run FFmpeg. But:
 1.  It was inefficient, as all pages loaded GIFSane resources (mainly ffmpeg.wasm)
 2.  Some websites `[Content Security Policy][30]` block any content injection to it. GitHub is quite aggressive in these policies, for example.
 
-Once FFmpeg.wasm was moved to a background script, I managed to run FFmpeg and convert GIFs. It still required a hack to pass the final MP4 from the background to the content script. This is because extensions don't emit JS objects, but stringified versions of them instead. I obviously found my way ([exhibit A][31], [exhibit B][32]).
+Once FFmpeg.wasm was moved to a background script, I managed to run FFmpeg and convert GIFs. It still required a hack to pass the final MP4 from the background to the content script. This is because extensions don't emit JS objects, but stringified versions of them instead. I obviously found my way 🤷 ([exhibit A][31], [exhibit B][32]).
 
 But, even with this workaround, I couldn't inject the blob into the page. Some websites declare `media-src` in their CSP headers, which blocks media injection (like blobs). Another ~duct tape~ hack had to be applied, with a little help from `chrome.webRequest.onHeadersReceived`.
 
-With this API, the `onHeadersReceived` is called once the page HTTP Headers are received. GIFSane reads them and changes them just a tiny bit: [it adds `blob:` to the CSP `media-src`][33]. After that, the GIFSane content script is able to replace the GIF with the FFmpeg output. I am not sure if this is a reason for security concerns, but it was my only way around it (please, [ping me on Twitter][34] if it is).
+With this API, the `onHeadersReceived` is called once the page HTTP Headers are received. GIFSane reads them and changes them just a tiny bit: [it adds `blob:` to the CSP `media-src`][33]. After that, the GIFSane content script can replace the GIF with the FFmpeg output. I am not sure if this is a reason for security concerns, but it was my only way around it (please, [ping me on Twitter][34] if it is).
 
 ## Final words
 
