@@ -82,7 +82,7 @@ As of January 2022, there is no "pre-packaged" FFMPEG.wasm available with single
 You can build manually by heading to [https://github.com/ffmpegwasm/ffmpeg.wasm-core][21] and following the instructions. Or, you can use GitHub Actions in your favour:
 
 - Fork the project: [https://github.com/ffmpegwasm/ffmpeg.wasm-core][22]
-- Enable the Github Actions (just go to the Actions tab)
+- Enable the GitHub Actions (just go to the Actions tab)
 - Push a dummy commit
 - There should be two workflows running in your Github Actions: go to `Build FFmpeg.wasm (Single Thread)`
 - It will take ages to compile: go make a coffee ☕️
