@@ -1,7 +1,7 @@
 ---
 title: 'GIFs (sane) playback control using WASM and FFmpeg'
 date: '2022-01-20T12:00:00Z'
-description: "Not having playback control on GIFs always annoyed me a bit. I always secretly hoped that one day browsers would support this. This day never arrived, and I decided to take matters into my own hands."
+summary: "Not having playback control on GIFs always annoyed me a bit. I always secretly hoped that one day browsers would support this. This day never arrived, and I decided to take matters into my own hands."
 ---
 
 ![Photo by Stephen Monterroso on Unsplash](./cover.jpg)
