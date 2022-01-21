@@ -4,6 +4,7 @@ theme: 'hugo-PaperMod'
 languageCode: "en-us"
 enableEmoji: true
 paginate: 7
+summaryLength: 100
 params:
   title: Bruno Luiz Silva
   description: A collection of random software engineering thoughts
