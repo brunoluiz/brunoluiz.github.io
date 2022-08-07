@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Blogs on Bruno Luiz Silva</title><link>https://brunoluiz.net/blog/</link><description>Recent content in Blogs on Bruno Luiz Silva</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>2022-01-20</lastBuildDate><atom:link href="https://brunoluiz.net/blog/index.xml" rel="self" type="application/rss+xml"/><item><title>GIFs (sane) playback control using WASM and FFmpeg</title><link>https://brunoluiz.net/blog/2022/jan/gif-sane-playback-control-ffmpegwasm/</link><pubDate>2022-01-20</pubDate><guid>https://brunoluiz.net/blog/2022/jan/gif-sane-playback-control-ffmpegwasm/</guid><description>&lt;p>&lt;img loading="lazy" src="./cover.jpg" alt="Photo by Stephen Monterroso on Unsplash" />
 &lt;/p>
-&lt;!-- raw HTML omitted -->
+&lt;!-- https://unsplash.com/photos/cwcPV_VKfy4 -->
 &lt;p>Animated images in GIF format are around for a long time. They were first released in 1987 by CompuServe. Yep, your maths are correct: they came even before browsers. It was not until Netscape 2.0 that the GIF format was incorporated and conquered the world (&lt;a href="https://www.vox.com/culture/2017/6/15/15802136/gif-turns-30-evolution-internet-history">really&lt;/a>).&lt;/p>
 &lt;p>They are everywhere: from memes to artsy GIFs, they come in all shapes and formats. The software engineering world adopted them for a particular use case: recording tutorials and demos.&lt;/p>
 &lt;p>Markdown probably is to blame here. Embedding a GIF into your Github page, static blog or NPM package, which tend to use Markdown, is the easiest way to embed a &amp;ldquo;video-like&amp;rdquo; component: &lt;code>![](./img.gif)&lt;/code> and all good.&lt;/p>
@@ -35,7 +35,7 @@
 &lt;h3 id="single-threaded-ffmpegwasm-is-possible-">Single-threaded FFmpeg.wasm is possible 🚀&lt;/h3>
 &lt;p>&lt;img loading="lazy" src="./fixing.jpg" alt="Photo by Michael Dziedzic on Unsplash" />
 &lt;/p>
-&lt;!-- raw HTML omitted -->
+&lt;!-- Photo by &lt;a href="https://unsplash.com/@lazycreekimages?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText">Michael Dziedzic&lt;/a> on &lt;a href="https://unsplash.com/s/photos/fix?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText">Unsplash&lt;/a> -->
 &lt;p>On the bright side: WASM applications can be compiled to single-threaded, and FFMPEG.wasm is no different. It removes the need for &lt;code>SharedArrayBuffer&lt;/code> with the only caveat being it will be certainly slower.&lt;/p>
 &lt;p>As of January 2022, there is no &amp;ldquo;pre-packaged&amp;rdquo; FFMPEG.wasm available with single-threaded support. But &lt;a href="https://github.com/jeromewu">@jeromewu&lt;/a> already pushed the required changes to compile it. This means you will need to get your hands a little bit dirty.&lt;/p>
 &lt;p>&lt;strong>Build &lt;code>ffmpeg.wasm-core&lt;/code>&lt;/strong>&lt;/p>
@@ -645,7 +645,7 @@ alias kaf&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74
 &lt;h3 id="create-an-npmjscom-account">Create an npmjs.com account&lt;/h3>
 &lt;p>Before doing anything, an account on &lt;a href="https://npmjs.com">npmjs.com&lt;/a> is required for publishing a package. This is the website for the npm public repository, used when &lt;code>npm install ...&lt;/code> is executed.&lt;/p>
 &lt;p>To create an account, go to the &lt;a href="https://www.npmjs.com/signup">npm signup page&lt;/a> and fill up the form. After finishing the process, a test can be done using &lt;code>npm login&lt;/code> and &lt;code>npm whoami&lt;/code>. Has it output your username? Great! It is working!&lt;/p>
-&lt;!-- raw HTML omitted -->
+&lt;!-- ![](https://cdn-images-1.medium.com/max/1600/1*sUm176ELamVqjUF1GUpiVw.gif) -->
 &lt;h3 id="some-words-about-scopes">Some words about scopes&lt;/h3>
 &lt;p>Scopes are useful in many ways, although not strictly required to publish an npm package. Every user has its own scope, defined as the npm user name.&lt;/p>
 &lt;p>As only the developer/company can publish to its own scope, it is quite useful to indicate it is an official package. For example, one can publish a package called &lt;code>xyz-sdk&lt;/code>, but another called &lt;code>xyz&lt;/code> might already exist. How to know which to install? What if &lt;code>xyz&lt;/code> mimics &lt;code>xyz-sdk&lt;/code>, but with malicious code?&lt;/p>
@@ -672,7 +672,7 @@ alias kaf&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74
 &lt;h3 id="publish-the-package">Publish the package&lt;/h3>
 &lt;p>The basic implementation is done and now is time to deploy it! On the first time, a &lt;code>npm publish --access=public&lt;/code> is required. The &lt;code>access=public&lt;/code> param is needed because scoped are &lt;code>restricted&lt;/code> by default. On following publishings, a &lt;code>npm publish&lt;/code> will do the job.&lt;/p>
 &lt;p>Congratulations! You published your first package on npm. It should be available at &lt;code>https://npmjs.com/package/@your-npm-user/package-name&lt;/code> and ready to be installed through &lt;code>npm install @your-npm-user/package-name&lt;/code>.&lt;/p>
-&lt;!-- raw HTML omitted -->
+&lt;!-- ![](https://cdn-images-1.medium.com/max/1600/1*oltzIY-eP8kDiK7mIlUVIQ.gif) -->
 &lt;p>&lt;img loading="lazy" src="npm_published_module.png" alt="Published package" />
 &lt;/p>
 &lt;h3 id="releasing-new-versions">Releasing new versions&lt;/h3>
@@ -688,7 +688,7 @@ c5af2df chore: add new implementations
 b8571cc &lt;span style="color:#f92672">(&lt;/span>tag: v0.1.0&lt;span style="color:#f92672">)&lt;/span> 0.1.0
 c5bf2ef chore: initial commit
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>There are &lt;a href="https://docs.npmjs.com/cli/version.html">more information about the versioning process here&lt;/a>.&lt;/p>
-&lt;!-- raw HTML omitted -->
+&lt;!-- ![](https://cdn-images-1.medium.com/max/1600/1*gg3mGMbiQMFB7FKQQi8NzQ.gif) -->
 &lt;h3 id="using-in-local-projects-through-linking">Using in local projects through linking&lt;/h3>
 &lt;p>A simple way to test the new shiny package is through &lt;code>npm install&lt;/code>. It will work as expected but, if a change is required, a new version has to be published and the project dependency has to be upgraded to use the new one.&lt;/p>
 &lt;p>This is unproductive, especially when a package is new and changes happen quite often. A way to solve it is through &lt;code>npm link&lt;/code>: it creates a symbolic link inside the project &lt;code>node_modules&lt;/code> folder, replacing the installed version with the local one.&lt;/p>
@@ -1054,7 +1054,7 @@ ITNext&lt;/a>.&lt;/li>
 &lt;/ol>
 &lt;p>If more patches are needed, this process can be repeated on the same version, incrementing only the patch version.&lt;/p>
 &lt;h3 id="what-about-applying-it-to-other-environments">What about applying it to other environments?&lt;/h3>
-&lt;p>This patch probably should be applied to other environments as well, which can be done through &lt;a href="http://think-like-a-git.net/sections/rebase-from-the-ground-up/cherry-picking-explained.html">git cherry-pick&lt;/a> &lt;!-- raw HTML omitted --> . It basically applies the chosen commit to the actual HEAD.&lt;/p>
+&lt;p>This patch probably should be applied to other environments as well, which can be done through &lt;a href="http://think-like-a-git.net/sections/rebase-from-the-ground-up/cherry-picking-explained.html">git cherry-pick&lt;/a> &lt;commit-hash> . It basically applies the chosen commit to the actual HEAD.&lt;/p>
 &lt;ol>
 &lt;li>
 &lt;p>Checkout to the environment version tag &lt;code>git checkout v0.13.0&lt;/code>&lt;/p>
