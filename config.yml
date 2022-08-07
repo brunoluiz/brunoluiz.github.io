@@ -24,3 +24,4 @@ params:
     - name: "linkedin"
       url: "https://uk.linkedin.com/in/brnluiz"
   ShowReadingTime: true
+  ShowPostNavLinks: true
