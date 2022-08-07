@@ -25,3 +25,7 @@ params:
       url: "https://uk.linkedin.com/in/brnluiz"
   ShowReadingTime: true
   ShowPostNavLinks: true
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
