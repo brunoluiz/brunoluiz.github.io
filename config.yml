@@ -9,7 +9,7 @@ params:
   title: Bruno Luiz Silva
   description: A collection of random software engineering thoughts
   images:
-  - android-chrome-512x512.png
+  - cover.jpg
   defaultTheme: 'auto'
   homeInfoParams:
     Title: 👨‍💻 Bruno Luiz Silva
