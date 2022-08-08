@@ -1,7 +1,9 @@
 ---
-title: 'ImageWand: private-first image conversion experiment with Golang & WASM'
+title: 'ImageWand: privacy-first image conversion experiment with Golang & WASM'
 date: '2022-08-07T12:00:00Z'
 summary: "After my experiment with GIFSane, one thing was clear: WASM shines when we think about complex applications (eg: media manipulation), usually performing better or opening more opportunities than JavaScript. It is finally time to try to create something from scratch, using Golang WASM toolchain"
+aliases:
+  - /blog/2022/aug/imagewand-private-first-image-conversion-experiment-with-golang-and-wasm/
 ---
 
 [![Photo by Mark Tegethoff on Unsplash](./cover.jpg)](https://unsplash.com/photos/NbgQfUvKFE0)
