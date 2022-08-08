@@ -1,4 +1,204 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Tags on Bruno Luiz Silva</title><link>https://brunoluiz.net/tags/</link><description>Recent content in Tags on Bruno Luiz Silva</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://brunoluiz.net/tags/index.xml" rel="self" type="application/rss+xml"/><item><title>GIFs (sane) playback control using WASM and FFmpeg</title><link>https://brunoluiz.net/blog/2022/jan/gif-sane-playback-control-ffmpegwasm/</link><pubDate>2022-01-20</pubDate><guid>https://brunoluiz.net/blog/2022/jan/gif-sane-playback-control-ffmpegwasm/</guid><description>&lt;p>&lt;img loading="lazy" src="./cover.jpg" alt="Photo by Stephen Monterroso on Unsplash" />
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Tags on Bruno Luiz Silva</title><link>https://brunoluiz.net/tags/</link><description>Recent content in Tags on Bruno Luiz Silva</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://brunoluiz.net/tags/index.xml" rel="self" type="application/rss+xml"/><item><title>ImageWand: private-first image conversion experiment with Golang &amp; WASM</title><link>https://brunoluiz.net/blog/2022/aug/imagewand-private-first-image-conversion-experiment-with-golang-and-wasm/</link><pubDate>2022-07-07</pubDate><guid>https://brunoluiz.net/blog/2022/aug/imagewand-private-first-image-conversion-experiment-with-golang-and-wasm/</guid><description>&lt;p>&lt;a href="https://unsplash.com/photos/NbgQfUvKFE0">&lt;img loading="lazy" src="./cover.jpg" alt="Photo by Mark Tegethoff on Unsplash" />
+&lt;/a>&lt;/p>
+&lt;p>At the beginning of the year, I was curious about WebAssembly (WASM). &lt;a href="https://brunoluiz.net/blog/2022/jan/gif-sane-playback-control-ffmpegwasm/">The result was GIFSane&lt;/a>, but that was not enough: &lt;a href="https://github.com/ffmpegwasm/ffmpeg.wasm">FFMpeg.wasm&lt;/a> was already pre-compiled, and I only had to sort out how to use it within an extension. One thing was clear though: WASM shines when we think about complex applications (eg: media manipulation), usually performing better or opening more opportunities than JavaScript.&lt;/p>
+&lt;p>I&amp;rsquo;ve moved houses quite recently. It meant manipulating tons of documents, converting to different formats, resizing etc. Mac&amp;rsquo;s Preview app can handle it, but many might rely on browsers due to the first search results for &amp;ldquo;Convert image format1 format2&amp;rdquo;. Seriously, look at these Google results.&lt;/p>
+&lt;p>&lt;img loading="lazy" src="./01-google-search.png" alt="Google results for &amp;amp;lsquo;convert image&amp;amp;rsquo;" />
+&lt;/p>
+&lt;p>When someone is converting a puppy image from JPG to PDF this might be ok. But after hearing that my family used these sites to convert documents like Passports, I got scared. Most people don&amp;rsquo;t realise that these files go to a server, and they can be stored for whatever reason and for an indefinite time. &amp;ldquo;Identity theft&amp;rdquo; sends its regards 😅&lt;/p>
+&lt;p>What if there was some website to convert images locally, without requiring a server? What if the technology for that already exists? That is when I started developing &lt;a href="https://imagewand.concordalabs.com/">ImageWand&lt;/a> (&lt;a href="https://github.com/brunoluiz/imagewand">source&lt;/a>).&lt;/p>
+&lt;h2 id="converting-your-images-locally-and-privately-imagewand">Converting your images locally and privately: ImageWand&lt;/h2>
+&lt;p>ImageWand converts images locally using WASM and Golang. In the future, it could potentially resize and compress images, but I tried to keep it simple by only using standard libraries encoders and decoders (no PDF for now).&lt;/p>
+&lt;p>It seems that Rust would have been a more solid choice for WASM, but I would have to learn it to develop this project. Rust is famous for its &lt;a href="https://users.rust-lang.org/t/making-rust-easy-to-learn-and-use/65866/3">steep learning curve&lt;/a> and, to keep things simple and focused, I went with Golang.&lt;/p>
+&lt;p>&lt;img loading="lazy" src="./02-imagewand.png" alt="ImageWand main page" />
+&lt;/p>
+&lt;center>
+&lt;small>Less is more, although I guess the application could benefit of more features 😅&lt;/small>
+&lt;/center>
+&lt;h2 id="the-building-experience">The building experience&lt;/h2>
+&lt;p>Golang offers some standard libraries for image manipulation (&lt;a href="https://pkg.go.dev/image">&lt;code>image&lt;/code> package&lt;/a>). Implementing something to convert A to B wasn&amp;rsquo;t the hard part. &lt;a href="https://github.com/brunoluiz/imagewand/blob/v1.0.0/imagewand.go">The conversion logic was extracted and re-used&lt;/a> in both CLI and WASM implementations, which is impressive in terms of portability.&lt;/p>
+&lt;h3 id="covering-the-basics-interfacing-with-user-input">Covering the basics: interfacing with user input&lt;/h3>
+&lt;p>In a CLI, the application can receive user input through flags or arguments. In WASM, things are a bit peculiar as inputs have to come from JavaScript into Golang.&lt;/p>
+&lt;p>You can instantiate and load the WASM binary for every call, similar to a CLI call, but it would be an expensive operation. The best way is to run it in the background (&lt;a href="https://github.com/brunoluiz/imagewand/blob/v1.0.0/cmd/wasm/main.go#L54">observe the use of a channel to keep it running&lt;/a>) while developers call it through a JavaScript interface.&lt;/p>
+&lt;p>In Golang, this is done by &lt;a href="https://github.com/brunoluiz/imagewand/blob/v1.0.0/cmd/wasm/main.go#L51-L53">exposing global JavaScript objects/functions within &lt;code>main()&lt;/code>&lt;/a>. It is not great as it might conflict with other variables and it pollutes the global scope. Other WASM implementations (Rust or TinyGo+WASI) &lt;a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WebAssembly/Instance/exports">expose methods by exporting them&lt;/a> in the WASM instance, which is cleaner than relying on global variables.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#66d9ef">func&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>() {
+&lt;span style="color:#a6e22e">fmt&lt;/span>.&lt;span style="color:#a6e22e">Println&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;Starting ImageWand 🪄&amp;#34;&lt;/span>)
+&lt;span style="color:#a6e22e">js&lt;/span>.&lt;span style="color:#a6e22e">Global&lt;/span>().&lt;span style="color:#a6e22e">Set&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;wand&amp;#34;&lt;/span>, &lt;span style="color:#66d9ef">map&lt;/span>[&lt;span style="color:#66d9ef">string&lt;/span>]&lt;span style="color:#66d9ef">interface&lt;/span>{}{
+&lt;span style="color:#e6db74">&amp;#34;convertFromURL&amp;#34;&lt;/span>: &lt;span style="color:#a6e22e">convertFromURL&lt;/span>(),
+&lt;span style="color:#e6db74">&amp;#34;convertFromBlob&amp;#34;&lt;/span>: &lt;span style="color:#a6e22e">convertFromBlob&lt;/span>(),
+})
+&lt;span style="color:#f92672">&amp;lt;-&lt;/span>make(&lt;span style="color:#66d9ef">chan&lt;/span> &lt;span style="color:#66d9ef">bool&lt;/span>)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="interacting-with-javascript-land">Interacting with &amp;ldquo;JavaScript-land&amp;rdquo;&lt;/h3>
+&lt;p>To declare and interact with JavaScript in Golang runtime, developers rely on &lt;a href="https://pkg.go.dev/syscall/js">&lt;code>syscall/js&lt;/code>&lt;/a>. This package allows the application to create functions, read values from JS objects (DOM and non-DOM) and interface byte arrays with JS values (specifically: &lt;code>UInt8Array&lt;/code>). The only caveat is the following, been present since its release on Golang 1.11.&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;em>This package is EXPERIMENTAL. Its current scope is only to allow tests to run, but not yet to provide a comprehensive API for users. It is exempt from the Go compatibility promise.&lt;/em>&lt;/p>
+&lt;/blockquote>
+&lt;p>Although it allows all sorts of interactions with JavaScript, in my limited experience with it, I would recommend developers to only use it to interface user inputs between Golang and the JavaScript runtime.&lt;/p>
+&lt;p>If you want to manipulate DOM or create elaborate objects through Golang, you might be in a world of pain. Not only there are no typing guarantees, but the tooling for those is just not there. ImageWand only uses it to gather user input to call &lt;code>imagewand&lt;/code> conversion functions, essentially a glue between the UI and Golang.&lt;/p>
+&lt;p>I&amp;rsquo;ve &lt;a href="https://github.com/brunoluiz/imagewand/blob/main/jasm/wasm.go">created an internal package (jasm)&lt;/a> with a few helper functions to interface with JavaScript values. &lt;a href="https://github.com/brunoluiz/imagewand/blob/main/cmd/wasm/main.go#L20-L48">It made &lt;code>wasm/main.go&lt;/code> way cleaner&lt;/a>, but certainly the most important of all is the &lt;code>Await&lt;/code> method.&lt;/p>
+&lt;h3 id="golang-and-javascript-promises">Golang and JavaScript promises&lt;/h3>
+&lt;p>JavaScript applications are single-threaded and leverage an event-loop strategy. Certain tasks might cause it to block, such as disk or network operations. JavaScript can schedule these operations by spinning processes off the event-loop, without blocking the main thread. A common way of doing&lt;a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises"> it is through Promises&lt;/a>.&lt;/p>
+&lt;p>Golang HTTP calls are &lt;a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API">using JavaScript&amp;rsquo;s &lt;code>fetch&lt;/code>&lt;/a> under the hood, for example. This results in a blocking operation (network call), which needs to be handled properly. Using &lt;code>net/http&lt;/code> functions incorrectly will result in a runtime deadlock error. It is a common mistake, been even pointed out on the &lt;a href="https://pkg.go.dev/syscall/js#FuncOf">&lt;code>syscall/js.FuncOf&lt;/code> documentation&lt;/a>:&lt;/p>
+&lt;blockquote>
+&lt;p>Invoking the wrapped Go function from JavaScript will pause the event loop and spawn a new goroutine. Other wrapped functions which are triggered during a call from Go to JavaScript get executed on the same goroutine.&lt;/p>
+&lt;p>As a consequence, if one wrapped function blocks, JavaScript&amp;rsquo;s event loop is blocked until that function returns. &lt;strong>Hence, calling any async JavaScript API, which requires the event loop, like fetch (http.Client), will cause an immediate deadlock. Therefore a blocking function should explicitly start a new goroutine.&lt;/strong>&lt;/p>
+&lt;/blockquote>
+&lt;p>Starting goroutine solves event loop blocking. Image processing would definetely be a blocking operation and definitely be spun up in a goroutine. But, JavaScript doesn&amp;rsquo;t &amp;ldquo;understand&amp;rdquo; them, and the application needs to signal JavaScript runtime to wait for its results. The easiest way is to create a &lt;code>Promise&lt;/code> through &lt;code>syscall/js&lt;/code> and call &lt;code>resolve()&lt;/code> through the goroutine.&lt;/p>
+&lt;p>As it is a bit of a long piece of code, abstraction is vital. In ImageWand, this is dealt with through &lt;a href="https://github.com/brunoluiz/imagewand/blob/main/jasm/wasm.go#L37-L57">the jasm.Await function&lt;/a>.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#66d9ef">func&lt;/span> &lt;span style="color:#a6e22e">Await&lt;/span>(&lt;span style="color:#a6e22e">cb&lt;/span> &lt;span style="color:#66d9ef">func&lt;/span>() (&lt;span style="color:#a6e22e">js&lt;/span>.&lt;span style="color:#a6e22e">Value&lt;/span>, &lt;span style="color:#66d9ef">error&lt;/span>)) &lt;span style="color:#a6e22e">js&lt;/span>.&lt;span style="color:#a6e22e">Value&lt;/span> {
+&lt;span style="color:#a6e22e">handler&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> &lt;span style="color:#a6e22e">js&lt;/span>.&lt;span style="color:#a6e22e">FuncOf&lt;/span>(&lt;span style="color:#66d9ef">func&lt;/span>(&lt;span style="color:#a6e22e">this&lt;/span> &lt;span style="color:#a6e22e">js&lt;/span>.&lt;span style="color:#a6e22e">Value&lt;/span>, &lt;span style="color:#a6e22e">args&lt;/span> []&lt;span style="color:#a6e22e">js&lt;/span>.&lt;span style="color:#a6e22e">Value&lt;/span>) &lt;span style="color:#66d9ef">interface&lt;/span>{} {
+&lt;span style="color:#a6e22e">resolve&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> &lt;span style="color:#a6e22e">args&lt;/span>[&lt;span style="color:#ae81ff">0&lt;/span>]
+&lt;span style="color:#a6e22e">reject&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> &lt;span style="color:#a6e22e">args&lt;/span>[&lt;span style="color:#ae81ff">1&lt;/span>]
+&lt;span style="color:#75715e">// This would be the function I want to deal with
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">go&lt;/span> &lt;span style="color:#66d9ef">func&lt;/span>() {
+&lt;span style="color:#a6e22e">res&lt;/span>, &lt;span style="color:#a6e22e">err&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> &lt;span style="color:#a6e22e">cb&lt;/span>()
+&lt;span style="color:#66d9ef">if&lt;/span> &lt;span style="color:#a6e22e">err&lt;/span> &lt;span style="color:#f92672">!=&lt;/span> &lt;span style="color:#66d9ef">nil&lt;/span> {
+&lt;span style="color:#a6e22e">reject&lt;/span>.&lt;span style="color:#a6e22e">Invoke&lt;/span>(&lt;span style="color:#a6e22e">Error&lt;/span>(&lt;span style="color:#a6e22e">err&lt;/span>))
+&lt;span style="color:#66d9ef">return&lt;/span>
+}
+&lt;span style="color:#a6e22e">resolve&lt;/span>.&lt;span style="color:#a6e22e">Invoke&lt;/span>(&lt;span style="color:#a6e22e">res&lt;/span>)
+}()
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">nil&lt;/span>
+})
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#a6e22e">promiseJS&lt;/span>.&lt;span style="color:#a6e22e">New&lt;/span>(&lt;span style="color:#a6e22e">handler&lt;/span>)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>This way, any blocking operation can be created as a promise by wrapping it through this. There is a pull request open at &lt;code>golang/go&lt;/code> &lt;a href="https://github.com/golang/go/pull/52581">that implements a better version of this snippet&lt;/a>, perhaps landing in a future version of Go.&lt;/p>
+&lt;h2 id="optimisations">Optimisations&lt;/h2>
+&lt;p>Once the proof of concept was up and running, there was a problem: binary size. At this point, building without any optimisation generated a 3.2Mb binary. Not ideal for mobile usage.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-shell" data-lang="shell">GOOS&lt;span style="color:#f92672">=&lt;/span>js GOARCH&lt;span style="color:#f92672">=&lt;/span>wasm go build -o ./app/wasm/main-go.wasm ./cmd/wasm
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The first optimisation one can do is to disable the injection of debugging information on build time through &lt;code>ldflags&lt;/code>. For ImageWand, it reduced the binary to 3.1Mb (2%). Although quite low effort, it doesn&amp;rsquo;t help much.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-shell" data-lang="shell">GOOS&lt;span style="color:#f92672">=&lt;/span>js GOARCH&lt;span style="color:#f92672">=&lt;/span>wasm go build -o ./app/wasm/main-go-optimal.wasm -ldflags&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;-s -w&amp;#34;&lt;/span> ./cmd/wasm
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Tools like &lt;a href="https://rustwasm.github.io/twiggy/">&lt;code>twiggy&lt;/code> can help analyse the binary size&lt;/a> as well. There wasn&amp;rsquo;t much to tweak in this case, but I recommend giving it a try. The one that everyone recommends though, regardless of language, is &lt;code>wasm-opt&lt;/code> from the &lt;a href="http://webassembly.github.io/binaryen/">&lt;code>binaryen&lt;/code> toolchain&lt;/a>.&lt;/p>
+&lt;p>It allows many optimisations, but it requires a bit of tweaking per-project basis. After playing around with it, the previous optimised binary with &lt;code>-Oz&lt;/code> produced the best results: a 2.9Mb binary, a 7% reduction compared to the original binary.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-shell" data-lang="shell">wasm-opt -Oz -o ./app/wasm/main-go-optimal-binaryen.wasm ./app/wasm/main-go-optimal.wasm
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>With Golang compiler, this is as far as I could go with optimisations. Even considering Gzip, it didn&amp;rsquo;t look great. It is not rare to find websites reaching 1Mb nowadays but, for such a simple project, 2.9Mb is unacceptable.&lt;/p>
+&lt;p>&lt;img loading="lazy" src="./03-benchmark-go.png" alt="Go binary sizes" />
+&lt;/p>
+&lt;center>
+&lt;small>Binary size per optimisation: no excessive gains, but still something&lt;/small>
+&lt;/center>
+&lt;h2 id="tinygo-a-better-compiler-for-wasm">TinyGo: a better compiler for WASM?&lt;/h2>
+&lt;p>I heard about &lt;a href="https://tinygo.org/">TinyGo&lt;/a> sometime ago. With the slogan &amp;ldquo;A Go Compiler For Small Places&amp;rdquo; and a focus on embedded systems, I never got on the hype train. It is a subset of the Golang language, which means &lt;a href="https://tinygo.org/docs/reference/lang-support/">there are some limitations&lt;/a> and not all packages will work on it, even the &lt;a href="https://tinygo.org/docs/reference/lang-support/stdlib/">ones in the standard library&lt;/a>. This means it is not exactly a drop-in for all scenarios.&lt;/p>
+&lt;p>But, besides embedded systems, it seems to be a quite popular WASM compiler. The binaries produced, being a subset and focused on &amp;ldquo;small places&amp;rdquo;, are quite small. Taking into consideration the supported packages and limitations, it seemed a good candidate for ImageWand.&lt;/p>
+&lt;h3 id="almost-a-drop-in-replacement">Almost a drop-in replacement&lt;/h3>
+&lt;p>The first thing I tried was to compile the program using TinyGo, without any changes. It worked incredibly well, and the binary size dropped from ~3.2Mb to ~1.5Mb. Quite an improvement, especially when the WASM target is a web browser.&lt;/p>
+&lt;p>This was until I checked the console. Using &lt;code>.String()&lt;/code> to get values from &lt;code>syscall/js.Value&lt;/code> has not been implemented. Seemingly, ImageWand hit a TinyGo limitation and a hack around would be required.&lt;/p>
+&lt;br/>
+&lt;p>&lt;img loading="lazy" src="./04-tinygo-error.png" alt="TinyGo error" />
+&lt;br/>&lt;/p>
+&lt;p>&lt;a href="https://github.com/tinygo-org/tinygo/issues/1140">There are some hacks for it&lt;/a>, but they all have some memory leak issues. As the surface between the program functionality and &lt;code>syscall/js&lt;/code> is quite limited, &lt;a href="https://github.com/brunoluiz/imagewand/commit/4860cb4c757c0ad859912047eb145798d47ff434">changing those into &lt;code>int&lt;/code> seemed a better solution (without any caveat)&lt;/a>.&lt;/p>
+&lt;p>Besides this, anyone attempting to move from Golang to TinyGo has to replace&lt;a href="https://github.com/tinygo-org/tinygo/blob/release/targets/wasm_exec.js"> &lt;code>wasm_exec.js&lt;/code>&lt;/a>. &lt;a href="https://tinygo.org/docs/guides/webassembly/#how-it-works">According to the documentation&lt;/a>, it is based on the Go&amp;rsquo;s one, but with a couple of changes that make it incompatible. Nothing major and super easy to tackle.&lt;/p>
+&lt;p>Once tweaked, ImageWand was successfully compiled using TinyGo, without any error messages in runtime and a binary twice the original size (1.5Mb). Smells like progress!&lt;/p>
+&lt;h3 id="tinygo-after-optimisations">TinyGo after optimisations&lt;/h3>
+&lt;p>Similar to Golang, the TinyGo compiler &lt;a href="https://tinygo.org/docs/reference/usage/important-options/">allows tweaks&lt;/a> according to project requirements. Considering this will be distributed on the web, optimisations related to size are important. Some might prefer performance tweaks, which are available as well.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-shell" data-lang="shell">tinygo build -o app/wasm/main-tinygo-optimal.wasm -target wasm -no-debug -gc leaking ./cmd/wasm
+wasm-opt -Oz -o ./app/wasm/main-tinygo-optimal-binaryen.wasm ./app/wasm/main-tinygo-optimal.wasm
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>As in Golang though, &lt;code>wasm-opt&lt;/code> did not result in a massive gain, but it is still something.&lt;/p>
+&lt;p>&lt;img loading="lazy" src="./05-benchmark-tinygo.png" alt="TinyGo binary sizes" />
+&lt;/p>
+&lt;center>
+&lt;small>TinyGo binary size per optimisation: drastic improvements when applying optimisations&lt;/small>
+&lt;/center>
+&lt;br/>
+&lt;p>&lt;img loading="lazy" src="./06-benchmark-all.png" alt="TinyGo &amp;#43; Go binary sizes" />
+&lt;/p>
+&lt;center>
+&lt;small>Full binary size comparison from Golang to Tinygo + optimisations&lt;/small>
+&lt;/center>
+&lt;br/>
+&lt;p>If your implementation is compatible with TinyGo and you don&amp;rsquo;t fall into an edge case, go for it! It provides plenty of features, and it seems a good choice in terms of binary size, especially considering web distribution.&lt;/p>
+&lt;h3 id="wasi-interesting-but-not-mature-enough-on-tinygo">WASI: interesting but not mature enough on TinyGo&lt;/h3>
+&lt;p>At this point, ImageWand was working and it was not a large binary: I could call it a day. But, there was still one thing that I wanted to try out: &lt;a href="https://github.com/bytecodealliance/wasmtime/blob/main/docs/WASI-overview.md">WASI&lt;/a>.&lt;/p>
+&lt;blockquote>
+&lt;p>WASI stands for WebAssembly System Interface. It&amp;rsquo;s an API designed by the Wasmtime project that provides access to several operating-system-like features, including files and filesystems, Berkeley sockets, clocks, and random numbers, that we&amp;rsquo;ll be proposing for standardisation.&lt;/p>
+&lt;p>&lt;strong>It&amp;rsquo;s designed to be independent of browsers, so it doesn&amp;rsquo;t depend on Web APIs or JS, and isn&amp;rsquo;t limited by the need to be compatible with JS&lt;/strong>. And it has integrated capability-based security, so it extends WebAssembly&amp;rsquo;s characteristic sandboxing to include I/O.&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;small>ℹ️ &lt;a href="https://hacks.mozilla.org/2019/03/standardizing-wasi-a-webassembly-system-interface/">There is an interesting article from MDN&lt;/a> about the subject – It is something I definitely want to dive deeper into in the future&lt;/small>&lt;/p>
+&lt;p>ImageWand was relying on &lt;code>syscall/js&lt;/code> to interface with user input, which depends on JavaScript APIs, and it wouldn&amp;rsquo;t run in any other runtime besides the browser. Binaries compiled into the WASI standard though can be run anywhere that implements its specification: browser, terminal or within other backends (serverless function with NodeJS running Golang WASI bins). Yes, &amp;ldquo;Build once, run everywhere&amp;rdquo; &lt;del>Java&lt;/del> vibes.&lt;/p>
+&lt;p>TinyGo supports WASI. This means &lt;code>syscall/js&lt;/code> is not required if you don&amp;rsquo;t want to manipulate the DOM, which would have made ImageWand code simpler, becoming just an exported Golang function… But, there are a couple of limitations when implementing WASI programs with TinyGo:&lt;/p>
+&lt;ol>
+&lt;li>&lt;a href="https://tinygo.org/docs/concepts/compiler-internals/calling-convention/#:~:text=The%20WebAssembly%20target%20does%20not%20return%20variables%20directly%20that%20cannot%20be%20handled%20by%20JavaScript%20(see%20above%20about%20i64%2C%20also%20struct%2C%20i64%2C%20multiple%20return%20values%2C%20etc).%20Instead%2C%20they%20are%20stored%20into%20a%20pointer%20passed%20as%20the%20first%20parameter%20by%20the%20caller.">Function arguments and outputs can only be numbers or pointers, which are essentially numbers with a memory address&lt;/a>.&lt;/li>
+&lt;li>&lt;a href="https://github.com/tinygo-org/tinygo/issues/3010#issuecomment-1191916589">There is no proper support for multi-return, so no easy &lt;code>(someType, error)&lt;/code>&lt;/a> without some hacks.&lt;/li>
+&lt;li>Lacking documentation and helper methods to operate on top of shared WASM memory (&lt;a href="https://github.com/tinygo-org/tinygo/issues/3040">I&amp;rsquo;ve opened a ticket around documentation&lt;/a>).&lt;/li>
+&lt;/ol>
+&lt;p>ImageWand was passing a slice of &lt;code>byte&lt;/code> with the image content, which was the simplest way to get this working (don&amp;rsquo;t io.Reader me: it is not as simple). To pass the image input and receive the output in &lt;code>[]byte&lt;/code>, you need to use JavaScript and WASM shared memory space, pointers and all sort of low-level magic.&lt;/p>
+&lt;p>Checking Github, it seems many people came across the issue of passing non-numeric values or returning multiple values, and every developer has a different solution to it &lt;a href="https://github.com/tinygo-org/tinygo/issues/2512#issuecomment-1011399751">[1]&lt;/a> &lt;a href="https://github.com/tinygo-org/tinygo/issues/1824">[2]&lt;/a>.&lt;a href="https://github.com/brunoluiz/imagewand/pull/4"> Eventually, I came up with my way of dealing with this&lt;/a>, but it is quite ugly and probably not efficient at all. Most likely I should have used &lt;a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WebAssembly/Memory">&lt;code>WebAssembly.memory.buffer&lt;/code>&lt;/a>, but I couldn&amp;rsquo;t find an easy way of doing so. Besides, WASI was an extra in this whole experiment and, at this point, I had invested a long time cracking my head to have at least something minimal working.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-js" data-lang="js">&lt;span style="color:#75715e">// JavaScript code
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">new&lt;/span> &lt;span style="color:#a6e22e">Uint8Array&lt;/span>(&lt;span style="color:#a6e22e">buf&lt;/span>).&lt;span style="color:#a6e22e">forEach&lt;/span>((&lt;span style="color:#a6e22e">b&lt;/span>) =&amp;gt; &lt;span style="color:#a6e22e">imagewand&lt;/span>.&lt;span style="color:#a6e22e">appendToBuffer&lt;/span>(&lt;span style="color:#a6e22e">b&lt;/span>));
+&lt;span style="color:#a6e22e">await&lt;/span> &lt;span style="color:#a6e22e">imagewand&lt;/span>.&lt;span style="color:#a6e22e">convertFromBlob&lt;/span>(&lt;span style="color:#a6e22e">formatToNumber&lt;/span>(&lt;span style="color:#a6e22e">format&lt;/span>));
+&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">outputSize&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">imagewand&lt;/span>.&lt;span style="color:#a6e22e">getOutputSize&lt;/span>();
+&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">arrayBuffer&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">new&lt;/span> &lt;span style="color:#a6e22e">Uint8Array&lt;/span>(&lt;span style="color:#a6e22e">outputSize&lt;/span>);
+&lt;span style="color:#66d9ef">for&lt;/span> (&lt;span style="color:#66d9ef">let&lt;/span> &lt;span style="color:#a6e22e">i&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>; &lt;span style="color:#a6e22e">i&lt;/span> &lt;span style="color:#f92672">&amp;lt;&lt;/span> &lt;span style="color:#a6e22e">outputSize&lt;/span>; &lt;span style="color:#a6e22e">i&lt;/span>&lt;span style="color:#f92672">++&lt;/span>) {
+&lt;span style="color:#a6e22e">arrayBuffer&lt;/span>[&lt;span style="color:#a6e22e">i&lt;/span>] &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">imagewand&lt;/span>.&lt;span style="color:#a6e22e">getOutputAtPos&lt;/span>(&lt;span style="color:#a6e22e">i&lt;/span>);
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#75715e">// Golang code
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">type&lt;/span> &lt;span style="color:#a6e22e">image&lt;/span> []&lt;span style="color:#66d9ef">byte&lt;/span>
+&lt;span style="color:#66d9ef">var&lt;/span> &lt;span style="color:#a6e22e">input&lt;/span> &lt;span style="color:#a6e22e">image&lt;/span>;
+&lt;span style="color:#66d9ef">var&lt;/span> &lt;span style="color:#a6e22e">output&lt;/span> &lt;span style="color:#a6e22e">image&lt;/span>;
+&lt;span style="color:#75715e">//export appendToBuffer
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">func&lt;/span> &lt;span style="color:#a6e22e">appendToBuffer&lt;/span>(&lt;span style="color:#a6e22e">i&lt;/span> &lt;span style="color:#66d9ef">byte&lt;/span>) {
+&lt;span style="color:#a6e22e">input&lt;/span> = append(&lt;span style="color:#a6e22e">input&lt;/span>, &lt;span style="color:#a6e22e">i&lt;/span>)
+}
+&lt;span style="color:#75715e">//export getOutputSize
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">func&lt;/span> &lt;span style="color:#a6e22e">getOutputSize&lt;/span>() &lt;span style="color:#66d9ef">int&lt;/span> {
+&lt;span style="color:#66d9ef">return&lt;/span> len(&lt;span style="color:#a6e22e">output&lt;/span>)
+}
+&lt;span style="color:#75715e">//export getOutputAtPos
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">func&lt;/span> &lt;span style="color:#a6e22e">getOutputAtPos&lt;/span>(&lt;span style="color:#a6e22e">i&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span>) &lt;span style="color:#66d9ef">byte&lt;/span> {
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#a6e22e">output&lt;/span>[&lt;span style="color:#a6e22e">i&lt;/span>]
+}
+&lt;span style="color:#75715e">// Other stuff
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>
+&lt;span style="color:#75715e">//export convertFromBlob
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">func&lt;/span> &lt;span style="color:#a6e22e">convertFromBlob&lt;/span>(&lt;span style="color:#a6e22e">format&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span>) {
+&lt;span style="color:#a6e22e">img&lt;/span>, &lt;span style="color:#a6e22e">err&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> &lt;span style="color:#a6e22e">imagewand&lt;/span>.&lt;span style="color:#a6e22e">New&lt;/span>(&lt;span style="color:#a6e22e">bytes&lt;/span>.&lt;span style="color:#a6e22e">NewBuffer&lt;/span>(&lt;span style="color:#a6e22e">input&lt;/span>))
+&lt;span style="color:#66d9ef">if&lt;/span> &lt;span style="color:#a6e22e">err&lt;/span> &lt;span style="color:#f92672">!=&lt;/span> &lt;span style="color:#66d9ef">nil&lt;/span> {
+panic(&lt;span style="color:#a6e22e">err&lt;/span>)
+}
+&lt;span style="color:#a6e22e">f&lt;/span>, &lt;span style="color:#a6e22e">ok&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> &lt;span style="color:#a6e22e">fileFormatFromInt&lt;/span>[&lt;span style="color:#a6e22e">format&lt;/span>]
+&lt;span style="color:#66d9ef">if&lt;/span> !&lt;span style="color:#a6e22e">ok&lt;/span> {
+panic(&lt;span style="color:#e6db74">&amp;#34;format not supported&amp;#34;&lt;/span>)
+}
+&lt;span style="color:#a6e22e">b&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> &lt;span style="color:#a6e22e">bytes&lt;/span>.&lt;span style="color:#a6e22e">NewBuffer&lt;/span>([]&lt;span style="color:#66d9ef">byte&lt;/span>{})
+&lt;span style="color:#66d9ef">if&lt;/span> &lt;span style="color:#a6e22e">err&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> &lt;span style="color:#a6e22e">img&lt;/span>.&lt;span style="color:#a6e22e">Convert&lt;/span>(&lt;span style="color:#a6e22e">b&lt;/span>, &lt;span style="color:#a6e22e">f&lt;/span>); &lt;span style="color:#a6e22e">err&lt;/span> &lt;span style="color:#f92672">!=&lt;/span> &lt;span style="color:#66d9ef">nil&lt;/span> {
+panic(&lt;span style="color:#a6e22e">err&lt;/span>)
+}
+&lt;span style="color:#a6e22e">output&lt;/span> = &lt;span style="color:#a6e22e">b&lt;/span>.&lt;span style="color:#a6e22e">Bytes&lt;/span>()
+&lt;span style="color:#a6e22e">input&lt;/span> = []&lt;span style="color:#66d9ef">byte&lt;/span>{}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>These limitations and lack of documentation around WASI, workarounds and common examples for TinyGo make it quite hard to abandon &lt;code>syscall/js&lt;/code> for browser apps or use it for non-JS WASM applications. Although I managed to make it work, I wouldn&amp;rsquo;t recommend someone to drop &lt;code>syscall/js&lt;/code> in favour of WASI TinyGo for browser applications at the moment, only if the person wants to deep dive and study its details. If you decide to do so, please help the community by adding examples, tutorials and documentation to the official project page.&lt;/p>
+&lt;h2 id="conclusions-on-using-golang-with-wasm">Conclusions on using Golang with WASM&lt;/h2>
+&lt;p>Being able to re-use and compile Golang code into WASM is exciting. Besides, for those used to Golang as their daily driver, it might be a natural choice when considering complex applications.&lt;/p>
+&lt;p>In general, I always recommend Golang due its tooling. But, for WASM, my experience was quite bumpy:&lt;/p>
+&lt;ul>
+&lt;li>The final binary size using Golang toolchain (around 3.2Mb) might be OK for the backend but not for frontend apps. This adds up when considering network outbound costs or slow mobile connections.&lt;/li>
+&lt;li>TinyGo is an amazing alternative, but you might fall into edge-cases or unsupported features. This is quite an annoyance but, if you manage to get your way around it, it is probably the perfect choice for your Golang WASM project.&lt;/li>
+&lt;li>CI pipelines will get more complex as Golang/TinyGo tooling needs to be handled, and &lt;a href="https://github.com/brunoluiz/imagewand/blob/v1.0.0/.github/workflows/deploy.yaml">extra build steps are required&lt;/a>. Not that JavaScript toolchain is not complex by itself already.&lt;/li>
+&lt;li>The use of &lt;code>syscall/js&lt;/code> is quite cumbersome and unsafe, but mostly because of the JavaScript nature.&lt;/li>
+&lt;li>Dealing with DOM elements is possible, but changing UI elements is quite a painful and complex task. Try to limit its use only as glue.&lt;/li>
+&lt;li>Golang WASM is an independent and experimental port. &lt;a href="https://github.com/golang/go/issues/53383">There are discussions on how to deal with such ports&lt;/a>, but it is something to bear in mind. Besides, as it is still not a stable API, it might change at any point (although it never changed since its release).&lt;/li>
+&lt;li>WASI support is Golang does not exist at the moment, and TinyGo is not the most ergonomic in terms of WASI development, with a lack of documentation and examples. This can be mostly due to the WASI specification, as it is still in progress, but things like &lt;code>wasm-bindgen&lt;/code> for Rust prove that it could be somehow possible.&lt;/li>
+&lt;/ul>
+&lt;p>Would I choose Golang for a WASM project? If I had to develop something quickly or the people involved are used to Golang, definitely yes (TinyGo, to be fair). But I feel it is not the best choice in terms of features, documentation, toolchain and support. C/C++ and Rust seem to lead the way.&lt;/p>
+&lt;p>I never programmed with Rust before, but considering its support to WASM and some other interesting use cases I have in mind, it is perhaps a sign that I should finally try to learn it.&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://imagewand.concordalabs.com">🔗 ImageWand project page&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/brunoluiz/imagewand">💾 ImageWand source code&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://twitter.com/brunoluiz">💬 Reach me on Twitter @ brunoluiz&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="references">References&lt;/h2>
+&lt;ol>
+&lt;li>&lt;a href="https://withblue.ink/2020/10/03/go-webassembly-http-requests-and-promises.html">Go, WebAssembly, HTTP requests and Promises&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://developer.mozilla.org/en-US/docs/Glossary/Transferable_objects">MDN: Transferable objects&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://qvault.io/golang/running-go-in-the-browser-wasm-web-workers/">Running Go in the Browser with WASM and Web Workers&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://www.sitepen.com/blog/using-webassembly-with-web-workers">Using WebAssembly with Web Workers&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://www.fermyon.com/blog/optimizing-tinygo-wasm">Shrink Your TinyGo WebAssembly Modules by 60%&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://elewis.dev/are-we-wasm-yet-part-1">Are We Wasm Yet ? - Part 1&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://elewis.dev/are-we-wasm-yet-part-2#heading-server-implementation">Are We Wasm Yet ? - Part 2&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://hacks.mozilla.org/2019/03/standardizing-wasi-a-webassembly-system-interface/">Standardizing WASI: A system interface to run WebAssembly outside the web&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://wasi.dev/">WASI&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://wasmbyexample.dev/examples/webassembly-linear-memory/webassembly-linear-memory.go.en-us.html#">WebAssembly Linear Memory example&lt;/a>&lt;/li>
+&lt;/ol></description></item><item><title>GIFs (sane) playback control using WASM and FFmpeg</title><link>https://brunoluiz.net/blog/2022/jan/gif-sane-playback-control-ffmpegwasm/</link><pubDate>2022-01-20</pubDate><guid>https://brunoluiz.net/blog/2022/jan/gif-sane-playback-control-ffmpegwasm/</guid><description>&lt;p>&lt;img loading="lazy" src="./cover.jpg" alt="Photo by Stephen Monterroso on Unsplash" />
 &lt;/p>
 &lt;!-- https://unsplash.com/photos/cwcPV_VKfy4 -->
 &lt;p>Animated images in GIF format are around for a long time. They were first released in 1987 by CompuServe. Yep, your maths are correct: they came even before browsers. It was not until Netscape 2.0 that the GIF format was incorporated and conquered the world (&lt;a href="https://www.vox.com/culture/2017/6/15/15802136/gif-turns-30-evolution-internet-history">really&lt;/a>).&lt;/p>
@@ -956,134 +1156,4 @@ ITNext&lt;/a>.&lt;/li>
 &lt;li>
 &lt;p>Vogels repo: &lt;a href="https://github.com/ryanfitz/vogels">https://github.com/ryanfitz/vogels&lt;/a>&lt;/p>
 &lt;/li>
-&lt;/ul></description></item><item><title>Still using GitFlow? What about a simpler alternative?</title><link>https://brunoluiz.net/blog/2017/jul/still-using-gitflow-what-about-a-simpler-alternative/</link><pubDate>2017-07-18</pubDate><guid>https://brunoluiz.net/blog/2017/jul/still-using-gitflow-what-about-a-simpler-alternative/</guid><description>&lt;p>&lt;img loading="lazy" src="cover.jpg" alt="Alternative on sight" />
-&lt;/p>
-&lt;p>GitFlow is a branching model created by Vincent Driessen on 2010 (&lt;a href="http://nvie.com/posts/a-successful-git-branching-model/">original article&lt;/a>). Since it was published, many companies had tested and implemented it, which allows us to have many reviews about how well (or not) it works. After some discussions within our team, we decided to not go with GitFlow, but use a simpler model instead, together with a tightly defined workflow. Some of the discussed reasons of why not go with GitFlow are the same written on &lt;a href="http://endoflineblog.com/gitflow-considered-harmful">this blog post&lt;/a>.&lt;/p>
-&lt;h2 id="the-feature-branch-model">The Feature Branch Model&lt;/h2>
-&lt;p>Compared to GitFlow, it is easier to implement and does not require any plugins to be properly used. The step-by-step of this model would be:&lt;/p>
-&lt;ol>
-&lt;li>
-&lt;p>Create a branch from the master (feature-x), which is where the feature will be developed: &lt;code>git checkout -b feature-x&lt;/code>&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Push the branch to the remote: &lt;code>git push -u origin feature-x&lt;/code>. With the branch in the remote repo, a pull request should be opened with it (&lt;a href="https://help.github.com/articles/creating-a-pull-request/">How to open it in GitHub&lt;/a>). A pull request is where all modifications are available to other members and they will be able to review it&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Fix the reviewed code and wait for approval. If a new release on the master generates a conflict, a best practice would be to rebase it (instead of merging)&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>(optional) If a rebase is needed: checkout to master &lt;code>git checkout master&lt;/code>, pull the changes &lt;code>git pull&lt;/code>, go back to the feature branch &lt;code>git checkout feature-x&lt;/code>, do the rebase &lt;code>git rebase master&lt;/code> and then sync the rebased branch &lt;code>git push --force-with-lease&lt;/code>. &lt;a href="https://www.atlassian.com/git/tutorials/merging-vs-rebasing">A good tutorial about merging x rebasing is available on this Atlassian article&lt;/a>.&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>If there are no conflicts and it was approved ⇒ &lt;strong>squash + merge&lt;/strong>&lt;/p>
-&lt;/li>
-&lt;/ol>
-&lt;p>&lt;a href="https://www.atlassian.com/git/tutorials/comparing-workflows#feature-branch-workflow">This Atlassian article have a more detailed view on the feature branch model&lt;/a>&lt;/p>
-&lt;h3 id="why-squash--merge-instead-of-just-merge">Why Squash + Merge instead of just Merge?&lt;/h3>
-&lt;p>The squash and merge is made up of two processes: the squash, which compact all commits in one big commit/patch, and then the merge itself. After squashing + merging, you will have only one commit in the target branch (usually master) containing all your modifications. This enables two things:&lt;/p>
-&lt;ol>
-&lt;li>
-&lt;p>It is easier to move this feature, as the whole patch/feature will be on one commit hash&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>The target branch will be cleaner, less messy and more readable — without those 67 commits you have made to finish the feature.&lt;/p>
-&lt;/li>
-&lt;/ol>
-&lt;p>There are more information about &lt;a href="https://softwareengineering.stackexchange.com/questions/263164/why-squash-git-commits-for-pull-requests">about why devs prefers squash and merge, instead of only merging, on this article&lt;/a>.&lt;/p>
-&lt;h2 id="managing-release-versions-with-git-tags">Managing release versions with git tags&lt;/h2>
-&lt;p>In the feature branch model, a merge is considered a new version release. To track each release version, tags can be used. These will be used as reference to choose which version should be deployed at the servers.&lt;/p>
-&lt;p>To manage these tags/release, a good practice is the usage of &lt;a href="http://semver.org">*semantic versioning&lt;/a>:*&lt;/p>
-&lt;blockquote>
-&lt;p>Given a version number &lt;strong>MAJOR.MINOR.PATCH&lt;/strong>, increment the:&lt;/p>
-&lt;ol>
-&lt;li>MAJOR version when you make incompatible API changes,&lt;/li>
-&lt;li>MINOR version when you add functionality in a backwards-compatible manner, and&lt;/li>
-&lt;li>PATCH version when you make backwards-compatible bug fixes.&lt;/li>
-&lt;/ol>
-&lt;/blockquote>
-&lt;p>The process to create the releases can be automated using &lt;a href="https://github.com/geddski/grunt-release">&lt;code>grunt-release&lt;/code>&lt;/a> or &lt;a href="https://github.com/lfender6445/gulp-release-tasks">&lt;code>gulp-release-tasks&lt;/code>&lt;/a>. But, following the steps bellow, it can be easily done by hand:&lt;/p>
-&lt;ol>
-&lt;li>
-&lt;p>Checkout to the master branch: &lt;code>git checkout master&lt;/code>&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Pull changes from the remote &lt;code>git pull&lt;/code>&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Get the most recent tag using &lt;code>git describe --abbrev=0&lt;/code> (let&amp;rsquo;s say it returns v0.1.0)&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Create a tag using &lt;code>git tag -a &amp;lt;version&amp;gt;&lt;/code>⇒&lt;code>git tag -a v0.2.0&lt;/code>&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Push the modifications and the tag: &lt;code>git push origin v0.2.0 --follow-tags&lt;/code>&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Done!&lt;/p>
-&lt;/li>
-&lt;/ol>
-&lt;h2 id="deploying">Deploying&lt;/h2>
-&lt;p>In many PaaS, such as AWS Beanstalk or Heroku, a remote repository is set-up where, when changes are pushed (eg. git push heroku master), a deploy is triggered using the latest commits on master. In these cases, a simple push force using the release tag will deploy the desired version: &lt;code>git push -f &amp;lt;deploy/env-remote&amp;gt; v0.2.0:master&lt;/code>. Easy, eh?&lt;/p>
-&lt;blockquote>
-&lt;p>NOTE: At Chaordic New Offers Team, a grunt script was developed where we publish which tag should be deployed: &lt;code>grunt deploy:&amp;lt;version&amp;gt;:&amp;lt;env&amp;gt;:all&lt;/code>&lt;/p>
-&lt;/blockquote>
-&lt;h2 id="what-happens-if-a-hot-fix-is-needed">What happens if a hot-fix is needed?&lt;/h2>
-&lt;p>At some point, an issue will be raised and the production version will need a hot-fix &lt;em>ASAP&lt;/em>. A feature branch can&amp;rsquo;t just be opened to develop a fix, as the master will probably be ahead of the production version. In this case, the fix needs to be done directly on the production version:&lt;/p>
-&lt;ol>
-&lt;li>
-&lt;p>Checkout to the production version tag &lt;code>git checkout v0.10.0&lt;/code>&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Create a new branch from this tag &lt;code>git checkout -b hotfix-v0.10.1-weirdbehavior&lt;/code>&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Create the fix and commit it&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Create a tag for this new release &lt;code>git tag -a v0.10.1&lt;/code> (notice the SEMVER pattern)&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Push the branch and tag to remote &lt;code>git push -u origin hotfix-v0.10.1-weirdbehavior --follow-tags&lt;/code>&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Deploy the tag &lt;code>v0.10.1&lt;/code> to the production environment&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>A push request should be opened, as the fix should be applied at the master afterwards&lt;/p>
-&lt;/li>
-&lt;/ol>
-&lt;p>If more patches are needed, this process can be repeated on the same version, incrementing only the patch version.&lt;/p>
-&lt;h3 id="what-about-applying-it-to-other-environments">What about applying it to other environments?&lt;/h3>
-&lt;p>This patch probably should be applied to other environments as well, which can be done through &lt;a href="http://think-like-a-git.net/sections/rebase-from-the-ground-up/cherry-picking-explained.html">git cherry-pick&lt;/a> &lt;commit-hash> . It basically applies the chosen commit to the actual HEAD.&lt;/p>
-&lt;ol>
-&lt;li>
-&lt;p>Checkout to the environment version tag &lt;code>git checkout v0.13.0&lt;/code>&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Create a new branch for the patch &lt;code>git checkout -b hotfix-v0.13.1&lt;/code>&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Do a &lt;code>git cherry-pick v0.10.1&lt;/code> or a &lt;code>git cherry-pick &amp;lt;commit-hash&amp;gt;&lt;/code> to apply the desired commit&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;code>git tag -a v0.13.1&lt;/code> and &lt;code>git push origin v0.13.1&lt;/code> (push just the tag)&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Deploy it&lt;/p>
-&lt;/li>
-&lt;/ol>
-&lt;h3 id="what-if-i-want-to-get-a-modification-from-master-and-sent-to-one-of-the-environments">What if I want to get a modification from master and sent to one of the environments?&lt;/h3>
-&lt;p>It is very similar to the above one: a &lt;code>git cherry-pick&lt;/code> should be done using a commit hash from the master as, after &lt;strong>squash + merge&lt;/strong> a push request, a new commit is generated with all changes (big patch of commits condensed in one).&lt;/p>
-&lt;h2 id="just-keep-in-mind">Just keep in mind…&lt;/h2>
-&lt;p>The gap between the environments versions should be as short as possible. Otherwise, some issues may appear:&lt;/p>
-&lt;ul>
-&lt;li>
-&lt;p>If the production is on &lt;code>v0.1.10&lt;/code>, the latest release is &lt;code>v0.10&lt;/code>, but the version &lt;code>v0.3&lt;/code> will be deployed: the team members will have to check if some of the production patches are still required and then apply them, one by one.&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>If some feature was only finished on &lt;code>v0.10.0&lt;/code>, and it is required for the roll-out, but the &lt;code>v0.7.0&lt;/code> is still not well tested: the release should be hold until the &lt;code>v0.7.0&lt;/code> has been tested&lt;/p>
-&lt;/li>
-&lt;/ul>
-&lt;p>Usually, these version gaps occur when the producing capacity is higher than the testing capacity (developers x testers ratio).&lt;/p>
-&lt;h2 id="conclusion">Conclusion&lt;/h2>
-&lt;p>The model is still being tested but, until now, it has been working well. The only faced drawbacks were the ones pointed on the session above.&lt;/p></description></item></channel></rss>
+&lt;/ul></description></item></channel></rss>
