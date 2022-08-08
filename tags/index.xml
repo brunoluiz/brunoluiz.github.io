@@ -283,7 +283,11 @@ Uncaught (in promise) RuntimeError: abort(Assertion failed: Cannot call unknown 
 &lt;/p>
 &lt;p>Creating GIFSane was an interesting challenge. I now want to go deeper into WASM and perhaps convert a project myself (I am open to ideas).&lt;/p>
 &lt;p>Because it doesn&amp;rsquo;t have hardware acceleration, it is a bit slow at times. As long as developers don&amp;rsquo;t push 5 minutes GIFs, FFmpeg.wasm should be enough. If not, I might create an external agent which calls a bare-metal FFmpeg.&lt;/p>
-&lt;p>Closer to the end of the year, I will revisit this post and GIFSane due to Manifest V3 migrations. Expect a Part II soon 👀&lt;/p></description></item><item><title>The forgotten art of HTML redirects, without either HTTP 301 or JavaScript</title><link>https://brunoluiz.net/blog/2021/jun/redirect-users-client-side-only/</link><pubDate>2021-06-17</pubDate><guid>https://brunoluiz.net/blog/2021/jun/redirect-users-client-side-only/</guid><description>&lt;p>&lt;img loading="lazy" src="cover.jpg" alt="Photo by Javier Allegue Barros on Unsplash" />
+&lt;p>Closer to the end of the year, I will revisit this post and GIFSane due to Manifest V3 migrations. Expect a Part II soon 👀&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://github.com/brunoluiz/gifsane">🔗 GIFSane project page&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://twitter.com/brunoluiz">💬 Reach me on Twitter @ brunoluiz&lt;/a>&lt;/li>
+&lt;/ul></description></item><item><title>The forgotten art of HTML redirects, without either HTTP 301 or JavaScript</title><link>https://brunoluiz.net/blog/2021/jun/redirect-users-client-side-only/</link><pubDate>2021-06-17</pubDate><guid>https://brunoluiz.net/blog/2021/jun/redirect-users-client-side-only/</guid><description>&lt;p>&lt;img loading="lazy" src="cover.jpg" alt="Photo by Javier Allegue Barros on Unsplash" />
 &lt;/p>
 &lt;p>One of the first things API developers learn is HTTP codes. Usually, people already saw some 404 around, but soon they learn about the uses of 2xx, 4xx and 5xx codes. Probably you, insidious reader, realised I jumped the 3xx series.&lt;/p>
 &lt;p>Most first time developers never hear about 3xx, but probably because most haven&amp;rsquo;t gone through some scenario requiring it. There are many codes in this series, but the code of interest here is HTTP 301. If a developer wants to redirect users, returning 301 will indicate to the client that the resource was moved permanently to a new address (specified in the response).&lt;/p>
@@ -343,7 +347,11 @@ Uncaught (in promise) RuntimeError: abort(Assertion failed: Cannot call unknown 
 &amp;lt;/&lt;span style="color:#f92672">head&lt;/span>&amp;gt;
 &amp;lt;/&lt;span style="color:#f92672">html&lt;/span>&amp;gt;
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>As mentioned on the W3C page, it is recommended that developers use HTTP 301 instead of this strategy. But there are some valid use cases in which you might end up using this strategy. With or without URLZap, anyone hosting websites statically should be able to have redirects without having to maintain or pay a web server. It can be hosted virtually anywhere, and all browsers support it.&lt;/p>
-&lt;p>And well, it is always interesting to find different ways to do things we take for granted 🙃&lt;/p></description></item><item><title>Getting good code reviews from peers</title><link>https://brunoluiz.net/blog/2020/sep/getting-good-code-reviews/</link><pubDate>2020-09-28</pubDate><guid>https://brunoluiz.net/blog/2020/sep/getting-good-code-reviews/</guid><description>&lt;p>&lt;img loading="lazy" src="cover.jpg" alt="Photo by Glenn Carstens-Peters on Unsplash" />
+&lt;p>And well, it is always interesting to find different ways to do things we take for granted 🙃&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://github.com/brunoluiz/urlzap">🔗 URLZap project page&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://twitter.com/brunoluiz">💬 Reach me on Twitter @ brunoluiz&lt;/a>&lt;/li>
+&lt;/ul></description></item><item><title>Getting good code reviews from peers</title><link>https://brunoluiz.net/blog/2020/sep/getting-good-code-reviews/</link><pubDate>2020-09-28</pubDate><guid>https://brunoluiz.net/blog/2020/sep/getting-good-code-reviews/</guid><description>&lt;p>&lt;img loading="lazy" src="cover.jpg" alt="Photo by Glenn Carstens-Peters on Unsplash" />
 &lt;/p>
 &lt;p>Every software developer, soon after pushing code to the repository, has this urge to ping the team to ask for code review. But, I dare to say: don&amp;rsquo;t do it! Most likely some adjusments and checks can still be done, especially if this is your first push for this feature.&lt;/p>
 &lt;p>The following guidelines might help you to get better and faster code reviews.&lt;/p>
