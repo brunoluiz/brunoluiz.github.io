@@ -88,6 +88,9 @@ As mentioned on the W3C page, it is recommended that developers use HTTP 301 ins
 
 And well, it is always interesting to find different ways to do things we take for granted 🙃
 
+- [🔗 URLZap project page](https://github.com/brunoluiz/urlzap)
+- [💬 Reach me on Twitter @ brunoluiz](https://twitter.com/brunoluiz)
+
 [1]: https://www.w3.org/TR/WCAG20-TECHS/H76.html
 [2]: https://ogp.me/
 [3]: https://developer.twitter.com/en/docs/twitter-for-websites/cards/guides/getting-started

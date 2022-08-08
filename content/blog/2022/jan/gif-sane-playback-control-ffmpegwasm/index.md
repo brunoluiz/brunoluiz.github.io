@@ -147,6 +147,9 @@ Because it doesn't have hardware acceleration, it is a bit slow at times. As lon
 
 Closer to the end of the year, I will revisit this post and GIFSane due to Manifest V3 migrations. Expect a Part II soon 👀
 
+- [🔗 GIFSane project page](https://github.com/brunoluiz/gifsane)
+- [💬 Reach me on Twitter @ brunoluiz](https://twitter.com/brunoluiz)
+
 [1]: https://www.vox.com/culture/2017/6/15/15802136/gif-turns-30-evolution-internet-history
 [2]: https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Image_types#webp_image
 [3]: https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Image_types#apng_animated_portable_network_graphics
