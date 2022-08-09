@@ -27,7 +27,7 @@ It seems that Rust would have been a more solid choice for WASM, but I would hav
 
 ![ImageWand main page](./02-imagewand.png)
 <center>
-  <small>Less is more, although I guess the application could benefit of more features 😅</small>
+  <small>Less is more, although I guess the application could benefit from more features 😅</small>
 </center>
 
 
