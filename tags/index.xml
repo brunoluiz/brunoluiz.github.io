@@ -12,7 +12,7 @@
 &lt;p>&lt;img loading="lazy" src="./02-imagewand.png" alt="ImageWand main page" />
 &lt;/p>
 &lt;center>
-&lt;small>Less is more, although I guess the application could benefit of more features 😅&lt;/small>
+&lt;small>Less is more, although I guess the application could benefit from more features 😅&lt;/small>
 &lt;/center>
 &lt;h2 id="the-building-experience">The building experience&lt;/h2>
 &lt;p>Golang offers some standard libraries for image manipulation (&lt;a href="https://pkg.go.dev/image">&lt;code>image&lt;/code> package&lt;/a>). Implementing something to convert A to B wasn&amp;rsquo;t the hard part. &lt;a href="https://github.com/brunoluiz/imagewand/blob/v1.0.0/imagewand.go">The conversion logic was extracted and re-used&lt;/a> in both CLI and WASM implementations, which is impressive in terms of portability.&lt;/p>
