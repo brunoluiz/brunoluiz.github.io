@@ -10,7 +10,7 @@ summary: "Postgres is a great database, one of developer's favourites, but upgra
 
 Postgres is one of the developer's favourite databases. It is available in most cloud providers, and companies can go years with Postgres features solely. But, as with everything, Postgres could be better in some aspects. The article ["Things I hate about Postgres"][1] list some of these points, for example. Until last year, I was mainly using [CockroachDB][2], but since I changed companies, Postgres and its peculiarities hit me every now and then.
 
-The services using Postgres deal with a large request volume, and due to its financial nature, downtimes are frowned upon (perhaps not the ideal choice for this, but that is a topic for another post). Failovers are never 100% clean, and configuration tweaks might result in a writer instance restart. Happily, there are ways to circumvent minor database downtimes, such as request retries and leveraging pgBouncer. **But what about upgrades?**
+The services using Postgres the company I am working for deal with a large request volume, and due to its financial nature, downtimes are frowned upon (perhaps not the ideal choice for this, but that is a topic for another post). Failovers are never 100% clean, and configuration tweaks might result in a writer instance restart. Happily, there are ways to circumvent minor database downtimes, such as request retries and leveraging pgBouncer. **But what about upgrades?**
 
 [Minor versions are not risky][3], as they don't change the file system. The only downtime required is when it is restarting the instance with the new version. Some coordination is required (reader upgrades first, then writer), but managed solutions deal with this automatically. Some, such as AWS and GCP, even provide [zero-downtime patching][4].
 
@@ -24,7 +24,8 @@ With [AWS end-of-life for Aurora Postgres 10 on January 2023][6], potential perf
 
 The most straightforward path would be an in-place upgrade. To try this, I created an instance in our staging environment (with ~1Tb) and triggered an in-place upgrade. To my negative surprise, it took around 15 minutes + a variable execution time for ANALYSE: an unacceptable downtime for a high-traffic service. We tried with smaller and larger databases, but the time was around ~15 minutes as well.
 
-![Timing of in-place upgrade](./timings.png)
+![Database uptime x in-place upgrade timing from CloudWatch metrics](./timings.png)
+<p align='center'><small><em>Database uptime x in-place upgrade timing from CloudWatch metrics</em></small></p>
 
 After this initial reality shock and a few days of research, a couple of options came across:
 
@@ -40,7 +41,7 @@ One of [AWS Data Migration Service's][8] (DMS) selling points is "Maintain high 
 
 Although recommended online by a few, once you go through their documentation, it is clear **its focus is on heterogeneous** migrations (different engines), such as migrating from MySQL to Postgres. DMS uses [an intermediary schema][9], which converts data between each engine. This intermediary schema [has a few limitations][10] for Postgres, and such things always represent a risk. For example, [if misconfigured, it might truncate JSON objects][11] (NCLOBs in the intermediary schema).
 
-It might be better to skip such hurdles for homogenous migrations (Postgres to Postgres). Postgres 10+ provides a similar native solution, which doesn't use any intermediary schema: logical replication. This is even [recommended in AWS's documentation][12].
+To avoid such hurdles for homogenous migrations (Postgres to Postgres), another solution would be better. Postgres 10+ provides a similar native solution, which doesn't use any intermediary schema: logical replication. This is even [recommended in AWS's documentation][12].
 
 > When you migrate from a database engine other than PostgreSQL to a PostgreSQL database, AWS DMS is almost always the best migration tool to use. **But when you are migrating from a PostgreSQL database to a PostgreSQL database, PostgreSQL tools can be more effective.**
 
@@ -67,7 +68,8 @@ In a very simplified overview, this is how it works:
     *  This can be skipped. You need to have the entire state copy for upgrades, but it might be ok if the target is used for analytics.
 1.  Once the database is in-sync, switch over whenever is more convenient.
 
-[![Slow upgrade](./slow-upgrade.png)](./slow-upgrade.png)
+[![Native logical replication diagram (without LSN "hacks")](./slow-upgrade.png)](./slow-upgrade.png)
+<p align='center'><small><em>Native logical replication diagram (without LSN "hacks")</em></small></p>
 
 It is a simple and well-documented process available in any Postgres distribution. Besides, there are a couple of benefits going with this approach instead of an in-place upgrade:
 
@@ -75,7 +77,7 @@ It is a simple and well-documented process available in any Postgres distributio
 2.  ANALYSEs, VACUUMs, and REINDEXes can be done before live traffic.
 3.  The teams can benchmark queries to evaluate their performance before the switchover.
 
-[There are some limitations][22], which overlap with some from DMS, so be aware. Mainly, the database schema and sequence data are not replicated on the replication. The team will need to create the target using `pg_dumpall` and `pg_dump` or some backup + table truncation, and the sequences have to be manually reset during the switchover.
+[There are some limitations][22], which overlap with some from DMS, so be aware. Mainly, the database schema and sequence data are not replicated on the replication. The team will need to create the target using `pg_dumpall` and `pg_dump` or some backup/clone + table truncation, and the sequences have to be manually reset during the switchover.
 
 After an initial discovery time to write a run-book, the first test came around and setting it up was relatively easy. To create the target, we cloned it, deleted the tables and recreated them using `pg_dump --schema-only`. Once the publisher/subscriber setup was done, it was a matter of waiting for it to fully sync.
 
@@ -106,9 +108,10 @@ Setting this up is similar to the previous option but slightly more complicated:
 1.  Observe the replication and wait for it to catch up.
 1.  Scale down API instances using the service, allow the source to flush all pending operations and switch over to the target.
 
-[![Fast upgrade](./fast-upgrade.png)](./fast-upgrade.png)
+[![Native logical replication diagram with LSN "hacks"](./fast-upgrade.png)](./fast-upgrade.png)
+<p align='center'><small><em>Native logical replication diagram with LSN "hacks"</em></small></p>
 
-As one can see, there are way more steps and details. Fetching the LSN and setting it to a specific position is where the trick lives, but it is a bit risky. If that information is incorrect and the target is assigned to an early LSN, the replication will be stuck trying to replicate existing data (unique constraints will hit). If set to a late LSN, it will lose operations.
+As one can see, there are more steps and details. Fetching the LSN and setting it to a specific position is where the trick lives, but it is a bit risky. If that information is incorrect and the target is assigned to an early LSN, the replication will be stuck trying to replicate existing data (unique constraints will hit). If set to a late LSN, it will lose operations.
 
 After going through all those steps, it worked well and fast. By sampling some of the data, it seemed to be all there. But, because of the data loss risk, **the team had to develop a tool to ensure data integrity**. After more dry runs with the integrity checks, we realised that sometimes there was data loss, sometimes due to operator mistakes, and sometimes we couldn't find the reason. I can't recommend this enough: **if the team is leaning toward this option, don't skip the integrity checks!**
 
@@ -124,13 +127,16 @@ The initial clone + replication setup was done during work hours, as it shouldn'
 
 Most regions were troubleless, besides our largest one. In general, the initial clone + upgrade + replication steps took around 30-45 minutes, and plenty of operations accumulated in the replication slot during this time. It can increase indefinitely, which is a reason to worry already. Still, if it gets too big, it might take a very long time to flush everything into the target, leading to considerable downtime during the switchover.
 
-![Replication lag](./lag.png)
+![High replication lag due to high traffic](./lag.png)
+<p align='center'><small><em>High replication lag due to high traffic</em></small></p>
 
 Most of our regions' replication slots rose to 300-500Mb, which, once set to replicate, were quickly down to ~10Mb. The largest one went up to 1Gb but, even when set to flush, due to a high `new:flushed operations` ratio, it eventually reached 3Gb during peak traffic time. This situation worried the team a bit due to the potential downtime, but once it got into the off-peak period, it flushed most pending operations, and the replication slot was kept under 10-50Mb.
 
 All the migrations were executed over three weeks. It all went very smoothly, although we kept an eye out for issues for days after, as we were worried about the data loss risk. Nothing came to our attention.
 
 I hope this convinced you to explore this alternative with your team. In the next post, I will publish our run-book to set up the "enhanced" logical replication process for AWS Aurora. Feel free to reach me if you are keen to follow this approach in your company and have questions around it.
+
+> 💡 In 2022's AWS Re-invent, they announced [Blue/Green deployments for RDS & Aurora MySQL and MariaDB][26]. It is a game-changer for upgrades, as it leans in a similar process to what is suggested in this article. It might make this method obsolete once released for Postgres, but hey: at least our lives will be easier!
 
 [1]: https://news.ycombinator.com/item?id=26709019
 [2]: https://www.cockroachlabs.com/
@@ -157,3 +163,4 @@ I hope this convinced you to explore this alternative with your team. In the nex
 [23]: https://pgdash.io/blog/monitoring-postgres-replication.html
 [24]: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Managing.Clone.html
 [25]: https://cluudcom/sql/docs/postgres/clone-instance
+[26]: https://aws.amazon.com/blogs/aws/new-fully-managed-blue-green-deployments-in-amazon-aurora-and-amazon-rds/
