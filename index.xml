@@ -1,4 +1,113 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Bruno Luiz Silva</title><link>https://brunoluiz.net/</link><description>Recent content on Bruno Luiz Silva</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>2022-08-07</lastBuildDate><atom:link href="https://brunoluiz.net/index.xml" rel="self" type="application/rss+xml"/><item><title>ImageWand: privacy-first image conversion experiment with Golang &amp; WASM</title><link>https://brunoluiz.net/blog/2022/aug/imagewand-privacy-first-image-conversion-experiment-with-golang-and-wasm/</link><pubDate>2022-08-07</pubDate><guid>https://brunoluiz.net/blog/2022/aug/imagewand-privacy-first-image-conversion-experiment-with-golang-and-wasm/</guid><description>&lt;p>&lt;a href="https://unsplash.com/photos/NbgQfUvKFE0">&lt;img loading="lazy" src="./cover.jpg" alt="Photo by Mark Tegethoff on Unsplash" />
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Bruno Luiz Silva</title><link>https://brunoluiz.net/</link><description>Recent content on Bruno Luiz Silva</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>2022-11-18</lastBuildDate><atom:link href="https://brunoluiz.net/index.xml" rel="self" type="application/rss+xml"/><item><title>Low downtime Postgres upgrade: I want to believe (part I)</title><link>https://brunoluiz.net/blog/2022/nov/low-downtime-postgres-upgrade-i-want-to-believe/</link><pubDate>2022-11-18</pubDate><guid>https://brunoluiz.net/blog/2022/nov/low-downtime-postgres-upgrade-i-want-to-believe/</guid><description>&lt;p>&lt;a href="https://unsplash.com/photos/RIb4BDwiakQ">&lt;img loading="lazy" src="./cover.jpg" alt="Photo by Florencia Viadana on Unsplash" />
+&lt;/a>&lt;/p>
+&lt;!-- https://unsplash.com/photos/RIb4BDwiakQ -->
+&lt;blockquote>
+&lt;p>💡 This post will describe the upgrade process, explore alternatives and what was the final choice. A subsequent post will have a detailed step-by-step guide on the chosen strategy.&lt;/p>
+&lt;/blockquote>
+&lt;p>Postgres is one of the developer&amp;rsquo;s favourite databases. It is available in most cloud providers, and companies can go years with Postgres features solely. But, as with everything, Postgres could be better in some aspects. The article &lt;a href="https://news.ycombinator.com/item?id=26709019">&amp;ldquo;Things I hate about Postgres&amp;rdquo;&lt;/a> list some of these points, for example. Until last year, I was mainly using &lt;a href="https://www.cockroachlabs.com/">CockroachDB&lt;/a>, but since I changed companies, Postgres and its peculiarities hit me every now and then.&lt;/p>
+&lt;p>The services using Postgres the company I am working for deal with a large request volume, and due to its financial nature, downtimes are frowned upon (perhaps not the ideal choice for this, but that is a topic for another post). Failovers are never 100% clean, and configuration tweaks might result in a writer instance restart. Happily, there are ways to circumvent minor database downtimes, such as request retries and leveraging pgBouncer. &lt;strong>But what about upgrades?&lt;/strong>&lt;/p>
+&lt;p>&lt;a href="https://www.postgresql.org/support/versioning/#:~:text=Upgrading%20to%20a%20minor%20release%20does%20not%20normally%20require%20a%20dump%20and%20restore%3B%20you%20can%20stop%20the%20database%20server%2C%20install%20the%20updated%20binaries%2C%20and%20restart%20the%20server.%20For%20some%20releases%2C%20manual%20changes%20may%20be%20required%20to%20complete%20the%20upgrade%2C%20so%20always%20read%20the%20release%20notes%20before%20upgrading.">Minor versions are not risky&lt;/a>, as they don&amp;rsquo;t change the file system. The only downtime required is when it is restarting the instance with the new version. Some coordination is required (reader upgrades first, then writer), but managed solutions deal with this automatically. Some, such as AWS and GCP, even provide &lt;a href="https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_UpgradeDBInstance.PostgreSQL.html#USER_UpgradeDBInstance.PostgreSQL.Minor.zdp">zero-downtime patching&lt;/a>.&lt;/p>
+&lt;p>But, major upgrades are way more complex: because Postgres &lt;a href="https://www.postgresql.org/support/versioning/#:~:text=Major%20versions%20usually%20change%20the%20internal%20format%20of%20system%20tables%20and%20data%20files.">needs to change the underlying filesystem&lt;/a>, all instances need to be shut down from traffic during the upgrade. There is no easy way out, and as of October 2022, managed solutions don&amp;rsquo;t provide any &amp;ldquo;magical&amp;rdquo; low-downtime solution.&lt;/p>
+&lt;p>With &lt;a href="https://www.amazonaws.cn/en/new/2022/amazon-aurora-postgresql-13-6-12-10-11-15-10-20/#:~:text=As%20a%20reminder%2C%20Amazon%20Aurora,life%20on%20January%2031%2C%202023.">AWS end-of-life for Aurora Postgres 10 on January 2023&lt;/a>, potential performance gains and Graviton instances availability only on newer versions, upgrading Postgres became a high priority. The catch? No one had ever done major upgrades in the company without downtime, and our customers wouldn&amp;rsquo;t welcome a long downtime.&lt;/p>
+&lt;h2 id="the-race-was-on">The race was on&lt;/h2>
+&lt;blockquote>
+&lt;p>💡 The company uses AWS Aurora Postgres, which has some extra features and peculiarities compared to Postgres.&lt;/p>
+&lt;/blockquote>
+&lt;p>The most straightforward path would be an in-place upgrade. To try this, I created an instance in our staging environment (with ~1Tb) and triggered an in-place upgrade. To my negative surprise, it took around 15 minutes + a variable execution time for ANALYSE: an unacceptable downtime for a high-traffic service. We tried with smaller and larger databases, but the time was around ~15 minutes as well.&lt;/p>
+&lt;p>&lt;img loading="lazy" src="./timings.png" alt="Database uptime x in-place upgrade timing from CloudWatch metrics" />
+&lt;/p>
+&lt;p align='center'>&lt;small>&lt;em>Database uptime x in-place upgrade timing from CloudWatch metrics&lt;/em>&lt;/small>&lt;/p>
+&lt;p>After this initial reality shock and a few days of research, a couple of options came across:&lt;/p>
+&lt;ol>
+&lt;li>&lt;strong>Native logical replication:&lt;/strong> this method would allow us to replicate the database using native features. Postgres runs an initial &lt;code>COPY&lt;/code> and then syncs out new operations to the target database (more on that later).&lt;/li>
+&lt;li>&lt;strong>Data migration tool (AWS DMS):&lt;/strong> it seemed to use logical replication underneath, combined with some cloud-provider magic. From the initial research, it seemed the most robust option.&lt;/li>
+&lt;li>&lt;strong>Logical replication on a cloned database:&lt;/strong> exact as the native, but it uses some hacks to trim down the initial &lt;code>COPY&lt;/code> time. Quite risky and primarily based &lt;a href="https://tech.instacart.com/creating-a-logical-replica-from-a-snapshot-in-rds-postgres-886d9d2c7343">on Instacart&amp;rsquo;s approach to a similar problem&lt;/a>.&lt;/li>
+&lt;li>&lt;strong>In-place upgrade:&lt;/strong> if all the above failed, the company would have to embrace for impact.&lt;/li>
+&lt;/ol>
+&lt;h2 id="exploring-the-options">Exploring the options&lt;/h2>
+&lt;h3 id="data-migration-tool-aws-dms">Data migration tool (AWS DMS)&lt;/h3>
+&lt;p>One of &lt;a href="https://aws.amazon.com/dms/">AWS Data Migration Service&amp;rsquo;s&lt;/a> (DMS) selling points is &amp;ldquo;Maintain high availability and minimal downtime during the migration process [&amp;hellip;]&amp;rdquo;. It was what we were looking for. In theory, for a low downtime, this would happen: the old cluster would still be handling traffic while being migrated (DMS) to a new one. Once finished, the team only needs to switch over.&lt;/p>
+&lt;p>Although recommended online by a few, once you go through their documentation, it is clear &lt;strong>its focus is on heterogeneous&lt;/strong> migrations (different engines), such as migrating from MySQL to Postgres. DMS uses &lt;a href="https://docs.aws.amazon.com/dms/latest/userguide/CHAP_Reference.DataTypes.html">an intermediary schema&lt;/a>, which converts data between each engine. This intermediary schema &lt;a href="https://docs.aws.amazon.com/dms/latest/userguide/CHAP_Source.PostgreSQL.html#CHAP_Source.PostgreSQL.Limitations">has a few limitations&lt;/a> for Postgres, and such things always represent a risk. For example, &lt;a href="https://docs.aws.amazon.com/dms/latest/userguide/CHAP_Source.PostgreSQL.html#CHAP_Source.PostgreSQL.Limitations:~:text=NCLOB%20%E2%80%93%20Replication%20handles,multiplied%20by%204.">if misconfigured, it might truncate JSON objects&lt;/a> (NCLOBs in the intermediary schema).&lt;/p>
+&lt;p>To avoid such hurdles for homogenous migrations (Postgres to Postgres), another solution would be better. Postgres 10+ provides a similar native solution, which doesn&amp;rsquo;t use any intermediary schema: logical replication. This is even &lt;a href="https://docs.aws.amazon.com/dms/latest/userguide/CHAP_Source.PostgreSQL.html#CHAP_Source.PostgreSQL.Homogeneous:~:text=But%20when%20you%20are%20migrating%20from%20a%20PostgreSQL%20database%20to%20a%20PostgreSQL%20database%2C%20PostgreSQL%20tools%20can%20be%20more%20effective.">recommended in AWS&amp;rsquo;s documentation&lt;/a>.&lt;/p>
+&lt;blockquote>
+&lt;p>When you migrate from a database engine other than PostgreSQL to a PostgreSQL database, AWS DMS is almost always the best migration tool to use. &lt;strong>But when you are migrating from a PostgreSQL database to a PostgreSQL database, PostgreSQL tools can be more effective.&lt;/strong>&lt;/p>
+&lt;/blockquote>
+&lt;p>After realising its focus on heterogeneous migrations and its specific limitations, we haven&amp;rsquo;t explored this option further.&lt;/p>
+&lt;h3 id="native-logical-replication">Native logical replication&lt;/h3>
+&lt;p>Since Postgres 9, developers can use physical streaming replication. This makes an exact copy, byte-by-byte, of the whole cluster onto the target, being very convenient and fast. The caveat is that both need to be running the same version, which wouldn&amp;rsquo;t work for upgrades. &lt;a href="https://pgdash.io/blog/postgres-physical-replication.html">The logical instead replicates the object changes in the subscribers instead of re-creating it byte-by-byte&lt;/a>, which makes it quite handy when moving from different versions.&lt;/p>
+&lt;blockquote>
+&lt;p>💡 If you have never heard about replication types, look at this &lt;a href="https://pgdash.io/blog/postgres-physical-replication.html">pgDash post&lt;/a> and this &lt;a href="https://stackoverflow.com/questions/33621906/difference-between-stream-replication-and-logical-replication">StackOverflow question&lt;/a>. The &lt;a href="https://www.postgresql.org/docs/current/high-availability.html">documentation around high availability&lt;/a> can be a good read as well.&lt;/p>
+&lt;/blockquote>
+&lt;p>During the Postgres 9 era, logical replication was mainly done through an extension (&lt;a href="https://github.com/2ndQuadrant/pglogical">pglogical&lt;/a>) and database triggers. But, since Postgres 10, &lt;a href="https://www.postgresql.org/docs/current/logical-replication.html">it has become a native feature&lt;/a>.&lt;/p>
+&lt;p>The &lt;a href="https://www.postgresql.org/docs/current/wal-internals.html">WAL (write-ahead logs)&lt;/a> are generated on each write operation to the database. The insert position is described as LSN (Log Sequence Number). WAL logs can be used for cluster disaster recovery, which redoes some records. After some point, these logs are discarded. But logical replication creates &lt;a href="https://www.postgresql.org/docs/current/logical-replication.html#:~:text=31.3.%20Row%20Filters,31.4.2.%20Examples">replication slots&lt;/a> which keep those operations stored separately with their respective LSN positions, which can then be used to replicate (redo) the database state at subscribers. &lt;a href="https://www.postgresql.org/docs/current/logical-replication.html#:~:text=31.3.%20Row%20Filters,31.4.2.%20Examples">It has other quirks&lt;/a>, such as specifying which table to replicate, columns to publish and rows to filter, but all are based on the WAL logs available.&lt;/p>
+&lt;p>The &lt;strong>replication slots are the main piece of the logical replication&lt;/strong>, as well as the setup of a PUBLISHER (source) and a SUBSCRIBER (target), which will use the replication slot as their data source.&lt;/p>
+&lt;p>In a very simplified overview, this is how it works:&lt;/p>
+&lt;ol>
+&lt;li>A publication and replication slot are set up on the source database.&lt;/li>
+&lt;li>An empty database is created (target). &lt;strong>It requires manual schema migration and setup&lt;/strong>, as neither pglogical nor the native option does it for you.&lt;/li>
+&lt;li>The target database subscribes to the source database publication.&lt;/li>
+&lt;li>By default, it will trigger a COPY process, which ensures all the data is copied to the target database. Once finished, new operations are flushed periodically from the replication slot.
+&lt;ul>
+&lt;li>This can be skipped. You need to have the entire state copy for upgrades, but it might be ok if the target is used for analytics.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Once the database is in-sync, switch over whenever is more convenient.&lt;/li>
+&lt;/ol>
+&lt;p>&lt;a href="./slow-upgrade.png">&lt;img loading="lazy" src="./slow-upgrade.png" alt="Native logical replication diagram (without LSN &amp;amp;ldquo;hacks&amp;amp;rdquo;)" />
+&lt;/a>&lt;/p>
+&lt;p align='center'>&lt;small>&lt;em>Native logical replication diagram (without LSN "hacks")&lt;/em>&lt;/small>&lt;/p>
+&lt;p>It is a simple and well-documented process available in any Postgres distribution. Besides, there are a couple of benefits going with this approach instead of an in-place upgrade:&lt;/p>
+&lt;ol>
+&lt;li>Lower downtime, as it would be just the time of the switchover.&lt;/li>
+&lt;li>ANALYSEs, VACUUMs, and REINDEXes can be done before live traffic.&lt;/li>
+&lt;li>The teams can benchmark queries to evaluate their performance before the switchover.&lt;/li>
+&lt;/ol>
+&lt;p>&lt;a href="https://www.postgresql.org/docs/current/logical-replication-restrictions.html">There are some limitations&lt;/a>, which overlap with some from DMS, so be aware. Mainly, the database schema and sequence data are not replicated on the replication. The team will need to create the target using &lt;code>pg_dumpall&lt;/code> and &lt;code>pg_dump&lt;/code> or some backup/clone + table truncation, and the sequences have to be manually reset during the switchover.&lt;/p>
+&lt;p>After an initial discovery time to write a run-book, the first test came around and setting it up was relatively easy. To create the target, we cloned it, deleted the tables and recreated them using &lt;code>pg_dump --schema-only&lt;/code>. Once the publisher/subscriber setup was done, it was a matter of waiting for it to fully sync.&lt;/p>
+&lt;p>After two days though, it was far from reaching the end, &lt;a href="https://pgdash.io/blog/monitoring-postgres-replication.html">based on replication statistics&lt;/a>. After poking around, we realised it was still running the initial COPY, a step required for the initial seed. It seemed slow, consuming plenty of resources on the source database, and no one knew what to tweak to improve it or make it faster.&lt;/p>
+&lt;p>Although it seems an option, the slowness of the initial COPY would be a problem for the production clusters. In staging, it never finished (1Tb), even after running for almost a week (we cut the experiment short). This could be a reasonable strategy if the company&amp;rsquo;s databases were smaller (~1Tb). But, as the company&amp;rsquo;s largest regional database is +30Tb of data, this could mean weeks of waiting for the upgrade to finish.&lt;/p>
+&lt;p>If only the initial COPY time could be reduced&amp;hellip;&lt;/p>
+&lt;h3 id="logical-replication-on-a-cloned-database">&lt;strong>Logical replication on a cloned database&lt;/strong>&lt;/h3>
+&lt;p>Some engineers mentioned they saw a similar setup which skipped the initial COPY. Cloning or restoring the source dataset into the target database and activating the replication between both instances should drastically reduce the setup time.&lt;/p>
+&lt;p>The problem? There is no official documentation around this method, and when activating the subscription, some data would already be present in the target. The subscriber WAL LSN position needs to be adjusted to skip some operations of the replication slot, which can lead to data loss. Risky, but the benefit around setup time is unbeatable, especially for large databases.&lt;/p>
+&lt;p>Setting this up is similar to the previous option but slightly more complicated:&lt;/p>
+&lt;ol>
+&lt;li>A publication + replication slot has to be set up on the source database (old cluster).&lt;/li>
+&lt;li>Once set, the target database is generated through cloning. &lt;a href="https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Managing.Clone.html">AWS RDS Aurora feature&lt;/a>, but &lt;a href="https://cluudcom/sql/docs/postgres/clone-instance">GCP has something similar&lt;/a>.
+&lt;ul>
+&lt;li>While cloning, the source database keeps all write operations stored on the created replication slot.&lt;/li>
+&lt;li>Cloning doesn&amp;rsquo;t impact your live database. This is due to how Aurora volumes are implemented and how cloning leverages that.&lt;/li>
+&lt;li>No truncation + &lt;code>pg_dump&lt;/code> is required&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Once the target instance is ready, it will &lt;strong>log an error with its starting LSN position&lt;/strong>. It will be handy as it allows skipping data in the replication process already present in the target due to the time between replication slot creation x clone finishing. The operator needs to keep note of this for later use.&lt;/li>
+&lt;li>Delete the logical replication setup (subscriber + replication slot) from the target instance. Cloud providers don&amp;rsquo;t allow upgrades if there are logical replication slots.&lt;/li>
+&lt;li>Upgrade the cloned instance, not forgetting to run ANALYSE + VACUUM. At this point, the team can benchmark this cluster to guarantee it has the same performance, reindex specific indexes and do any operation that would impact live traffic.&lt;/li>
+&lt;li>Create a subscription on the target database, specifying &lt;strong>no initial copy, no replication slot creation and leaving it disabled by default&lt;/strong>.&lt;/li>
+&lt;li>Advance the replication slot origin on the target &lt;strong>to the LSN found at (3) and enable the subscription.&lt;/strong>&lt;/li>
+&lt;li>Observe the replication and wait for it to catch up.&lt;/li>
+&lt;li>Scale down API instances using the service, allow the source to flush all pending operations and switch over to the target.&lt;/li>
+&lt;/ol>
+&lt;p>&lt;a href="./fast-upgrade.png">&lt;img loading="lazy" src="./fast-upgrade.png" alt="Native logical replication diagram with LSN &amp;amp;ldquo;hacks&amp;amp;rdquo;" />
+&lt;/a>&lt;/p>
+&lt;p align='center'>&lt;small>&lt;em>Native logical replication diagram with LSN "hacks"&lt;/em>&lt;/small>&lt;/p>
+&lt;p>As one can see, there are more steps and details. Fetching the LSN and setting it to a specific position is where the trick lives, but it is a bit risky. If that information is incorrect and the target is assigned to an early LSN, the replication will be stuck trying to replicate existing data (unique constraints will hit). If set to a late LSN, it will lose operations.&lt;/p>
+&lt;p>After going through all those steps, it worked well and fast. By sampling some of the data, it seemed to be all there. But, because of the data loss risk, &lt;strong>the team had to develop a tool to ensure data integrity&lt;/strong>. After more dry runs with the integrity checks, we realised that sometimes there was data loss, sometimes due to operator mistakes, and sometimes we couldn&amp;rsquo;t find the reason. I can&amp;rsquo;t recommend this enough: &lt;strong>if the team is leaning toward this option, don&amp;rsquo;t skip the integrity checks!&lt;/strong>&lt;/p>
+&lt;p>After many iterations, automation, and tests, the process was taking only around an hour. If the integrity test pointed out some failure, we just re-ran it.&lt;/p>
+&lt;h2 id="how-did-it-go">How did it go?&lt;/h2>
+&lt;p>We mainly evaluated the last two options, but choosing the third was inevitable because of the second approach&amp;rsquo;s initial COPY time. Most of the upgrade was automated to minimise risks, and our internal tooling guaranteed data integrity and performance.&lt;/p>
+&lt;p>We had a few bumps in the road, such as data loss in newly created clones. But, as our integrity tooling detected issues, we just discarded the target and re-run scripts.&lt;/p>
+&lt;p>The initial clone + replication setup was done during work hours, as it shouldn&amp;rsquo;t impact live traffic, making it easier on operators. However, the switchover was during an off-peak time window, which is essential to minimise request loss and shorten replication slot flush time (last write operations received).&lt;/p>
+&lt;p>Most regions were troubleless, besides our largest one. In general, the initial clone + upgrade + replication steps took around 30-45 minutes, and plenty of operations accumulated in the replication slot during this time. It can increase indefinitely, which is a reason to worry already. Still, if it gets too big, it might take a very long time to flush everything into the target, leading to considerable downtime during the switchover.&lt;/p>
+&lt;p>&lt;img loading="lazy" src="./lag.png" alt="High replication lag due to high traffic" />
+&lt;/p>
+&lt;p align='center'>&lt;small>&lt;em>High replication lag due to high traffic&lt;/em>&lt;/small>&lt;/p>
+&lt;p>Most of our regions' replication slots rose to 300-500Mb, which, once set to replicate, were quickly down to ~10Mb. The largest one went up to 1Gb but, even when set to flush, due to a high &lt;code>new:flushed operations&lt;/code> ratio, it eventually reached 3Gb during peak traffic time. This situation worried the team a bit due to the potential downtime, but once it got into the off-peak period, it flushed most pending operations, and the replication slot was kept under 10-50Mb.&lt;/p>
+&lt;p>All the migrations were executed over three weeks. It all went very smoothly, although we kept an eye out for issues for days after, as we were worried about the data loss risk. Nothing came to our attention.&lt;/p>
+&lt;p>I hope this convinced you to explore this alternative with your team. In the next post, I will publish our run-book to set up the &amp;ldquo;enhanced&amp;rdquo; logical replication process for AWS Aurora. Feel free to reach me if you are keen to follow this approach in your company and have questions around it.&lt;/p>
+&lt;blockquote>
+&lt;p>💡 In 2022&amp;rsquo;s AWS Re-invent, they announced &lt;a href="https://aws.amazon.com/blogs/aws/new-fully-managed-blue-green-deployments-in-amazon-aurora-and-amazon-rds/">Blue/Green deployments for RDS &amp;amp; Aurora MySQL and MariaDB&lt;/a>. It is a game-changer for upgrades, as it leans in a similar process to what is suggested in this article. It might make this method obsolete once released for Postgres, but hey: at least our lives will be easier!&lt;/p>
+&lt;/blockquote></description></item><item><title>ImageWand: privacy-first image conversion experiment with Golang &amp; WASM</title><link>https://brunoluiz.net/blog/2022/aug/imagewand-privacy-first-image-conversion-experiment-with-golang-and-wasm/</link><pubDate>2022-08-07</pubDate><guid>https://brunoluiz.net/blog/2022/aug/imagewand-privacy-first-image-conversion-experiment-with-golang-and-wasm/</guid><description>&lt;p>&lt;a href="https://unsplash.com/photos/NbgQfUvKFE0">&lt;img loading="lazy" src="./cover.jpg" alt="Photo by Mark Tegethoff on Unsplash" />
 &lt;/a>&lt;/p>
 &lt;p>At the beginning of the year, I was curious about WebAssembly (WASM). &lt;a href="https://brunoluiz.net/blog/2022/jan/gif-sane-playback-control-ffmpegwasm/">The result was GIFSane&lt;/a>, but that was not enough: &lt;a href="https://github.com/ffmpegwasm/ffmpeg.wasm">FFMpeg.wasm&lt;/a> was already pre-compiled, and I only had to sort out how to use it within an extension. One thing was clear though: WASM shines when we think about complex applications (eg: media manipulation), usually performing better or opening more opportunities than JavaScript.&lt;/p>
 &lt;p>I&amp;rsquo;ve moved houses quite recently. It meant manipulating tons of documents, converting to different formats, resizing etc. Mac&amp;rsquo;s Preview app can handle it, but many might rely on browsers due to the first search results for &amp;ldquo;Convert image format1 format2&amp;rdquo;. Seriously, look at these Google results.&lt;/p>
@@ -981,187 +1090,4 @@ ITNext&lt;/a>.&lt;/li>
 &lt;p>&lt;img loading="lazy" src="noproblems.jpeg" alt="Photo by Kupono Kuwamura on Unsplash" />
 &lt;/p>
 &lt;h2 id="end-of-problems">End Of Problems?&lt;/h2>
-&lt;p>This will not be the last problem the team will have to struggle with. Stressful moments like these will appear but this is when the team will learn and grow, being able to rise and aim towards high stakes through time.&lt;/p></description></item><item><title>Joi: validate input and define databases in JavaScript</title><link>https://brunoluiz.net/blog/2017/aug/joi-validate-input-and-define-databases-in-javascript/</link><pubDate>2017-08-30</pubDate><guid>https://brunoluiz.net/blog/2017/aug/joi-validate-input-and-define-databases-in-javascript/</guid><description>&lt;p>&lt;img loading="lazy" src="cover.jpg" alt="Photo by Rayi Christian Wicaksono" />
-&lt;/p>
-&lt;p>As the saying goes: &lt;em>never trust user input&lt;/em>. People coming from PHP and Java have many validation libraries available. But what about JavaScript? There are some options, but none seems more interesting than Joi.&lt;/p>
-&lt;p>&lt;a href="https://github.com/hapijs/joi">Joi&lt;/a> is maintained by &lt;a href="https://hapijs.com/">Hapi.js project&lt;/a>. Even though hapi.js is a web framework by itself, Joi is independent and can be used in any type of node project. This is great for people using express or restify, for example.&lt;/p>
-&lt;p>What makes it even more interesting is that, besides user validation, it can be used to define database schemas as well. This post will introduce a quick start guide, with some usage cases and general tweaks.&lt;/p>
-&lt;h2 id="how-to-use-it">How to use it?&lt;/h2>
-&lt;p>First things first: it has to be installed on the project. Considering an already initiated node project, the command to install it is: npm install joi. After being installed, a schema is required to use it, such as the file &lt;code>rating-schema.js&lt;/code> below:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-js" data-lang="js">&lt;span style="color:#75715e">// rating-schema.js
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">Joi&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">require&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;joi&amp;#39;&lt;/span>)
-&lt;span style="color:#a6e22e">module&lt;/span>.&lt;span style="color:#a6e22e">exports&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">Joi&lt;/span>.&lt;span style="color:#a6e22e">object&lt;/span>().&lt;span style="color:#a6e22e">keys&lt;/span>({
-&lt;span style="color:#a6e22e">username&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#a6e22e">Joi&lt;/span>.&lt;span style="color:#a6e22e">string&lt;/span>(),
-&lt;span style="color:#a6e22e">rating&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#a6e22e">Joi&lt;/span>.&lt;span style="color:#a6e22e">number&lt;/span>()
-.&lt;span style="color:#a6e22e">integer&lt;/span>()
-.&lt;span style="color:#a6e22e">min&lt;/span>(&lt;span style="color:#ae81ff">1&lt;/span>)
-.&lt;span style="color:#a6e22e">max&lt;/span>(&lt;span style="color:#ae81ff">5&lt;/span>)
-.&lt;span style="color:#66d9ef">default&lt;/span>(&lt;span style="color:#ae81ff">5&lt;/span>),
-&lt;span style="color:#a6e22e">email&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#a6e22e">Joi&lt;/span>.&lt;span style="color:#a6e22e">string&lt;/span>()
-.&lt;span style="color:#a6e22e">email&lt;/span>()
-.&lt;span style="color:#a6e22e">required&lt;/span>()
-})
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>This defines a model where an username, a rating (from 1 to 5) and an email (which is a required field) are expected. This is a simple example, but there are way more validation options, which can be found on the &lt;a href="https://github.com/hapijs/joi/blob/v10.6.0/API.md">API reference&lt;/a>. To use the defined schema, consider a file called &lt;code>rating-test.js&lt;/code>:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-js" data-lang="js">&lt;span style="color:#75715e">// rating-test.js
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>
-&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">schema&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">require&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;./rating-schema&amp;#39;&lt;/span>)
-&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">result&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">schema&lt;/span>.&lt;span style="color:#a6e22e">validate&lt;/span>({
-&lt;span style="color:#a6e22e">username&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#e6db74">&amp;#39;brunoluiz&amp;#39;&lt;/span>,
-&lt;span style="color:#a6e22e">rating&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#ae81ff">5&lt;/span>,
-&lt;span style="color:#a6e22e">email&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#e6db74">&amp;#39;contact@brunoluiz.net&amp;#39;&lt;/span>
-})
-&lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#a6e22e">result&lt;/span>) &lt;span style="color:#75715e">// result.error will be null
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>
-&lt;span style="color:#75715e">// result.error will show an error due to missing e-mail
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">resultWithError&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">schema&lt;/span>.&lt;span style="color:#a6e22e">validate&lt;/span>({
-&lt;span style="color:#a6e22e">username&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#e6db74">&amp;#39;brunoluiz&amp;#39;&lt;/span>,
-&lt;span style="color:#a6e22e">rating&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#ae81ff">5&lt;/span>
-})
-&lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#a6e22e">resultWithError&lt;/span>) &lt;span style="color:#75715e">// result.error will have an error message
-&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;a href="https://github.com/hapijs/joi/blob/v10.6.0/API.md#errors">More about Joi errors&lt;/a>&lt;/p>
-&lt;h2 id="real-project-usage">Real project usage&lt;/h2>
-&lt;h3 id="validation-middleware">Validation middleware&lt;/h3>
-&lt;p>In a real project, Joi can be used on a middleware layer. On &lt;a href="http://expressjs.com">&lt;code>express&lt;/code>&lt;/a>, for example, this can be done using:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-js" data-lang="js">&lt;span style="color:#75715e">// ratings-validor.js
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>
-&lt;span style="color:#a6e22e">module&lt;/span>.&lt;span style="color:#a6e22e">exports&lt;/span> &lt;span style="color:#f92672">=&lt;/span> (&lt;span style="color:#a6e22e">req&lt;/span>, &lt;span style="color:#a6e22e">res&lt;/span>, &lt;span style="color:#a6e22e">next&lt;/span>) =&amp;gt; {
-&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">ratings&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">Ratings&lt;/span>.&lt;span style="color:#a6e22e">schema&lt;/span>.&lt;span style="color:#a6e22e">validate&lt;/span>(&lt;span style="color:#a6e22e">req&lt;/span>.&lt;span style="color:#a6e22e">body&lt;/span>)
-&lt;span style="color:#66d9ef">if&lt;/span> (&lt;span style="color:#a6e22e">ratings&lt;/span>.&lt;span style="color:#a6e22e">error&lt;/span>) {
-&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#a6e22e">next&lt;/span>(&lt;span style="color:#a6e22e">ratings&lt;/span>.&lt;span style="color:#a6e22e">error&lt;/span>)
-}
-&lt;span style="color:#a6e22e">req&lt;/span>.&lt;span style="color:#a6e22e">parsed&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">ratings&lt;/span>.&lt;span style="color:#a6e22e">value&lt;/span>
-&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#a6e22e">next&lt;/span>()
-}
-&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-js" data-lang="js">&lt;span style="color:#75715e">// ....
-&lt;/span>&lt;span style="color:#75715e">// routes.js
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>
-&lt;span style="color:#a6e22e">app&lt;/span>.&lt;span style="color:#a6e22e">post&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;/ratings&amp;#39;&lt;/span>, &lt;span style="color:#a6e22e">ratingsValidator&lt;/span>, &lt;span style="color:#a6e22e">ratingsCreateController&lt;/span>)
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>In this case, if the &lt;code>ratingsValidator&lt;/code> returns an error due to validation, express will stop the request before even reaching the controller.&lt;/p>
-&lt;h3 id="database-schema-mongodb-and-dynamodb">Database schema (MongoDB and DynamoDB)&lt;/h3>
-&lt;p>Some tools can use it to define their database schema (keep in mind that Joi is not an ORM). For MongoDB, &lt;code>mongoose&lt;/code> can be used together with &lt;a href="https://github.com/yoitsro/joigoose">&lt;code>joigoose&lt;/code>&lt;/a>, which easily converts a Joi schema. For example:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-js" data-lang="js">&lt;span style="color:#75715e">// rating.js
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">mongoose&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">require&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;mongoose&amp;#39;&lt;/span>)
-&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">joigoose&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">require&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;joigoose&amp;#39;&lt;/span>)(&lt;span style="color:#a6e22e">mongoose&lt;/span>)
-&lt;span style="color:#75715e">// Require the &amp;#39;ratings&amp;#39; schema
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">schema&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">require&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;./rating-schema&amp;#39;&lt;/span>)
-&lt;span style="color:#75715e">// Convert joi to mongoose schema
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">mongooseSchema&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">joigoose&lt;/span>.&lt;span style="color:#a6e22e">convert&lt;/span>(&lt;span style="color:#a6e22e">schema&lt;/span>)
-&lt;span style="color:#75715e">// Modify some fields with database specific instructions
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#a6e22e">mongooseSchema&lt;/span>.&lt;span style="color:#a6e22e">email&lt;/span>.&lt;span style="color:#a6e22e">unique&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">true&lt;/span>
-&lt;span style="color:#75715e">// Add fields which don&amp;#39;t make sense on the schema validator
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#a6e22e">mongooseSchema&lt;/span>.&lt;span style="color:#a6e22e">updatedAt&lt;/span> &lt;span style="color:#f92672">=&lt;/span> { &lt;span style="color:#a6e22e">type&lt;/span>&lt;span style="color:#f92672">:&lt;/span> Date, &lt;span style="color:#66d9ef">default&lt;/span>&lt;span style="color:#f92672">:&lt;/span> Date.&lt;span style="color:#a6e22e">now&lt;/span> }
-&lt;span style="color:#a6e22e">mongooseSchema&lt;/span>.&lt;span style="color:#a6e22e">createdAt&lt;/span> &lt;span style="color:#f92672">=&lt;/span> { &lt;span style="color:#a6e22e">type&lt;/span>&lt;span style="color:#f92672">:&lt;/span> Date, &lt;span style="color:#66d9ef">default&lt;/span>&lt;span style="color:#f92672">:&lt;/span> Date.&lt;span style="color:#a6e22e">now&lt;/span> }
-&lt;span style="color:#75715e">// Define mongoose model
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">Ratings&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">mongoose&lt;/span>.&lt;span style="color:#a6e22e">model&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;Ratings&amp;#39;&lt;/span>, &lt;span style="color:#a6e22e">mongooseSchema&lt;/span>)
-&lt;span style="color:#a6e22e">module&lt;/span>.&lt;span style="color:#a6e22e">exports&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">Ratings&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>Through &lt;a href="https://github.com/ryanfitz/vogels">&lt;code>vogels&lt;/code>&lt;/a>, the same can be done in projects using DynamoDB. By default, it accepts Joi as its schema definition. The following example is based on &lt;code>vogels&lt;/code> documentation:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-js" data-lang="js">&lt;span style="color:#75715e">// blog-post-schema.js
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>
-&lt;span style="color:#a6e22e">module&lt;/span>.&lt;span style="color:#a6e22e">exports&lt;/span> &lt;span style="color:#f92672">=&lt;/span> {
-&lt;span style="color:#a6e22e">email&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#a6e22e">Joi&lt;/span>.&lt;span style="color:#a6e22e">string&lt;/span>().&lt;span style="color:#a6e22e">email&lt;/span>(),
-&lt;span style="color:#a6e22e">title&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#a6e22e">Joi&lt;/span>.&lt;span style="color:#a6e22e">string&lt;/span>(),
-&lt;span style="color:#a6e22e">content&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#a6e22e">Joi&lt;/span>.&lt;span style="color:#a6e22e">binary&lt;/span>(),
-&lt;span style="color:#a6e22e">tags&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#a6e22e">vogels&lt;/span>.&lt;span style="color:#a6e22e">types&lt;/span>.&lt;span style="color:#a6e22e">stringSet&lt;/span>()
-}
-&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-js" data-lang="js">&lt;span style="color:#75715e">// blog-post.js
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">schema&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">require&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;./blog-post-schema.js&amp;#39;&lt;/span>)
-&lt;span style="color:#a6e22e">module&lt;/span>.&lt;span style="color:#a6e22e">exports&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">vogels&lt;/span>.&lt;span style="color:#a6e22e">define&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;BlogPost&amp;#39;&lt;/span>, {
-&lt;span style="color:#a6e22e">hashKey&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#e6db74">&amp;#39;email&amp;#39;&lt;/span>,
-&lt;span style="color:#a6e22e">rangeKey&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#960050;background-color:#1e0010">‘&lt;/span>&lt;span style="color:#a6e22e">title&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">’&lt;/span>,
-&lt;span style="color:#a6e22e">schema&lt;/span>
-})
-&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="exchangeability-for-front-end-validation">Exchangeability for front-end validation&lt;/h3>
-&lt;p>Some developers prefer to define the schema once and then use everywhere, including on browsers. Today &lt;a href="https://github.com/hapijs/joi/#browsers">Joi doesn&amp;rsquo;t support browser usage&lt;/a>, but a package called &lt;a href="https://github.com/jeffbski/joi-browser">&lt;code>joi-browser&lt;/code> does this job&lt;/a>, enabling the usage of exactly the same schema on the front-end as well.&lt;/p>
-&lt;h2 id="useful-tweaks">Useful tweaks&lt;/h2>
-&lt;p>&lt;img loading="lazy" src="tweaking.jpeg" alt="Photo by chuttersnap on Unsplash" />
-&lt;/p>
-&lt;h3 id="1-disable-joi-number-convert">#1 Disable Joi number() convert&lt;/h3>
-&lt;p>By default, Joi allows users to pass numbers formatted as strings, in cases of number() fields. This is specially bad if the validate() result is only used to check if there was an error, but not for it&amp;rsquo;s value field. To solve this, there are two possible solutions&lt;/p>
-&lt;ol>
-&lt;li>
-&lt;p>On &lt;code>schema.validate(value)&lt;/code>, an extra parameter can be passed to disable it, as: &lt;code>schema.validate(value, { convert: false })&lt;/code>&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Put a &lt;code>strict()&lt;/code> at the end of the desired number field, as: &lt;code>Joi.number().strict()&lt;/code>&lt;/p>
-&lt;/li>
-&lt;/ol>
-&lt;p>Both of them are quite annoying, because either all fields or all function calls require a specific config. One way to solve this is by extending Joi…&lt;/p>
-&lt;h3 id="2-extend-joi-defaults">#2 Extend Joi defaults&lt;/h3>
-&lt;p>In cases such as the above, or for new field types, or even when the behavior of a default field has to be changed, &lt;code>Joi.extend()&lt;/code> can be an option.&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-js" data-lang="js">&lt;span style="color:#75715e">// joi.js
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>
-&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">Joi&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">require&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;joi&amp;#39;&lt;/span>)
-&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">ukzip&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">/^[A-Z]{1,2}[0-9]{1,2}[A-Z]{0,1} ?[0-9][A-Z]{2}$/i&lt;/span>
-&lt;span style="color:#a6e22e">module&lt;/span>.&lt;span style="color:#a6e22e">exports&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">Joi&lt;/span>.&lt;span style="color:#a6e22e">extend&lt;/span>(
-{
-&lt;span style="color:#a6e22e">name&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#e6db74">&amp;#39;number&amp;#39;&lt;/span>,
-&lt;span style="color:#a6e22e">base&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#a6e22e">Joi&lt;/span>.&lt;span style="color:#a6e22e">number&lt;/span>().&lt;span style="color:#a6e22e">strict&lt;/span>()
-},
-{
-&lt;span style="color:#a6e22e">name&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#e6db74">&amp;#39;zipcode&amp;#39;&lt;/span>,
-&lt;span style="color:#a6e22e">base&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#a6e22e">Joi&lt;/span>.&lt;span style="color:#a6e22e">regex&lt;/span>(&lt;span style="color:#a6e22e">ukzip&lt;/span>).&lt;span style="color:#a6e22e">description&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;UK Zipcode&amp;#39;&lt;/span>)
-}
-)
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>When using Joi through this file, all number fields will be on the strict mode — which solves the issue of applying tweak #1 everywhere — and a &lt;code>zipcode()&lt;/code> validator is created, based on a pre-defined regex.&lt;/p>
-&lt;p>More rules can be added and, actually, the Joi API enables &lt;a href="https://github.com/hapijs/joi/blob/v10.6.0/API.md#extendextension">much more customisation&lt;/a> on &lt;code>Joi.extend&lt;/code>.&lt;/p>
-&lt;h3 id="3-create-default-fields">#3 Create default fields&lt;/h3>
-&lt;p>In some projects, a lot of models will have some default fields, such as an &lt;code>extensionAttributes&lt;/code>, where custom vendor data will be put into (as Magento already does) or &lt;code>updatedAt&lt;/code>. In these cases, the &lt;code>Joi.object&lt;/code> can be extended to include default fields:&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-js" data-lang="js">&lt;span style="color:#75715e">// joi.js
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>
-&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">Joi&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">require&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;joi&amp;#39;&lt;/span>)
-&lt;span style="color:#a6e22e">module&lt;/span>.&lt;span style="color:#a6e22e">exports&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">Joi&lt;/span>.&lt;span style="color:#a6e22e">extend&lt;/span>({
-&lt;span style="color:#a6e22e">name&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#e6db74">&amp;#39;object&amp;#39;&lt;/span>,
-&lt;span style="color:#a6e22e">base&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#a6e22e">Joi&lt;/span>.&lt;span style="color:#a6e22e">object&lt;/span>().&lt;span style="color:#a6e22e">keys&lt;/span>({
-&lt;span style="color:#a6e22e">extensionAttributes&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#a6e22e">Joi&lt;/span>.&lt;span style="color:#a6e22e">object&lt;/span>(),
-&lt;span style="color:#a6e22e">updatedAt&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#a6e22e">Joi&lt;/span>.&lt;span style="color:#a6e22e">date&lt;/span>().&lt;span style="color:#66d9ef">default&lt;/span>(Date.&lt;span style="color:#a6e22e">now&lt;/span>)
-})
-})
-&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="4-show-all-validation-errors">#4 Show all validation errors&lt;/h3>
-&lt;p>Usually Joi validation dies on the first error, returning on it&amp;rsquo;s message which field failed. This is an issue when an input have many fields with problems. The user will have to do many requests to discover all problematic fields. To fix this issue, the following option can be added on the function call:&lt;/p>
-&lt;p>&lt;code>const result = schema.validate(value, { abortEarly: false })&lt;/code>&lt;/p>
-&lt;p>With this config, if an error occurs, the &lt;code>result.error&lt;/code> will return all validation failures.&lt;/p>
-&lt;h3 id="5-built-in-joi-conditional-validations">#5 Built-in Joi conditional validations&lt;/h3>
-&lt;p>If a field depends on values from another field, the conditional when() can be used.&lt;/p>
-&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-js" data-lang="js">&lt;span style="color:#75715e">// joi-from-doc.js
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>
-&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">Joi&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">require&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;joi&amp;#39;&lt;/span>)
-&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">schema&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">Joi&lt;/span>.&lt;span style="color:#a6e22e">object&lt;/span>().&lt;span style="color:#a6e22e">keys&lt;/span>({
-&lt;span style="color:#a6e22e">a&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#a6e22e">Joi&lt;/span>.&lt;span style="color:#a6e22e">any&lt;/span>()
-.&lt;span style="color:#a6e22e">valid&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;x&amp;#39;&lt;/span>)
-.&lt;span style="color:#a6e22e">when&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;b&amp;#39;&lt;/span>, {
-&lt;span style="color:#a6e22e">is&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#ae81ff">5&lt;/span>,
-&lt;span style="color:#a6e22e">then&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#a6e22e">Joi&lt;/span>.&lt;span style="color:#a6e22e">valid&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;y&amp;#39;&lt;/span>),
-&lt;span style="color:#a6e22e">otherwise&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#a6e22e">Joi&lt;/span>.&lt;span style="color:#a6e22e">valid&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;z&amp;#39;&lt;/span>)
-}),
-&lt;span style="color:#a6e22e">b&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#a6e22e">Joi&lt;/span>.&lt;span style="color:#a6e22e">any&lt;/span>()
-})
-&lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#a6e22e">schema&lt;/span>.&lt;span style="color:#a6e22e">validate&lt;/span>({ &lt;span style="color:#a6e22e">a&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#e6db74">&amp;#39;x&amp;#39;&lt;/span> }).&lt;span style="color:#a6e22e">error&lt;/span> &lt;span style="color:#f92672">===&lt;/span> &lt;span style="color:#66d9ef">null&lt;/span>) &lt;span style="color:#75715e">// valid
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#a6e22e">schema&lt;/span>.&lt;span style="color:#a6e22e">validate&lt;/span>({ &lt;span style="color:#a6e22e">a&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#e6db74">&amp;#39;z&amp;#39;&lt;/span> }).&lt;span style="color:#a6e22e">error&lt;/span> &lt;span style="color:#f92672">===&lt;/span> &lt;span style="color:#66d9ef">null&lt;/span>) &lt;span style="color:#75715e">// valid
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#a6e22e">schema&lt;/span>.&lt;span style="color:#a6e22e">validate&lt;/span>({ &lt;span style="color:#a6e22e">a&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#e6db74">&amp;#39;z&amp;#39;&lt;/span>, &lt;span style="color:#a6e22e">b&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span> }).&lt;span style="color:#a6e22e">error&lt;/span> &lt;span style="color:#f92672">===&lt;/span> &lt;span style="color:#66d9ef">null&lt;/span>) &lt;span style="color:#75715e">// valid
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#a6e22e">schema&lt;/span>.&lt;span style="color:#a6e22e">validate&lt;/span>({ &lt;span style="color:#a6e22e">a&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#e6db74">&amp;#39;y&amp;#39;&lt;/span>, &lt;span style="color:#a6e22e">b&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span> }).&lt;span style="color:#a6e22e">error&lt;/span> &lt;span style="color:#f92672">!==&lt;/span> &lt;span style="color:#66d9ef">null&lt;/span>) &lt;span style="color:#75715e">// invalid
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#a6e22e">schema&lt;/span>.&lt;span style="color:#a6e22e">validate&lt;/span>({ &lt;span style="color:#a6e22e">a&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#e6db74">&amp;#39;y&amp;#39;&lt;/span>, &lt;span style="color:#a6e22e">b&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#ae81ff">5&lt;/span> }).&lt;span style="color:#a6e22e">error&lt;/span> &lt;span style="color:#f92672">===&lt;/span> &lt;span style="color:#66d9ef">null&lt;/span>) &lt;span style="color:#75715e">// valid
-&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>In this case, the field &lt;code>a&lt;/code> accepts the values &lt;code>x, y, z&lt;/code>. But, to accept &lt;code>y&lt;/code> as a value, the field b have to be equals 5, otherwise only &lt;code>x&lt;/code> and &lt;code>z&lt;/code> will be accepted.&lt;/p>
-&lt;p>Of course, this is a simple and fictitious conditional validation, but it is quite useful in cases where some field requires a specific validator when some other had a specific input.&lt;/p>
-&lt;h2 id="are-you-ready-to-use-it">Are you ready to use it?&lt;/h2>
-&lt;p>I hope this post convinced you to use some validation tool such as Joi, instead of validating everything by hand (or not validating at all). But, if you are using it already: do you know any other cool trick or tweak? Let me know in the comments section below.&lt;/p>
-&lt;h2 id="references">References&lt;/h2>
-&lt;ul>
-&lt;li>
-&lt;p>Joi repo: &lt;a href="https://github.com/hapijs/joi">https://github.com/hapijs/joi&lt;/a>&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Joi API Reference: &lt;a href="https://github.com/hapijs/joi/blob/v10.6.0/API.md">https://github.com/hapijs/joi/blob/v10.6.0/API.md&lt;/a>&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Joigoose repo: &lt;a href="https://github.com/yoitsro/joigoose">https://github.com/yoitsro/joigoose&lt;/a>&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Joi-browser repo: &lt;a href="https://github.com/jeffbski/joi-browser">https://github.com/jeffbski/joi-browser&lt;/a>&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Mongoose website: &lt;a href="http://mongoosejs.com">http://mongoosejs.com&lt;/a>&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Vogels repo: &lt;a href="https://github.com/ryanfitz/vogels">https://github.com/ryanfitz/vogels&lt;/a>&lt;/p>
-&lt;/li>
-&lt;/ul></description></item></channel></rss>
+&lt;p>This will not be the last problem the team will have to struggle with. Stressful moments like these will appear but this is when the team will learn and grow, being able to rise and aim towards high stakes through time.&lt;/p></description></item></channel></rss>
