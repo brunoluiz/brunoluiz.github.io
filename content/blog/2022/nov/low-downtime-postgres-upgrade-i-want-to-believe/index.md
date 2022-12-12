@@ -1,7 +1,7 @@
 ---
 title: 'Low downtime Postgres upgrade: I want to believe (part I)'
 date: '2022-11-18T12:00:00Z'
-summary: "Postgres is a great database, one of developer's favourites, but upgrades are far from easy and smooth. The journey on selecting an optimal solution and weighting its trade-offs and risks is always an exciting challenge."
+summary: "Postgres is a great database, one of developer's favourites, but upgrades are far from easy and smooth. The journey of selecting an optimal solution and weighing its trade-offs and risks is always an exciting challenge."
 ---
 [![Photo by Florencia Viadana on Unsplash](./cover.jpg)](https://unsplash.com/photos/RIb4BDwiakQ)
 <!-- https://unsplash.com/photos/RIb4BDwiakQ -->
