@@ -30,6 +30,8 @@ jobs:
         with:
           config: urlzap.yml
 
+      - run: ls public
+
       - 
         name: Deploy
         uses: peaceiris/actions-gh-pages@v3
