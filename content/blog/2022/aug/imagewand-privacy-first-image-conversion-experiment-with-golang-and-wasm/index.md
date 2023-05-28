@@ -8,6 +8,8 @@ aliases:
 
 [![Photo by Mark Tegethoff on Unsplash](./cover.jpg)](https://unsplash.com/photos/NbgQfUvKFE0)
 
+> 🧭 If you are looking for ImageWand repository, head to [brunoluiz/imagewand](https://github.com/brunoluiz/imagewand)
+
 At the beginning of the year, I was curious about WebAssembly (WASM). [The result was GIFSane](https://brunoluiz.net/blog/2022/jan/gif-sane-playback-control-ffmpegwasm/), but that was not enough: [FFMpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm) was already pre-compiled, and I only had to sort out how to use it within an extension. One thing was clear though: WASM shines when we think about complex applications (eg: media manipulation), usually performing better or opening more opportunities than JavaScript.
 
 I've moved houses quite recently. It meant manipulating tons of documents, converting to different formats, resizing etc. Mac's Preview app can handle it, but many might rely on browsers due to the first search results for "Convert image format1 format2". Seriously, look at these Google results.
