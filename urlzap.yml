@@ -2,4 +2,4 @@ path: ./public
 urls:
   yt: https://www.youtube.com/channel/UCCYzx5UEwMxFSQAQwi8f_Mg
   youtube: https://www.youtube.com/channel/UCCYzx5UEwMxFSQAQwi8f_Mg
-  imagewand: https://github.com/brunoluiz/imagewand
+  imagewand: https://brunoluiz.net/blog/2022/aug/imagewand-privacy-first-image-conversion-experiment-with-golang-and-wasm/
