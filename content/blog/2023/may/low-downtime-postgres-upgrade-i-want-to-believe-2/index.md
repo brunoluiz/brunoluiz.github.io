@@ -2,6 +2,9 @@
 title: 'Low downtime Postgres upgrade: I want to believe (part II)'
 date: '2023-09-03T12:00:00Z'
 summary: "Postgres is a great database, one of developer's favourites, but upgrades are far from easy and smooth. The journey of selecting an optimal solution and weighing its trade-offs and risks is always an exciting challenge."
+todo:
+    - add series fixing script
+    - add pg-data-checker cli
 ---
 
 [![Photo by Florencia Viadana on Unsplash](./cover.jpg)](https://unsplash.com/photos/RIb4BDwiakQ)
@@ -16,16 +19,16 @@ In the first part, I exposed the most reasonable options, what was used for the 
 ## Observations & Limitations
 
 1.  The following step-by-step is for a Postgres instance with only one database. It might work for multiple databases, but **logical replications only work against one database at a time**.
-2.  **Sequence data is not replicated.** This means extra steps are required to adjust any column using sequences (included in this guide)
+2.  **Sequence data is not replicated.** This means extra steps are required to adjust any column using sequences (included in this guide).
 3.  **The schema and DDL commands (the ones which alter the schema) are not replicated.** This means a schema freeze is needed during the database replication.
 
 ## Pre-setup
 
 There are a few steps you will need to do before even touching Postgres:
 
-1.  **Get hold of the cluster admin password**. This is the user that will be used for all operations.
+1.  **Get hold of the cluster admin password**. This is the user that will be used for all operations. In case of doubt, is the one created by default when you create the RDS Cluster (might be hidden in your Terraform state).
 2.  **Decide which version your team wants to update it to**. Most cloud providers allow you to jump multiple versions (in our case, we went from 10 to 14).
-3.  **Run the test suite against the desired version.** Although rare, there might be changes that affect your code.
+3.  **Run a test suite against the desired version and let it soak in development environments for a while.** Although rare, there might be changes that affect your code.
 4.  **Create a new set of** [**parameter groups**][2] **for the desired version.** It can be done in Terraform ([cluster][3] and [instances][4]) or in the UI. Having it in Terraform makes it easier to replicate these steps later.
 5.  **Ensure SOURCE and TARGET live in the same network and correctly set outbound/inbound firewalls.** It's trivial, but you never know if someone has changed something manually (our case).
 6.  [**Read the AWS Postgres upgrade guide**][5] to get familiarised with its usual process.
@@ -102,7 +105,7 @@ Before the final steps, don't forget the following:
 
 At this point, around 1-2 hours have passed since the replication slot creation. Your clone only has the data until that point. The following steps will flush all operations from the SOURCE into the TARGET, and at the end, both databases should have the same dataset.
 
-1.  **Create the subscription in the target Postgres.** You must replace all `$` with the correct values. Depending on your Postgres logging setup, this command might be logged with the plain password (`log_statement=ddl`, [for example][12]).
+1.  **Create the subscription in the target Postgres.** You must replace all `$` with the correct values. Depending on your Postgres logging setup, **this command might be logged with the plain password (`log_statement=ddl`, [for example][12])**. The team might be fine to have this password leaked in logs during the whole upgrade process, but remember to delete the account afterwards.
 
 ```
 
@@ -128,6 +131,12 @@ SELECT pg_replication_origin_advance(
 
 4.  Enable the subscription by executing `ALTER SUBSCRIPTION sub1 ENABLE;`.
 5.  On the SOURCE, observe the replication slot statistics. It will show the WAL logs being consumed, with the lag between the current LSN and slot LSN decreasing. [TODO: add query here]
+
+```sql
+SELECT slot_name, pg_size_pretty(pg_wal_lsn_diff(pg_current_wal_lsn(),restart_lsn)) AS replicationSlotLag, active FROM pg_replication_slots;
+SELECT * FROM pg_stat_replication;
+```
+
 6.  The operations will have been all flushed once the lag is around kilobytes. **Run your data integrity scripts at this point, as both should contain the same data (with a minor lag).**
 
 ## Finishing the process: the switch
