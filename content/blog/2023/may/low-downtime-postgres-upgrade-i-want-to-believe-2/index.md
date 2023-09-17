@@ -1,9 +1,8 @@
 ---
-title: 'Low downtime Postgres upgrade: I want to believe (part II)'
+title: 'Low downtime Postgres upgrade: the runbook (part II)'
 date: '2023-09-03T12:00:00Z'
-summary: "Postgres is a great database, one of developer's favourites, but upgrades are far from easy and smooth. The journey of selecting an optimal solution and weighing its trade-offs and risks is always an exciting challenge."
+summary: "No one is really prepared to upgrade big Postgres instances without downtime. This second part will focus on how to do it the lowest downtime possible."
 todo:
-    - add series fixing script
     - add pg-data-checker cli
 ---
 
@@ -14,13 +13,15 @@ todo:
 
 It is 2023 and upgrading Postgres is still a pain. For those using AWS, there is hope, as they [started to offer blue/green deployments for MySQL][1]. Alas, this is not available for Postgres yet.
 
-In the first part, I exposed the most reasonable options, what was used for the upgrade and how it went. In this post, you will find a lengthy step-by-step on how to achieve a Postgres zero-downtime upgrade_._
+In the first part, I exposed the most reasonable options, what was used for the upgrade and how it went. In this post, you will find a lengthy step-by-step on how to achieve a Postgres zero-downtime upgrade.
 
 ## Observations & Limitations
 
 1.  The following step-by-step is for a Postgres instance with only one database. It might work for multiple databases, but **logical replications only work against one database at a time**.
-2.  **Sequence data is not replicated.** This means extra steps are required to adjust any column using sequences (included in this guide).
+2.  **Sequence/series data is not replicated.** This means extra steps are required to adjust any column using sequences (included in this guide).
 3.  **The schema and DDL commands (the ones which alter the schema) are not replicated.** This means a schema freeze is needed during the database replication.
+4.  **Logical replication [will require rows to have a "replica identity"][13].** This should be a primary key and if all your tables have one it will not be a problem. If you find a table missing one, you will need to set the identity manually or create a primary key. [Read the documentation to understand the trade-offs][13].
+5.  **Upgrades can't happen if the database already has replication slots:** The team will need to drop existing replication slots by doing `SELECT pg_drop_replication_slot(slot_name)`.
 
 ## Pre-setup
 
@@ -31,7 +32,16 @@ There are a few steps you will need to do before even touching Postgres:
 3.  **Run a test suite against the desired version and let it soak in development environments for a while.** Although rare, there might be changes that affect your code.
 4.  **Create a new set of** [**parameter groups**][2] **for the desired version.** It can be done in Terraform ([cluster][3] and [instances][4]) or in the UI. Having it in Terraform makes it easier to replicate these steps later.
 5.  **Ensure SOURCE and TARGET live in the same network and correctly set outbound/inbound firewalls.** It's trivial, but you never know if someone has changed something manually (our case).
-6.  [**Read the AWS Postgres upgrade guide**][5] to get familiarised with its usual process.
+6.  **Ensure all tables have replica identity correctly set or have a primary key.**
+7.  [**Read the AWS Postgres upgrade guide**][5] to get familiarised with its usual process.
+
+## Data integrity
+
+The engineering team could only be confident if we proved that the data integrity was kept after the upgrade. We came up with a few scripts which were consolidated in a tool available at [`processout/pg-upgrade-data-check`](https://github.com/processout/pg-upgrade-data-check).
+
+The script compares data from before the replication and after the replication, comparing the hash of all rows in the between the time the database was replicating. It detected issues multiple times in both testing and production rollouts. The caveat is that it relies on an autoincremental key, not working if your tables don't have one.
+
+In any case, even if this tool does not suit you, **it is very important that the team defines a strategy to prove the data has been kept intact**.
 
 ## Preparing the SOURCE for replication
 
@@ -130,7 +140,7 @@ SELECT pg_replication_origin_advance(
 ```
 
 4.  Enable the subscription by executing `ALTER SUBSCRIPTION sub1 ENABLE;`.
-5.  On the SOURCE, observe the replication slot statistics. It will show the WAL logs being consumed, with the lag between the current LSN and slot LSN decreasing. [TODO: add query here]
+5.  On the SOURCE, observe the replication slot statistics. It will show the WAL logs being consumed, with the lag between the current LSN and slot LSN decreasing.
 
 ```sql
 SELECT slot_name, pg_size_pretty(pg_wal_lsn_diff(pg_current_wal_lsn(),restart_lsn)) AS replicationSlotLag, active FROM pg_replication_slots;
@@ -202,8 +212,21 @@ Every company has a different setup, but this is what will be required in broad 
 2.  **Change environment variables:** point to the new database
 3.  **Wait for flush:** there might be some in-flight WAL logs. Refer to the above queries to monitor the progress. Ideally the replication slot should be almost empty (around * kB of data)
 4.  **Disable subscription:** `ALTER SUBSCRIPTION sub1 DISABLE;`
-5.  **Sync all fields using a sequence:** doing this through a SQL script is recommended, as more time spent here = more downtime.
-```sql
+5.  **Sync all fields using a sequence:** doing this through a SQL script is recommended, as more time spent here = more downtime. The following script can be used
+```bash
+# Creates script
+cat << EOT >> ./fix_sequences.sql
+SELECT 'SELECT SETVAL(' || quote_literal(s.sequence_schema || '.' || s.sequence_name) || ', COALESCE(MAX(id), 1)) FROM ' || quote_ident(t.table_schema) || '.' || quote_ident(t.table_name) || ';' as sql
+FROM information_schema.sequences s
+JOIN information_schema.tables t ON t.table_name = REPLACE(sequence_name, '_id_seq', '') AND t.table_schema = s.sequence_schema
+ORDER BY sequence_name ASC;
+-- This could be used as well: https://wiki.postgresql.org/wiki/Fixing_Sequences
+-- But it missed some sequences when I tried
+EOT
+
+# Query database and generate sequences to be fixed
+psql -Atq -f ./fix_sequences.sql -o ./fix_sequences.gen.sql $target_url
+psql -f ./fix_sequences.gen.sql $target_url
 ```
 6.  **Restart traffic to the database:** If everything goes right, you should be ready to re-enable connections to it.
 
@@ -225,3 +248,4 @@ If everything goes right, no data is lost, and there is minimal downtime, the te
 [10]: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster#restore_to_point_in_time-argument-reference
 [11]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.PostgreSQL.html#USER_UpgradeDBInstance.PostgreSQL.MajorVersion.Process:~:text=Handle%20logical%20replication%20slots
 [12]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_LogAccess.Concepts.PostgreSQL.html#:~:text=Logs%20all%20data%20definition%20language%20(DDL)%20statements%2C%20such%20as%20CREATE%2C%20ALTER%2C%20DROP%2C%20and%20so%20on.
+[13]: https://www.postgresql.org/docs/current/logical-replication-publication.html#:~:text=By%20default%2C%20this%20is%20the%20primary%20key%2C%20if%20there%20is%20one.%20Another%20unique%20index%20(with%20certain%20additional%20requirements)%20can%20also%20be%20set%20to%20be%20the%20replica%20identity.%20If%20the%20table%20does%20not%20have%20any%20suitable%20key%2C%20then%20it%20can%20be%20set%20to%20replica%20identity%20FULL%2C%20which%20means%20the%20entire%20row%20becomes%20the%20key.
