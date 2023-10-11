@@ -2,7 +2,7 @@
 &lt;/a>&lt;/p>
 &lt;!-- https://unsplash.com/photos/RIb4BDwiakQ -->
 &lt;p>It is 2023 and upgrading Postgres is still a pain. For those using AWS, there is hope, as they &lt;a href="https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/blue-green-deployments.html">started to offer blue/green deployments for MySQL&lt;/a>. Alas, this is not available for Postgres yet.&lt;/p>
-&lt;p>In the first part, I exposed the most reasonable options, what was used for the upgrade and how it went. In this post, you will find a lengthy step-by-step on how to achieve a Postgres zero-downtime upgrade.&lt;/p>
+&lt;p>&lt;a href="https://brunoluiz.net/blog/2022/nov/low-downtime-postgres-upgrade-i-want-to-believe/">In the first part, I exposed the most reasonable options, what was used for the upgrade and how it went&lt;/a>. In this post, you will find a lengthy step-by-step on how to achieve a Postgres zero-downtime upgrade.&lt;/p>
 &lt;h2 id="observations--limitations">Observations &amp;amp; Limitations&lt;/h2>
 &lt;ol>
 &lt;li>The following step-by-step is for a Postgres instance with only one database. It might work for multiple databases, but &lt;strong>logical replications only work against one database at a time&lt;/strong>.&lt;/li>
