@@ -2,14 +2,12 @@
 title: 'Low downtime Postgres upgrade: the runbook (part II)'
 date: '2023-09-03T12:00:00Z'
 summary: "No one is really prepared to upgrade big Postgres instances without downtime. This second part will focus on how to do it the lowest downtime possible."
-todo:
-    - add pg-data-checker cli
+aliases:
+  - /2023/may/low-downtime-postgres-upgrade-i-want-to-believe-2/
 ---
 
 [![Photo by Florencia Viadana on Unsplash](./cover.jpg)](https://unsplash.com/photos/RIb4BDwiakQ)
 <!-- https://unsplash.com/photos/RIb4BDwiakQ -->
-
-# Low downtime Postgres upgrade: I want to believe (part II)
 
 It is 2023 and upgrading Postgres is still a pain. For those using AWS, there is hope, as they [started to offer blue/green deployments for MySQL][1]. Alas, this is not available for Postgres yet.
 
