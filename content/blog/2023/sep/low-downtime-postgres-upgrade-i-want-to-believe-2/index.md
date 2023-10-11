@@ -11,7 +11,7 @@ aliases:
 
 It is 2023 and upgrading Postgres is still a pain. For those using AWS, there is hope, as they [started to offer blue/green deployments for MySQL][1]. Alas, this is not available for Postgres yet.
 
-In the first part, I exposed the most reasonable options, what was used for the upgrade and how it went. In this post, you will find a lengthy step-by-step on how to achieve a Postgres zero-downtime upgrade.
+[In the first part, I exposed the most reasonable options, what was used for the upgrade and how it went](https://brunoluiz.net/blog/2022/nov/low-downtime-postgres-upgrade-i-want-to-believe/). In this post, you will find a lengthy step-by-step on how to achieve a Postgres zero-downtime upgrade.
 
 ## Observations & Limitations
 
