@@ -4,9 +4,11 @@ date: '2022-08-07T12:00:00Z'
 summary: "After my experiment with GIFSane, one thing was clear: WASM shines when we think about complex applications (eg: media manipulation), usually performing better or opening more opportunities than JavaScript. It is finally time to try to create something from scratch, using Golang WASM toolchain"
 aliases:
   - /blog/2022/aug/imagewand-private-first-image-conversion-experiment-with-golang-and-wasm/
+cover:
+  image: cover.jpg
+  alt: Photo by Mark Tegethoff on Unsplash
+  caption: <a href="https://unsplash.com/photos/NbgQfUvKFE0">Photo by Mark Tegethoff on Unsplash</a>
 ---
-
-[![Photo by Mark Tegethoff on Unsplash](./cover.jpg)](https://unsplash.com/photos/NbgQfUvKFE0)
 
 > 🧭 If you are looking for ImageWand repository, head to [brunoluiz/imagewand](https://github.com/brunoluiz/imagewand)
 
@@ -20,7 +22,6 @@ When someone is converting a puppy image from JPG to PDF this might be ok. But a
 
 What if there was some website to convert images locally, without requiring a server? What if the technology for that already exists? That is when I started developing [ImageWand](https://imagewand.concordalabs.com/) ([source](https://github.com/brunoluiz/imagewand)).
 
-
 ## Converting your images locally and privately: ImageWand
 
 ImageWand converts images locally using WASM and Golang. In the future, it could potentially resize and compress images, but I tried to keep it simple by only using standard libraries encoders and decoders (no PDF for now).
@@ -32,11 +33,9 @@ It seems that Rust would have been a more solid choice for WASM, but I would hav
   <small>Less is more, although I guess the application could benefit from more features 😅</small>
 </center>
 
-
 ## The building experience
 
 Golang offers some standard libraries for image manipulation ([`image` package](https://pkg.go.dev/image)). Implementing something to convert A to B wasn't the hard part. [The conversion logic was extracted and re-used](https://github.com/brunoluiz/imagewand/blob/v1.0.0/imagewand.go) in both CLI and WASM implementations, which is impressive in terms of portability.
-
 
 ### Covering the basics: interfacing with user input
 
@@ -45,7 +44,6 @@ In a CLI, the application can receive user input through flags or arguments. In 
 You can instantiate and load the WASM binary for every call, similar to a CLI call, but it would be an expensive operation. The best way is to run it in the background ([observe the use of a channel to keep it running](https://github.com/brunoluiz/imagewand/blob/v1.0.0/cmd/wasm/main.go#L54)) while developers call it through a JavaScript interface.
 
 In Golang, this is done by [exposing global JavaScript objects/functions within `main()`](https://github.com/brunoluiz/imagewand/blob/v1.0.0/cmd/wasm/main.go#L51-L53). It is not great as it might conflict with other variables and it pollutes the global scope. Other WASM implementations (Rust or TinyGo+WASI) [expose methods by exporting them](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WebAssembly/Instance/exports) in the WASM instance, which is cleaner than relying on global variables.
-
 
 ```go
 func main() {
@@ -59,7 +57,6 @@ func main() {
 }
 ```
 
-
 ### Interacting with "JavaScript-land"
 
 To declare and interact with JavaScript in Golang runtime, developers rely on [`syscall/js`](https://pkg.go.dev/syscall/js). This package allows the application to create functions, read values from JS objects (DOM and non-DOM) and interface byte arrays with JS values (specifically: `UInt8Array`). The only caveat is the following, been present since its release on Golang 1.11.
@@ -72,10 +69,9 @@ If you want to manipulate DOM or create elaborate objects through Golang, you mi
 
 I've [created an internal package (jasm)](https://github.com/brunoluiz/imagewand/blob/main/jasm/wasm.go) with a few helper functions to interface with JavaScript values. [It made `wasm/main.go` way cleaner](https://github.com/brunoluiz/imagewand/blob/main/cmd/wasm/main.go#L20-L48), but certainly the most important of all is the `Await` method.
 
-
 ### Golang and JavaScript promises
 
-JavaScript applications are single-threaded and leverage an event-loop strategy. Certain tasks might cause it to block, such as disk or network operations. JavaScript can schedule these operations by spinning processes off the event-loop, without blocking the main thread. A common way of doing[ it is through Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises).
+JavaScript applications are single-threaded and leverage an event-loop strategy. Certain tasks might cause it to block, such as disk or network operations. JavaScript can schedule these operations by spinning processes off the event-loop, without blocking the main thread. A common way of doing[it is through Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises).
 
 Golang HTTP calls are [using JavaScript's `fetch`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) under the hood, for example. This results in a blocking operation (network call), which needs to be handled properly. Using `net/http` functions incorrectly will result in a runtime deadlock error. It is a common mistake, been even pointed out on the [`syscall/js.FuncOf` documentation](https://pkg.go.dev/syscall/js#FuncOf):
 
@@ -86,7 +82,6 @@ Golang HTTP calls are [using JavaScript's `fetch`](https://developer.mozilla.org
 Starting goroutine solves event loop blocking. Image processing would definetely be a blocking operation and definitely be spun up in a goroutine. But, JavaScript doesn't "understand" them, and the application needs to signal JavaScript runtime to wait for its results. The easiest way is to create a `Promise` through `syscall/js` and call `resolve()` through the goroutine.
 
 As it is a bit of a long piece of code, abstraction is vital. In ImageWand, this is dealt with through [the jasm.Await function](https://github.com/brunoluiz/imagewand/blob/main/jasm/wasm.go#L37-L57).
-
 
 ```go
 func Await(cb func() (js.Value, error)) js.Value {
@@ -114,7 +109,6 @@ func Await(cb func() (js.Value, error)) js.Value {
 
 This way, any blocking operation can be created as a promise by wrapping it through this. There is a pull request open at `golang/go` [that implements a better version of this snippet](https://github.com/golang/go/pull/52581), perhaps landing in a future version of Go.
 
-
 ## Optimisations
 
 Once the proof of concept was up and running, there was a problem: binary size. At this point, building without any optimisation generated a 3.2Mb binary. Not ideal for mobile usage.
@@ -133,7 +127,6 @@ Tools like [`twiggy` can help analyse the binary size](https://rustwasm.github.i
 
 It allows many optimisations, but it requires a bit of tweaking per-project basis. After playing around with it, the previous optimised binary with `-Oz` produced the best results: a 2.9Mb binary, a 7% reduction compared to the original binary.
 
-
 ```shell
 wasm-opt -Oz -o ./app/wasm/main-go-optimal-binaryen.wasm ./app/wasm/main-go-optimal.wasm
 ```
@@ -145,13 +138,11 @@ With Golang compiler, this is as far as I could go with optimisations. Even cons
   <small>Binary size per optimisation: no excessive gains, but still something</small>
 </center>
 
-
 ## TinyGo: a better compiler for WASM?
 
 I heard about [TinyGo](https://tinygo.org/) sometime ago. With the slogan "A Go Compiler For Small Places" and a focus on embedded systems, I never got on the hype train. It is a subset of the Golang language, which means [there are some limitations](https://tinygo.org/docs/reference/lang-support/) and not all packages will work on it, even the [ones in the standard library](https://tinygo.org/docs/reference/lang-support/stdlib/). This means it is not exactly a drop-in for all scenarios.
 
 But, besides embedded systems, it seems to be a quite popular WASM compiler. The binaries produced, being a subset and focused on "small places", are quite small. Taking into consideration the supported packages and limitations, it seemed a good candidate for ImageWand.
-
 
 ### Almost a drop-in replacement
 
@@ -166,14 +157,13 @@ This was until I checked the console. Using `.String()` to get values from `sysc
 
 [There are some hacks for it](https://github.com/tinygo-org/tinygo/issues/1140), but they all have some memory leak issues. As the surface between the program functionality and `syscall/js` is quite limited, [changing those into `int` seemed a better solution (without any caveat)](https://github.com/brunoluiz/imagewand/commit/4860cb4c757c0ad859912047eb145798d47ff434).
 
-Besides this, anyone attempting to move from Golang to TinyGo has to replace[ `wasm_exec.js`](https://github.com/tinygo-org/tinygo/blob/release/targets/wasm_exec.js). [According to the documentation](https://tinygo.org/docs/guides/webassembly/#how-it-works), it is based on the Go's one, but with a couple of changes that make it incompatible. Nothing major and super easy to tackle.
+Besides this, anyone attempting to move from Golang to TinyGo has to replace[`wasm_exec.js`](https://github.com/tinygo-org/tinygo/blob/release/targets/wasm_exec.js). [According to the documentation](https://tinygo.org/docs/guides/webassembly/#how-it-works), it is based on the Go's one, but with a couple of changes that make it incompatible. Nothing major and super easy to tackle.
 
 Once tweaked, ImageWand was successfully compiled using TinyGo, without any error messages in runtime and a binary twice the original size (1.5Mb). Smells like progress!
 
 ### TinyGo after optimisations
 
 Similar to Golang, the TinyGo compiler [allows tweaks](https://tinygo.org/docs/reference/usage/important-options/) according to project requirements. Considering this will be distributed on the web, optimisations related to size are important. Some might prefer performance tweaks, which are available as well.
-
 
 ```shell
 tinygo build -o app/wasm/main-tinygo-optimal.wasm -target wasm -no-debug -gc leaking ./cmd/wasm
@@ -194,9 +184,7 @@ As in Golang though, `wasm-opt` did not result in a massive gain, but it is stil
 </center>
   <br/>
 
-
 If your implementation is compatible with TinyGo and you don't fall into an edge case, go for it! It provides plenty of features, and it seems a good choice in terms of binary size, especially considering web distribution.
-
 
 ### WASI: interesting but not mature enough on TinyGo
 
@@ -212,16 +200,13 @@ ImageWand was relying on `syscall/js` to interface with user input, which depend
 
 TinyGo supports WASI. This means  `syscall/js` is not required if you don't want to manipulate the DOM, which would have made ImageWand code simpler, becoming just an exported Golang function… But, there are a couple of limitations when implementing WASI programs with TinyGo:
 
-
-
 1. [Function arguments and outputs can only be numbers or pointers, which are essentially numbers with a memory address](https://tinygo.org/docs/concepts/compiler-internals/calling-convention/#:~:text=The%20WebAssembly%20target%20does%20not%20return%20variables%20directly%20that%20cannot%20be%20handled%20by%20JavaScript%20(see%20above%20about%20i64%2C%20also%20struct%2C%20i64%2C%20multiple%20return%20values%2C%20etc).%20Instead%2C%20they%20are%20stored%20into%20a%20pointer%20passed%20as%20the%20first%20parameter%20by%20the%20caller.).
 2. [There is no proper support for multi-return, so no easy `(someType, error)`](https://github.com/tinygo-org/tinygo/issues/3010#issuecomment-1191916589) without some hacks.
 3. Lacking documentation and helper methods to operate on top of shared WASM memory ([I've opened a ticket around documentation](https://github.com/tinygo-org/tinygo/issues/3040)).
 
 ImageWand was passing a slice of `byte` with the image content, which was the simplest way to get this working (don't io.Reader me: it is not as simple). To pass the image input and receive the output in `[]byte`, you need to use JavaScript and WASM shared memory space, pointers and all sort of low-level magic.
 
-Checking Github, it seems many people came across the issue of passing non-numeric values or returning multiple values, and every developer has a different solution to it [[1]](https://github.com/tinygo-org/tinygo/issues/2512#issuecomment-1011399751) [[2]](https://github.com/tinygo-org/tinygo/issues/1824).[ Eventually, I came up with my way of dealing with this](https://github.com/brunoluiz/imagewand/pull/4),  but it is quite ugly and probably not efficient at all. Most likely I should have used [`WebAssembly.memory.buffer`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WebAssembly/Memory), but I couldn't find an easy way of doing so. Besides, WASI was an extra in this whole experiment and, at this point, I had invested a long time cracking my head to have at least something minimal working.
-
+Checking Github, it seems many people came across the issue of passing non-numeric values or returning multiple values, and every developer has a different solution to it [[1]](https://github.com/tinygo-org/tinygo/issues/2512#issuecomment-1011399751) [[2]](https://github.com/tinygo-org/tinygo/issues/1824).[Eventually, I came up with my way of dealing with this](https://github.com/brunoluiz/imagewand/pull/4),  but it is quite ugly and probably not efficient at all. Most likely I should have used [`WebAssembly.memory.buffer`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WebAssembly/Memory), but I couldn't find an easy way of doing so. Besides, WASI was an extra in this whole experiment and, at this point, I had invested a long time cracking my head to have at least something minimal working.
 
 ```js
 // JavaScript code
@@ -301,9 +286,9 @@ Would I choose Golang for a WASM project? If I had to develop something quickly 
 
 I never programmed with Rust before, but considering its support to WASM and some other interesting use cases I have in mind, it is perhaps a sign that I should finally try to learn it.
 
-- [🔗 ImageWand project page](https://imagewand.concordalabs.com)
-- [💾 ImageWand source code](https://github.com/brunoluiz/imagewand)
-- [💬 Reach me on Twitter @ brunoluiz](https://twitter.com/brunoluiz)
+* [🔗 ImageWand project page](https://imagewand.concordalabs.com)
+* [💾 ImageWand source code](https://github.com/brunoluiz/imagewand)
+* [💬 Reach me on Twitter @ brunoluiz](https://twitter.com/brunoluiz)
 
 ## References
 

@@ -4,9 +4,11 @@ date: '2018-03-07T19:44:37.121Z'
 summary: 'There is one big and very special date on the e-commerce and retail market and it is called Black Friday. For many, it means "discount prices", "sale!", "50% off", but for developers and IT people it is a challenging adventure.'
 aliases:
   - /2018/mar/a-tale-of-how-to-not-deploy-two-months-old-features/
+cover:
+  image: cover.jpg
+  alt: Photo by rawpixel.com on Unsplash
+  caption: Photo by rawpixel.com on Unsplash
 ---
-
-![Photo by rawpixel.com on Unsplash](cover.jpg)
 
 There is one big and very special date on the e-commerce and retail market and it's called Black Friday. For many, it means "discount prices", "sale!", "50% off", but for developers and IT people it is a challenging adventure.
 

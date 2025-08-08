@@ -2,10 +2,11 @@
 title: 'GIFs (sane) playback control using WASM and FFmpeg'
 date: '2022-01-20T12:00:00Z'
 summary: "Not having playback control on GIFs always annoyed me a bit. I always secretly hoped that one day browsers would support this. This day never arrived, and I decided to take matters into my own hands."
+cover:
+  image: cover.jpg
+  alt: Photo by Stephen Monterroso on Unsplash
+  caption: <a href="https://unsplash.com/photos/cwcPV_VKfy4">Photo by Stephen Monterroso on Unsplash</a>
 ---
-
-![Photo by Stephen Monterroso on Unsplash](./cover.jpg)
-<!-- https://unsplash.com/photos/cwcPV_VKfy4 -->
 
 Animated images in GIF format are around for a long time. They were first released in 1987 by CompuServe. Yep, your maths are correct: they came even before browsers. It was not until Netscape 2.0 that the GIF format was incorporated and conquered the world ([really][1]).
 
@@ -72,7 +73,6 @@ The caveat is that, on Firefox, [extensions can't use `SharedArrayBuffer`][18]. 
 ![Photo by Michael Dziedzic on Unsplash](./fixing.jpg)
 <!-- Photo by <a href="https://unsplash.com/@lazycreekimages?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Michael Dziedzic</a> on <a href="https://unsplash.com/s/photos/fix?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a> -->
 
-
 On the bright side: WASM applications can be compiled to single-threaded, and FFMPEG.wasm is no different. It removes the need for `SharedArrayBuffer` with the only caveat being it will be certainly slower.
 
 As of January 2022, there is no "pre-packaged" FFMPEG.wasm available with single-threaded support. But [@jeromewu][20] already pushed the required changes to compile it. This means you will need to get your hands a little bit dirty.
@@ -128,8 +128,8 @@ FFmpeg.wasm supports both. But, there is a catch: GIF to WebM encoding is slower
 
 Initially, GIFSane used a content script to run FFmpeg. But:
 
-1.  It was inefficient, as all pages loaded GIFSane resources (mainly ffmpeg.wasm)
-2.  Some websites `[Content Security Policy][30]` block any content injection to it. GitHub is quite aggressive in these policies, for example.
+1. It was inefficient, as all pages loaded GIFSane resources (mainly ffmpeg.wasm)
+2. Some websites `[Content Security Policy][30]` block any content injection to it. GitHub is quite aggressive in these policies, for example.
 
 Once FFmpeg.wasm was moved to a background script, I managed to run FFmpeg and convert GIFs. It still required a hack to pass the final MP4 from the background to the content script. This is because extensions don't emit JS objects, but stringified versions of them instead. I obviously found my way 🤷 ([exhibit A][31], [exhibit B][32]).
 
@@ -163,7 +163,6 @@ Closer to the end of the year, I will revisit this post and GIFSane due to Manif
 [11]: https://blog.mozilla.org/addons/2021/05/27/manifest-v3-update/
 [12]: https://bugs.chromium.org/p/chromium/issues/detail?id=1173354
 [13]: https://developer.chrome.com/docs/extensions/mv3/intro/mv3-overview/#service-workers
-[14]: https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL
 [15]: https://meltdownattack.com/
 [16]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer#security_requirements
 [17]: https://developer.chrome.com/docs/extensions/mv2/manifest/cross_origin_embedder_policy/
@@ -179,7 +178,6 @@ Closer to the end of the year, I will revisit this post and GIFSane due to Manif
 [27]: https://github.com/brunoluiz/gifsane-extension/blob/main/package.json#L8-L9
 [28]: https://github.com/brunoluiz/gifsane-extension/blob/main/src/handlers/ffmpeg-handler.js#L1-L9
 [29]: https://support.mozilla.org/en-US/kb/html5-audio-and-video-firefox#w_patented-media
-[30]: https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
 [31]: https://github.com/brunoluiz/gifsane-extension/blob/main/src/handlers/ffmpeg-handler.js#L71-L78
 [32]: https://github.com/brunoluiz/gifsane-extension/blob/main/src/content.js#L49-L50
 [33]: http://chrome.webRequest.onHeadersReceived

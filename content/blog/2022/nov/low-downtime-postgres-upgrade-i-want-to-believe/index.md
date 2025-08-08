@@ -2,9 +2,11 @@
 title: 'Low downtime Postgres upgrade: I want to believe (part I)'
 date: '2022-11-18T12:00:00Z'
 summary: "Postgres is a great database, one of developer's favourites, but upgrades are far from easy and smooth. The journey of selecting an optimal solution and weighing its trade-offs and risks is always an exciting challenge."
+cover:
+  image: cover.jpg
+  alt: Photo by Florencia Viadana on Unsplash
+  caption: <a href="https://unsplash.com/photos/RIb4BDwiakQ">Photo by Florencia Viadana on Unsplash</a>
 ---
-[![Photo by Florencia Viadana on Unsplash](./cover.jpg)](https://unsplash.com/photos/RIb4BDwiakQ)
-<!-- https://unsplash.com/photos/RIb4BDwiakQ -->
 
 > 💡 This post will describe the upgrade process, explore alternatives and what was the final choice. A subsequent post will have a detailed step-by-step guide on the chosen strategy.
 
@@ -29,12 +31,13 @@ The most straightforward path would be an in-place upgrade. To try this, I creat
 
 After this initial reality shock and a few days of research, a couple of options came across:
 
-1.  **Native logical replication:** this method would allow us to replicate the database using native features. Postgres runs an initial `COPY` and then syncs out new operations to the target database (more on that later).
-2.  **Data migration tool (AWS DMS):** it seemed to use logical replication underneath, combined with some cloud-provider magic. From the initial research, it seemed the most robust option.
-3.  **Logical replication on a cloned database:** exact as the native, but it uses some hacks to trim down the initial `COPY` time. Quite risky and primarily based [on Instacart's approach to a similar problem][7].
-4.  **In-place upgrade:** if all the above failed, the company would have to embrace for impact.
+1. **Native logical replication:** this method would allow us to replicate the database using native features. Postgres runs an initial `COPY` and then syncs out new operations to the target database (more on that later).
+2. **Data migration tool (AWS DMS):** it seemed to use logical replication underneath, combined with some cloud-provider magic. From the initial research, it seemed the most robust option.
+3. **Logical replication on a cloned database:** exact as the native, but it uses some hacks to trim down the initial `COPY` time. Quite risky and primarily based [on Instacart's approach to a similar problem][7].
+4. **In-place upgrade:** if all the above failed, the company would have to embrace for impact.
 
 ## Exploring the options
+
 ### Data migration tool (AWS DMS)
 
 One of [AWS Data Migration Service's][8] (DMS) selling points is "Maintain high availability and minimal downtime during the migration process [...]". It was what we were looking for. In theory, for a low downtime, this would happen: the old cluster would still be handling traffic while being migrated (DMS) to a new one. Once finished, the team only needs to switch over.
@@ -61,21 +64,21 @@ The **replication slots are the main piece of the logical replication**, as well
 
 In a very simplified overview, this is how it works:
 
-1.  A publication and replication slot are set up on the source database.
-1.  An empty database is created (target). **It requires manual schema migration and setup**, as neither pglogical nor the native option does it for you.
-1.  The target database subscribes to the source database publication.
-1.  By default, it will trigger a COPY process, which ensures all the data is copied to the target database. Once finished, new operations are flushed periodically from the replication slot.
-    *  This can be skipped. You need to have the entire state copy for upgrades, but it might be ok if the target is used for analytics.
-1.  Once the database is in-sync, switch over whenever is more convenient.
+1. A publication and replication slot are set up on the source database.
+1. An empty database is created (target). **It requires manual schema migration and setup**, as neither pglogical nor the native option does it for you.
+1. The target database subscribes to the source database publication.
+1. By default, it will trigger a COPY process, which ensures all the data is copied to the target database. Once finished, new operations are flushed periodically from the replication slot.
+    * This can be skipped. You need to have the entire state copy for upgrades, but it might be ok if the target is used for analytics.
+1. Once the database is in-sync, switch over whenever is more convenient.
 
 [![Native logical replication diagram (without LSN "hacks")](./slow-upgrade.png)](./slow-upgrade.png)
 <p align='center'><small><em>Native logical replication diagram (without LSN "hacks")</em></small></p>
 
 It is a simple and well-documented process available in any Postgres distribution. Besides, there are a couple of benefits going with this approach instead of an in-place upgrade:
 
-1.  Lower downtime, as it would be just the time of the switchover.
-2.  ANALYSEs, VACUUMs, and REINDEXes can be done before live traffic.
-3.  The teams can benchmark queries to evaluate their performance before the switchover.
+1. Lower downtime, as it would be just the time of the switchover.
+2. ANALYSEs, VACUUMs, and REINDEXes can be done before live traffic.
+3. The teams can benchmark queries to evaluate their performance before the switchover.
 
 [There are some limitations][22], which overlap with some from DMS, so be aware. Mainly, the database schema and sequence data are not replicated on the replication. The team will need to create the target using `pg_dumpall` and `pg_dump` or some backup/clone + table truncation, and the sequences have to be manually reset during the switchover.
 
@@ -95,18 +98,18 @@ The problem? There is no official documentation around this method, and when act
 
 Setting this up is similar to the previous option but slightly more complicated:
 
-1.  A publication + replication slot has to be set up on the source database (old cluster).
-1.  Once set, the target database is generated through cloning. [AWS RDS Aurora feature][24], but [GCP has something similar][25].
+1. A publication + replication slot has to be set up on the source database (old cluster).
+1. Once set, the target database is generated through cloning. [AWS RDS Aurora feature][24], but [GCP has something similar][25].
     * While cloning, the source database keeps all write operations stored on the created replication slot.
     * Cloning doesn't impact your live database. This is due to how Aurora volumes are implemented and how cloning leverages that.
     * No truncation + `pg_dump` is required
-1.  Once the target instance is ready, it will **log an error with its starting LSN position**. It will be handy as it allows skipping data in the replication process already present in the target due to the time between replication slot creation x clone finishing. The operator needs to keep note of this for later use.
-1.  Delete the logical replication setup (subscriber + replication slot) from the target instance. Cloud providers don't allow upgrades if there are logical replication slots.
-1.  Upgrade the cloned instance, not forgetting to run ANALYSE + VACUUM. At this point, the team can benchmark this cluster to guarantee it has the same performance, reindex specific indexes and do any operation that would impact live traffic.
-1.  Create a subscription on the target database, specifying **no initial copy, no replication slot creation and leaving it disabled by default**.
-1.  Advance the replication slot origin on the target **to the LSN found at (3) and enable the subscription.**
-1.  Observe the replication and wait for it to catch up.
-1.  Scale down API instances using the service, allow the source to flush all pending operations and switch over to the target.
+1. Once the target instance is ready, it will **log an error with its starting LSN position**. It will be handy as it allows skipping data in the replication process already present in the target due to the time between replication slot creation x clone finishing. The operator needs to keep note of this for later use.
+1. Delete the logical replication setup (subscriber + replication slot) from the target instance. Cloud providers don't allow upgrades if there are logical replication slots.
+1. Upgrade the cloned instance, not forgetting to run ANALYSE + VACUUM. At this point, the team can benchmark this cluster to guarantee it has the same performance, reindex specific indexes and do any operation that would impact live traffic.
+1. Create a subscription on the target database, specifying **no initial copy, no replication slot creation and leaving it disabled by default**.
+1. Advance the replication slot origin on the target **to the LSN found at (3) and enable the subscription.**
+1. Observe the replication and wait for it to catch up.
+1. Scale down API instances using the service, allow the source to flush all pending operations and switch over to the target.
 
 [![Native logical replication diagram with LSN "hacks"](./fast-upgrade.png)](./fast-upgrade.png)
 <p align='center'><small><em>Native logical replication diagram with LSN "hacks"</em></small></p>

@@ -4,9 +4,11 @@ date: '2019-02-15T19:44:37.121Z'
 summary: 'If you are not new in the JavaScript world, you might have already heard about npm. It is a package manager which lets developers easily add dependencies to projects, as `npm install hello-world`. But, have you ever asked, How do I create and publish my own packages'
 aliases:
   - /2019/feb/a-guide-to-npm-package-publishing/
+cover:
+  image: cover.jpg
+  alt: Photo by Paul Esch-Laurent on Unsplash
+  caption: Photo by Paul Esch-Laurent on Unsplash
 ---
-
-![Photo by Paul Esch-Laurent on Unsplash](cover.jpg)
 
 If you are not new in the JavaScript world, you might have already heard about [npm](https://www.npmjs.com/). It is a package manager which lets developers easily add dependencies to projects, as `npm install hello-world`. But, have you ever asked, "How do I create and publish my own packages"?
 

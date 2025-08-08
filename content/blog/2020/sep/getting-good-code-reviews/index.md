@@ -4,9 +4,11 @@ date: '2020-09-28T19:00:00Z'
 summary: "Every software developer, soon after pushing code to the repository, has this urge to ping the team to ask for code review. But, I dare to say: don't do it! Most likely the code will still have some issues, especially if this is your first push for this feature."
 aliases:
   - /2020/sep/getting-proper-code-reviews/
+cover:
+  image: cover.jpg
+  alt: Photo by Glenn Carstens-Peters on Unsplash
+  caption: Photo by Glenn Carstens-Peters on Unsplash
 ---
-
-![Photo by Glenn Carstens-Peters on Unsplash](cover.jpg)
 
 Every software developer, soon after pushing code to the repository, has this urge to ping the team to ask for code review. But, I dare to say: don't do it! Most likely some adjusments and checks can still be done, especially if this is your first push for this feature.
 
@@ -30,18 +32,18 @@ It will narrow down the scope, and it might raise some interesting discussions b
 
 Examples of splittable code:
 
--   Updates on schemas or any type model, as the team might want to discuss it before going ahead
--   Tooling updates (scripts or shared libs/SDK), as it might be of interest of other people outside the team
--   If there is a story ticket with sub-tasks, use the sub-tasks as a guide for opening pull requests
+- Updates on schemas or any type model, as the team might want to discuss it before going ahead
+- Tooling updates (scripts or shared libs/SDK), as it might be of interest of other people outside the team
+- If there is a story ticket with sub-tasks, use the sub-tasks as a guide for opening pull requests
 
 # Use comments to open discussions
 
 Most repository hosting services have tools to allow developers to comment in pull requests. As you review your code, these are some points you might want to discuss:
 
-1.  Discuss if an implementation is the best approach to the problem or if it is consistent with similar features
-2.  Discuss if [the code is idiomatic][1] for the language or framework
-3.  Point-out to possible breaking changes or disruptive codes (example: possible data loss)
-4.  Point out relevant bits of the code, where much of the logic happens
+1. Discuss if an implementation is the best approach to the problem or if it is consistent with similar features
+2. Discuss if [the code is idiomatic][1] for the language or framework
+3. Point-out to possible breaking changes or disruptive codes (example: possible data loss)
+4. Point out relevant bits of the code, where much of the logic happens
 
 ![Is this idiomatic code?](idiomatic-screenshot.png)
 
@@ -63,7 +65,7 @@ The team might exactly know what to expect for this feature, and there might be 
 
 If there is a ticket, replicating some bits in the description might be helpful as well. Someone might need to come back to it after months, or even other teams might want to peek into it. Most likely, just a few will remember details and this description could be of huge help in these moments.
 
-# Continuous integration: automation, automation, automation...
+# Continuous integration: automation, automation, automation
 
 ![Release automation](circleci-screenshot.png)
 
@@ -73,11 +75,11 @@ With tools such as [CircleCI](https://circleci.com/) or [Github Actions](https:/
 
 Things that could be easily automated:
 
--   Tests: if the project has them (it should), the commands to run them should be easy to include in the automation
--   [Linting](https://en.wikipedia.org/wiki/Lint_(software)): checks if the code follows code guidelines decided by the team, enabling to catch bugs and other programming errors. Most languages have linting tools, with many available configurations (examples: ESLint, golangci-lint)
--   Building: from binaries to docker images, why not add this process to your automation pipeline?
--   Deploying: depending on the team workflow, it might be even possible to deploy these straight to staging or production (continuous delivery)
--   Publishing: if the project is some tool, it can publish in the specific platform (screenshot example)
+- Tests: if the project has them (it should), the commands to run them should be easy to include in the automation
+- [Linting](https://en.wikipedia.org/wiki/Lint_(software)): checks if the code follows code guidelines decided by the team, enabling to catch bugs and other programming errors. Most languages have linting tools, with many available configurations (examples: ESLint, golangci-lint)
+- Building: from binaries to docker images, why not add this process to your automation pipeline?
+- Deploying: depending on the team workflow, it might be even possible to deploy these straight to staging or production (continuous delivery)
+- Publishing: if the project is some tool, it can publish in the specific platform (screenshot example)
 
 These are just examples. Your team might have different requirements and tasks, which could be configured into your continuous integration.
 

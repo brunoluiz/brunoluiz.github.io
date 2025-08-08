@@ -4,9 +4,11 @@ date: '2017-07-18T19:44:37.121Z'
 summary: 'GitFlow is a branching model created by Vincent Driessen on 2010. Since it was published, many companies had tested and implemented it, which allows us to have many reviews about how well (or not) it works. After some discussions within our team, we decided to not go with GitFlow, but use a simpler model instead, together with a tightly defined workflow.'
 aliases:
   - /2017/jul/still-using-gitflow-what-about-a-simpler-alternative/
+cover:
+  image: cover.jpg
+  alt: Alternative on sight
+  caption: Alternative on sight
 ---
-
-![Alternative on sight](cover.jpg)
 
 GitFlow is a branching model created by Vincent Driessen on 2010 ([original article](http://nvie.com/posts/a-successful-git-branching-model/)). Since it was published, many companies had tested and implemented it, which allows us to have many reviews about how well (or not) it works. After some discussions within our team, we decided to not go with GitFlow, but use a simpler model instead, together with a tightly defined workflow. Some of the discussed reasons of why not go with GitFlow are the same written on [this blog post](http://endoflineblog.com/gitflow-considered-harmful).
 

@@ -4,9 +4,11 @@ date: '2017-08-30T19:44:37.121Z'
 summary: 'As the saying goes: never trust user input. People coming from PHP and Java have many validation libraries available. But what about JavaScript? There are some options, but none seems more interesting than Joi.'
 aliases:
   - /2017/aug/joi-validate-input-and-define-databases-in-javascript/
+cover:
+  image: ./cover.jpg
+  alt: Photo by Rayi Christian Wicaksono
+  caption: Photo by Rayi Christian Wicaksono
 ---
-
-![Photo by Rayi Christian Wicaksono](cover.jpg)
 
 As the saying goes: _never trust user input_. People coming from PHP and Java have many validation libraries available. But what about JavaScript? There are some options, but none seems more interesting than Joi.
 

@@ -4,9 +4,11 @@ date: '2019-03-14T21:37:37.121Z'
 summary: 'Today, Kubernetes is the de facto container orchestration solution. Together with the devops culture, developers have to get familiarised to its tools, such as kubectl. But how do we go beyond kubectl?'
 aliases:
   - /2019/mar/kubernetes-devops-productivity-hacks/
+cover:
+  image: cover.jpg
+  alt: Photo by Cameron Venti on Unsplash
+  caption: Photo by Cameron Venti on Unsplash
 ---
-
-![Photo by Cameron Venti on Unsplash](cover.jpg)
 
 Today, Kubernetes is the de facto container orchestration solution. Together with the devops culture, developers have to get familiarised to its tools, such as `kubectl`.
 
@@ -36,7 +38,7 @@ If [`zsh`](http://zsh.sourceforge.net/) and [`oh-my-zsh`](https://ohmyz.sh/) are
 plugins=(git kubectl ...)
 ```
 
-There are fewer aliases compared to `ahmetb/kubectl-aliases`, making it easier to learn and faster to load. The list of `oh-my-zsh/kubectl` aliases is [ available here ](https://github.com/robbyrussell/oh-my-zsh/tree/master/plugins/kubectl)
+There are fewer aliases compared to `ahmetb/kubectl-aliases`, making it easier to learn and faster to load. The list of `oh-my-zsh/kubectl` aliases is [available here](https://github.com/robbyrussell/oh-my-zsh/tree/master/plugins/kubectl)
 
 `kubectx` and `kubens` do not have aliases by default. To allow shorter calls for it, place the following on `.zshrc` or `.bashrc`.
 

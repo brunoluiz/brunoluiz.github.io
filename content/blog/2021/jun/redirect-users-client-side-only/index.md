@@ -4,9 +4,11 @@ date: '2021-06-17T12:00:00Z'
 summary: "One of the first things API developers learn is HTTP codes. From these 3xx are special, as they redirect users from A to B. But what if I told you there is a way to do it without HTTP codes?"
 aliases:
   - /2021/jun/redirect-users-without-http-301-or-js/
+cover:
+  image: cover.jpg
+  alt: Photo by Javier Allegue Barros on Unsplash
+  caption: Photo by Javier Allegue Barros on Unsplash
 ---
-
-![Photo by Javier Allegue Barros on Unsplash](cover.jpg)
 
 One of the first things API developers learn is HTTP codes. Usually, people already saw some 404 around, but soon they learn about the uses of 2xx, 4xx and 5xx codes. Probably you, insidious reader, realised I jumped the 3xx series.
 
@@ -14,9 +16,9 @@ Most first time developers never hear about 3xx, but probably because most haven
 
 HTTP 301 can be useful in many cases:
 
--   Redirect URLs if there was a major URL change in a website (xyz.com/blog/2020/01/some-title to xyz.com/some-title).
--   Create redirect flows for auth (OAuth; redirect on user log-out).
--   Shorten URLs (redirect xyz.com/foo to foo.com).
+- Redirect URLs if there was a major URL change in a website (xyz.com/blog/2020/01/some-title to xyz.com/some-title).
+- Create redirect flows for auth (OAuth; redirect on user log-out).
+- Shorten URLs (redirect xyz.com/foo to foo.com).
 
 These can only be returned by HTTP servers. But, there are times you might not want to maintain an HTTP server. You might have a static generated website, where you want to redirect old URLs to new URLs (due to SEO), or just have shortened URLs together with your static website.
 
@@ -57,30 +59,30 @@ urls:
 <!-- Example output at ./output/github/index.html -->
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>GitHub: Where the world builds software · GitHub</title>
-		<link rel="canonical" href="https://github.com"/>
-		<meta name="robots" content="noindex">
-		<meta charset="utf-8" />
-		<meta http-equiv="refresh" content="0; url=https://github.com" />
-		<meta name="description" content="GitHub is where over 65 million developers shape the future of software, together. Contribute to the open source community, manage your Git repositories, review code like a pro, track bugs and features, power your CI/CD and DevOps workflows, and secure code before you commit it."/>
-		<meta property="fb:app_id" content="1401488693436528"/>
-		<meta name="twitter:image:src" content="https://github.githubassets.com/images/modules/site/social-cards/github-social.png"/>
-		<meta name="twitter:site" content="@github"/>
-		<meta name="twitter:card" content="summary_large_image"/>
-		<meta name="twitter:title" content="GitHub: Where the world builds software"/>
-		<meta name="twitter:description" content="GitHub is where over 65 million developers shape the future of software, together. Contribute to the open source community, manage your Git repositories, review code like a pro, track bugs and feat..."/>
-		<meta property="og:image" content="https://github.githubassets.com/images/modules/site/social-cards/github-social.png"/>
-		<meta property="og:image:alt" content="GitHub is where over 65 million developers shape the future of software, together. Contribute to the open source community, manage your Git repositories, review code like a pro, track bugs and feat..."/>
-		<meta property="og:site_name" content="GitHub"/>
-		<meta property="og:type" content="object"/>
-		<meta property="og:title" content="GitHub: Where the world builds software"/>
-		<meta property="og:url" content="https://github.com/"/>
-		<meta property="og:description" content="GitHub is where over 65 million developers shape the future of software, together. Contribute to the open source community, manage your Git repositories, review code like a pro, track bugs and feat..."/>
-		<meta property="og:image:type" content="image/png"/>
-		<meta property="og:image:width" content="1200"/>
-		<meta property="og:image:height" content="620"/>
-	</head>
+ <head>
+  <title>GitHub: Where the world builds software · GitHub</title>
+  <link rel="canonical" href="https://github.com"/>
+  <meta name="robots" content="noindex">
+  <meta charset="utf-8" />
+  <meta http-equiv="refresh" content="0; url=https://github.com" />
+  <meta name="description" content="GitHub is where over 65 million developers shape the future of software, together. Contribute to the open source community, manage your Git repositories, review code like a pro, track bugs and features, power your CI/CD and DevOps workflows, and secure code before you commit it."/>
+  <meta property="fb:app_id" content="1401488693436528"/>
+  <meta name="twitter:image:src" content="https://github.githubassets.com/images/modules/site/social-cards/github-social.png"/>
+  <meta name="twitter:site" content="@github"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="GitHub: Where the world builds software"/>
+  <meta name="twitter:description" content="GitHub is where over 65 million developers shape the future of software, together. Contribute to the open source community, manage your Git repositories, review code like a pro, track bugs and feat..."/>
+  <meta property="og:image" content="https://github.githubassets.com/images/modules/site/social-cards/github-social.png"/>
+  <meta property="og:image:alt" content="GitHub is where over 65 million developers shape the future of software, together. Contribute to the open source community, manage your Git repositories, review code like a pro, track bugs and feat..."/>
+  <meta property="og:site_name" content="GitHub"/>
+  <meta property="og:type" content="object"/>
+  <meta property="og:title" content="GitHub: Where the world builds software"/>
+  <meta property="og:url" content="https://github.com/"/>
+  <meta property="og:description" content="GitHub is where over 65 million developers shape the future of software, together. Contribute to the open source community, manage your Git repositories, review code like a pro, track bugs and feat..."/>
+  <meta property="og:image:type" content="image/png"/>
+  <meta property="og:image:width" content="1200"/>
+  <meta property="og:image:height" content="620"/>
+ </head>
 </html>
 ```
 

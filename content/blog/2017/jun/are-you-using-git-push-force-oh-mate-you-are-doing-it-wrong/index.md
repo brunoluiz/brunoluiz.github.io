@@ -3,9 +3,11 @@ title: 'Are you using git push force? Oh mate, you are doing it wrong!'
 date: '2017-06-03T19:44:37.121Z'
 aliases:
   - /2017/jun/are-you-using-git-push-force-oh-mate-you-are-doing-it-wrong/
+cover:
+  image: header.png
+  caption: Git branching
+  alt: Git branching
 ---
-
-![Git branching](header.png)
 
 You are developing some feature together with your team. Most likely you have done the usual dance: checkout a branch from the master or development branch, done your commits, pushed this feature branch to the remote and opened a push request for peer review.
 
