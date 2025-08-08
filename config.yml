@@ -15,6 +15,8 @@ params:
   homeInfoParams:
     Title: 👨‍💻 Bruno Luiz da Silva
     Content: A collection of random software engineering thoughts
+  cover:
+    hiddenInList: true
   socialIcons: # optional
     - name: "email"
       url: "mailto:contact@brunoluiz.net"
