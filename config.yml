@@ -1,11 +1,11 @@
 baseurl: "https://brunoluiz.net"
 title: "Bruno Luiz Silva"
 theme: "PaperMod"
-languageCode: "en-us"
+languageCode: "en"
 enableEmoji: true
 pagination:
   pagerSize: 7
-summaryLength: 100
+summaryLength: 300
 params:
   title: Bruno Luiz Silva
   description: A collection of random software engineering thoughts
