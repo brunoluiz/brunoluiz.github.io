@@ -13,7 +13,7 @@ params:
     - cover.jpg
   defaultTheme: "auto"
   homeInfoParams:
-    Title: 👨‍💻 Bruno Luiz da Silva
+    Title: 👨‍💻 Bruno Luiz Silva
     Content: A collection of random software engineering thoughts
   cover:
     hiddenInList: true
