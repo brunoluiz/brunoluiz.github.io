@@ -23,7 +23,7 @@ Standardised names will follow a pattern that allows “context” around that r
 
 There might be even more variations depending on what indicators are desirable. Extra indicators are favoured to give full context around the resource but it usually backfires, since they become quite long and confusing due to the amount of information in them.
 
-Also, the last example is already quite long (45 characters) and it could be even longer. Cloud vendors have character limits and it wouldn't be too hard to hit them due varying indicators (eg, `dev` ⇒ `production`: \+7 characters).
+Also, the last example is already quite long (45 characters) and it could be even longer.  Cloud vendors or platforms have character limits (eg, AWS S3 ⇒ 63 characters) and it wouldn't be too hard to hit them due varying indicators (eg, `dev` ⇒ `production`: \+7 characters).
 
 Besides the concerns above, the initial problem still holds: **renaming is hard**. **Naming strategies are fragile since it is hard to predict future changes** (eg, extra indicators). Not only, if more indicators are required, the strategy will be broken and a `v2` will be needed, leaving an organised mess behind.
 
