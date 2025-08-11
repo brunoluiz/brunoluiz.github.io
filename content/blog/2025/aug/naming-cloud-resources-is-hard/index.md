@@ -9,7 +9,7 @@ cover:
 
 ---
 
-Most of us have to name “things” daily: variables, functions, services, cloud resources and others. Most are easy to change due to refactoring tools, but cloud resources can be impossible at times. Most vendors require full resource replacement: renaming a database leads to restore/recreate, and a load balancer requires shifting live traffic to a new instance. **I will cover how to avoid major complications by simply re-thinking how you name cloud resources** and (hopefully) avoid renames**.**
+Most of us have to name “things” daily: variables, functions, services, cloud resources and others. Most are easy to change due to refactoring tools, but cloud resources can be impossible at times. Most vendors require full resource replacement: renaming a database leads to restore/recreate, and a load balancer requires shifting live traffic to a new instance. **We will cover how to avoid major complications by simply re-thinking how you name cloud resources** and (hopefully) avoid renames.
 
 ## **Could a naming convention help?**
 
@@ -55,7 +55,7 @@ Different from names, detecting resources that are non-conformant to the tagging
 
 Bear in mind that some cloud providers can leverage tags to display names for some resources in the Console. [For AWS Compute/Networking resources with `tag:Name`](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Using_Tags.html#:~:text=The%20console%20might%20organize%20resources%20according%20to%20the%20Name%20tag%2C%20but%20this%20tag%20doesn%27t%20have%20any%20semantic%20meaning%20to%20the%20Amazon%20EC2%20service.), and [Azure resources tagged with `hidden-title`](https://learn.microsoft.com/en-us/community/content/hidden-tags-azure#hidden-title). This can be useful in scenarios where the team wants to give extra context via the name while still keeping mutability as an option.
 
-ℹ️ Even if you don't want to embrace non-deterministic naming, tags are still quite powerful, and I strongly recommend that any company understand how to best use them and implement a basic strategy. AWS has some guides around [tagging strategy](https://docs.aws.amazon.com/whitepapers/latest/tagging-best-practices/building-your-tagging-strategy.html) and [tagging use cases](https://docs.aws.amazon.com/whitepapers/latest/tagging-best-practices/tagging-use-cases.html), as well as other vendors. I found “[Why Your Tagging Strategy Matters on AWS](https://medium.com/@keeganjustis/why-your-tagging-strategy-matters-on-aws-ab8c3b8335a6)” a quite comprehensive guide around the topic.
+> ℹ️ Even if you don't want to embrace non-deterministic naming, tags are still quite powerful, and I strongly recommend that any company understand how to best use them and implement a basic strategy. AWS has some guides around [tagging strategy](https://docs.aws.amazon.com/whitepapers/latest/tagging-best-practices/building-your-tagging-strategy.html) and [tagging use cases](https://docs.aws.amazon.com/whitepapers/latest/tagging-best-practices/tagging-use-cases.html), as well as other vendors. I found “[Why Your Tagging Strategy Matters on AWS](https://medium.com/@keeganjustis/why-your-tagging-strategy-matters-on-aws-ab8c3b8335a6)” a quite comprehensive guide around the topic.
 
 ![][image2]
 
