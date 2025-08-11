@@ -1,6 +1,6 @@
 ---
 title: Embrace non-deterministic names for Cloud resources
-date: '2025-08-08T10:00:00Z'
+date: '2025-08-13T10:00:00Z'
 summary: 'Since names are hard to change, teams might settle on a strategy that provides unique names, human-readable format so filtering/finding it is easy, and makes it simple to parse with automation, to name a few. But naming strategies are generally not good and you will see why.'
 cover:
   image: cover.jpg
