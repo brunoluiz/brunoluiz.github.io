@@ -4,6 +4,7 @@ date: '2025-08-12T10:00:00Z'
 summary: 'Most of us have to name “things” daily. Most are easy to change due to refactoring tools, but cloud resources can be impossible at times. We will cover how to avoid major complications by simply re-thinking how you name cloud resources and (hopefully) avoid renames.'
 cover:
   image: cover.jpg
+  relative: true
   alt: Photo by Jon Tyson on Unsplash
   caption: Photo by <a href="https://unsplash.com/@jontyson?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Jon Tyson</a> on <a href="https://unsplash.com/photos/four-markers-on-table-566CgCRSNCk?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>
 
