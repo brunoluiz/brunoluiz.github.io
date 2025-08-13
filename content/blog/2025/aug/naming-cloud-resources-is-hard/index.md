@@ -1,7 +1,7 @@
 ---
-title: Embrace non-deterministic names for Cloud resources
+title: Naming cloud resources doesn't have to be hard
 date: '2025-08-13T10:00:00Z'
-summary: 'Since names are hard to change, teams might settle on a strategy that provides unique names, human-readable format so filtering/finding it is easy, and makes it simple to parse with automation, to name a few. But naming strategies are generally not good and you will see why.'
+summary: 'Most of us have to name “things” daily: variables, functions, services, cloud resources and others. Most are easy to change due to refactoring tools, but cloud resources can be impossible at times. We will cover how to avoid major complications by simply re-thinking how you name cloud resources and (hopefully) avoid renames.'
 cover:
   image: cover.jpg
   alt: Photo by Jon Tyson on Unsplash
