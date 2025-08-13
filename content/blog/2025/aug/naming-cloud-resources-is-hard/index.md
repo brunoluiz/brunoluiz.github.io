@@ -1,7 +1,7 @@
 ---
 title: Naming cloud resources doesn't have to be hard
-date: '2025-08-13T10:00:00Z'
-summary: 'Most of us have to name “things” daily: variables, functions, services, cloud resources and others. Most are easy to change due to refactoring tools, but cloud resources can be impossible at times. We will cover how to avoid major complications by simply re-thinking how you name cloud resources and (hopefully) avoid renames.'
+date: '2025-08-12T10:00:00Z'
+summary: 'Most of us have to name “things” daily. Most are easy to change due to refactoring tools, but cloud resources can be impossible at times. We will cover how to avoid major complications by simply re-thinking how you name cloud resources and (hopefully) avoid renames.'
 cover:
   image: cover.jpg
   alt: Photo by Jon Tyson on Unsplash
