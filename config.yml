@@ -3,6 +3,18 @@ title: "Bruno Luiz da Silva"
 theme: "PaperMod"
 languageCode: "en"
 enableEmoji: true
+outputs:
+  home:
+    - HTML
+    - RSS
+  section:
+    - HTML
+    - RSS
+outputFormats:
+  RSS:
+    mediaType: "application/rss+xml"
+    rel: "alternate"
+    isPlainText: true
 pagination:
   pagerSize: 7
 summaryLength: 300
@@ -18,6 +30,8 @@ params:
   cover:
     hiddenInList: true
   socialIcons: # optional
+    - name: "rss"
+      url: "/feed.xml"
     - name: "email"
       url: "mailto:contact@brunoluiz.net"
     - name: "github"
@@ -28,6 +42,7 @@ params:
       url: "https://uk.linkedin.com/in/brnluiz"
   ShowReadingTime: true
   ShowPostNavLinks: true
+  ShowFullTextinRSS: true
 markup:
   goldmark:
     renderer:
