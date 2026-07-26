@@ -32,15 +32,21 @@ Upjet leverages the Terraform ecosystem and it generates providers that hook to 
 
 If you hit one of the above, you are left with implementing a provider from scratch. Before that, you must know how providers work.
 
-## The Crossplane reconcile loop
+## Start with the provider template
 
-Since Crossplane follows the controller pattern, a provider essentially implements the reconciliation loop, but with its own abstraction.
+The Crossplane team maintains a [provider template](https://github.com/crossplane/provider-template), which is a good starting point for most providers. Its README covers setup and creating a first controller with `make provider.addtype`.
 
-Instead of a single `Reconcile` function, provider controllers implement a strict interface with several hooks. The Crossplane runtime manages their lifecycle, ordering, and state, handling work that a controller built with Kubebuilder would otherwise need to implement. Read through the managed reconciler at least once. It is the best reference when troubleshooting provider behavior.
+Once you generate a type, its controller lives in `internal/controller/{}` and defines the reconciliation hooks described below ([example](https://github.com/crossplane/provider-template/tree/main/internal/controller/mytype)). The template gives you the repository structure and build tooling. The provider's behavior comes from how those hooks interact with the external API.
+
+## Implementing the Crossplane reconcile loop
+
+Crossplane providers use the controller pattern through a managed reconciler abstraction. Instead of a single `Reconcile` function, provider controllers implement a strict interface with several hooks. The Crossplane runtime manages their lifecycle, ordering, and state, handling work that a controller built with Kubebuilder would otherwise need to implement.
+
+`Setup` runs once to register a controller for a managed-resource kind. For each reconciliation, the runtime calls `Connect`, `Observe`, and then `Create`, `Update`, or `Delete` when needed before calling `Disconnect`. Read through the managed reconciler at least once. It is the best reference when troubleshooting provider behavior.
 
 Besides the specific hooks in the reconcile loop, Crossplane uses annotations to keep track of reconciliation state. A very important one is [`crossplane.io/external-name`](http://crossplane.io/external-name), which identifies the underlying resource. The runtime initializes a missing external name from `metadata.name`; providers should set it during `Create` when the external system assigns a different identifier. Users can pre-populate it to identify an existing resource, but should first import it with an [`Observe` management policy](https://docs.crossplane.io/v2.3/guides/import-existing-resources/) to prevent unintended changes.
 
-A provider lifecycle follows these steps:
+The provider lifecycle is:
 
 ```mermaid
 flowchart TD
@@ -70,30 +76,30 @@ flowchart TD
     style Removed fill:#FFCDD2
 ```
 
-1. **Setup:** registers a controller for one managed-resource kind. It runs outside the reconciliation loop and is the right place to construct shared dependencies, such as a connector. The managed resource and its `ProviderConfig` are available only later, in `Connect`.
-2. **Connect:** sets up the client or other dependencies required by the remaining lifecycle steps. It runs once per reconciliation and returns the `external` instance that owns the client.
-3. **Observe:** queries the third-party API, usually using [`crossplane.io/external-name`](http://crossplane.io/external-name), and returns `ResourceExists` and `ResourceUpToDate`. A vendor "not found" response returns `ResourceExists: false`; a real API error must be returned as an error. If the resource exists, `Observe` hydrates `status.atProvider` and compares the observed resource with `spec.forProvider` to decide whether it is up to date.
-4. **Create:** runs when `Observe` returns `ResourceExists: false`. It creates the external resource and sets `external-name` when the provider learns an externally assigned identifier. The reconciler persists annotation changes made by `Create`, but discards status changes, so a later `Observe` hydrates the resource status.
-5. **Update:** runs when `Observe` returns `ResourceExists: true` and `ResourceUpToDate: false`. It updates the external resource to match the desired state. The reconciler persists status changes made by `Update`, but not changes to annotations or spec fields. The next `Observe` confirms that the external resource is up to date.
-6. **Delete:** when the managed resource is being deleted, `Observe` still runs first. If it returns `ResourceExists: true`, the reconciler calls `Delete` and retries until `Observe` reports the resource absent. When `Observe` returns `ResourceExists: false`, the reconciler removes its finalizer in the same reconciliation.
-7. **Disconnect:** runs at the end of every reconciliation. It can be a no-op for reusable clients such as `http.Client`; use it to close resources with a per-reconciliation lifecycle, such as an ephemeral database session.
-
-## Implementation
-
-### Scaffolding
-
-So you are ready to start implementing your custom provider? The Crossplane team maintains a [provider template](https://github.com/crossplane/provider-template), which is a good starting point for most providers. Its README covers setup and creating a first controller with `make provider.addtype`.
-
-Once you generate your type with `make provider.addtype`, you will get a `internal/controller/{}` which is what defines the aforementioned reconciliation hooks ([example](https://github.com/crossplane/provider-template/tree/main/internal/controller/mytype)).
-
-### Setup
+### Setup registers controller dependencies
 
 This function runs once during provider setup and configures `controller-runtime` for the resource. It is also the right place to add a few shared dependencies:
 
 1. Inject the `controller.Options Logger` in the `connector` being created, since it is better to use the same logger used by the controller, with the same fields set by it
 2. In case opening a connection to your vendor can be expensive / slow, you might want to implement and inject a connection pool map at this stage. An example is a provider that connects to databases and lazily starts a connection at `Connect`, adds to this pool, and re-uses across reconciles, instead of always terminating it at `Disconnect`. **Bear in mind this is in general an optimisation and not always required** since it adds extra complexity (eg: configuring connections timeouts).
 
-### Connect / Disconnect
+These minimal hooks use the signatures generated by the provider template. Replace the comments with vendor-specific code; the return values are what tell the managed reconciler what to do next.
+
+```go
+func Setup(mgr ctrl.Manager, o controller.Options) error {
+	r := managed.NewReconciler(
+		mgr,
+		resource.ManagedKind(v1alpha1.MyTypeGroupVersionKind),
+		managed.WithTypedExternalConnector[*v1alpha1.MyType](&connector{}),
+	)
+
+	return ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.MyType{}).
+		Complete(r)
+}
+```
+
+### Connect once per reconciliation, reuse expensive clients carefully
 
 This is the first function called on the reconciliation loop ([example](https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go#L120-L162)). Since all further hooks will need a client to be set up, **the provider must set it up at this stage and keep a reference in the generated `external` instance.**
 
@@ -101,48 +107,145 @@ The provider should read `ProviderConfig` to configure authentication and other 
 
 Some SDKs, including OpenAPI-generated clients, require credentials on every method call. When they use `http.Client` underneath, a custom HTTP transport can set the required authorization headers and avoid duplicating that work at each call site.
 
+```go
+func (c *connector) Connect(ctx context.Context, cr *v1alpha1.MyType) (managed.TypedExternalClient[*v1alpha1.MyType], error) {
+	// Read ProviderConfig and create the vendor client. Might be an HTTP Client, database connection or even some CLI call.
+  // This will be used across this reconciliation loop only, unless there is some pooling logic implemented.
+	client, err := newClient(ctx, cr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create client on connect: %s", err)
+	}
+
+	return &external{client: client}, nil
+}
+```
+
 Paired with `Connect`, implement `Disconnect` to close resources that need closing. It can be a no-op for reusable clients such as `http.Client`, but might be required in cases of database connections (depending on how they are managed).
+
+```go
+func (c *external) Disconnect(context.Context) error {
+	// Close a per-reconciliation client here, if it has resources to release.
+	return nil
+}
+```
 
 | Repository | References |
 | :--------- | :--------- |
 | `crossplane-runtime` | [Connect/Disconnect core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1145-L1176) |
 | `provider-template` | [Code reference](https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go#L120-L162) |
 
-### Observe
+### Observe determines whether Crossplane creates, updates, or deletes
 
 This is one of the most important hooks since it defines what will (or not) be called next. It tries to fetch the resource via through the [`crossplane.io/external-name`](http://crossplane.io/external-name) resource annotation and then:
 
 1. If the annotation does not exist, is empty or the the vendor returns “not found”, it triggers `Create` by returning `ResourceExists: false`
 2. If it exists, it should always update the status of the MR (it is done via pointer when `cr.Status.AtProvider` is set) and the return must always have `ResourceExists: true`. The last part depends if the observed status matches the managed resource's desired state in `spec.forProvider`:
-   1. If it matches, this is effectively an import and the it must return `ResourceUpToDate: true` and set it to available
-   2. If does not, it must trigger an `Update` by returning `ResourceUpToDate: false`
+    1. If it matches, this is effectively an import and the it must return `ResourceUpToDate: true` and set it to available
+    2. If does not, it must trigger an `Update` by returning `ResourceUpToDate: false`
+
+The example below assumes the vendor adapter exposes `Get`, `Create`, `Update`, and `Delete`, and that `isNotFound` recognizes its not-found response.
+
+```go
+func (c *external) Observe(ctx context.Context, cr *v1alpha1.User) (managed.ExternalObservation, error) {
+  // If external name is empty, the resource has not being created yet and is deemed "non-existent"
+	externalName := meta.GetExternalName(cr)
+	if externalName == "" {
+		return managed.ExternalObservation{ResourceExists: false}, nil
+	}
+
+	observed, err := c.client.Get(ctx, externalName)
+	if isNotFound(err) {
+		return managed.ExternalObservation{ResourceExists: false}, nil
+	}
+	if err != nil {
+		return managed.ExternalObservation{}, fmt.Errorf("failed to get external resource: %s", err)
+	}
+
+  // Updates MR status with the observed state. Once too many fields are set, consolidate it in a
+  // private method such as `updateStatus`
+	cr.Status.AtProvider.Name = observed.Name
+
+  // Defines if the status is up-to-date based on field comparison. Similar to above,
+  // it can benefit from a private method such as `isUpToDate`
+	upToDate := cr.Spec.ForProvider.Name == observed.Name
+	if upToDate {
+		cr.Status.SetConditions(xpv1.Available())
+	}
+
+	return managed.ExternalObservation{ResourceExists: true, ResourceUpToDate: upToDate}, nil
+}
+```
 
 | Repository | References |
 | :--------- | :--------- |
 | `crossplane-runtime` | [Update core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1178-L1196) |
 | `provider-template` | [Code reference](https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go#L172-L218) |
 
-### Create
+### Create persists `external-name`, not status
 
 `Create` is called after `Observe` returns `ResourceExists: false`. It creates the resource in the third-party system and sets `external-name` if the third-party assigns its identifier. The managed reconciler persists annotation changes made in this hook, but discards status changes. Do not rely on `cr.Status.AtProvider` mutations in `Create`; populate status during the next `Observe` instead.
+
+```go
+func (c *external) Create(ctx context.Context, cr *v1alpha1.User) (managed.ExternalCreation, error) {
+  // Converts CR spec to vendors request using a mapper such as `toCreateRequest`.
+	created, err := c.client.Create(ctx, toCreateRequest(cr.Spec.ForProvider))
+	if err != nil {
+		return managed.ExternalCreation{}, fmt.Errorf("failed to create external resource: %s", err)
+	}
+
+	// Create persists annotations, but not status. Observe hydrates status later.
+	meta.SetExternalName(cr, created.ID)
+	return managed.ExternalCreation{}, nil
+}
+```
 
 | Repository | References |
 | :--------- | :--------- |
 | `crossplane-runtime` | [Create core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1349-L1471) |
 | `provider-template` | [Code reference](https://github.com/crossplane/provider-template/blob/main/internal/controller/mytype/mytype.go#L220-L230) |
 
-### Update
+### Update refreshes status, but cannot change spec or annotations
 
 `Update` is called after `Observe` returns `ResourceExists: true` and `ResourceUpToDate: false`. It changes the external resource to match `spec.forProvider`. Unlike `Create`, the reconciler persists status changes made by `Update`, so it can refresh `cr.Status.AtProvider` and conditions. Do not mutate annotations or spec fields in this hook, because they are not persisted. A subsequent `Observe` should confirm that the resource is now up to date.
+
+```go
+func (c *external) Update(ctx context.Context, cr *v1alpha1.User) (managed.ExternalUpdate, error) {
+  // Converts CR spec to vendors request using a mapper such as `toUpdateRequest`.
+	updated, err := c.client.Update(ctx, meta.GetExternalName(cr), toUpdateRequest(cr.Spec.ForProvider))
+	if err != nil {
+		return managed.ExternalUpdate{}, fmt.Errorf("failed to update external resource: %s", err)
+	}
+
+	// Update persists status, unlike Create.
+	cr.Status.AtProvider.Name = updated.Name
+	return managed.ExternalUpdate{}, nil
+}
+```
 
 | Repository | References |
 | :--------- | :--------- |
 | `crossplane-runtime` | [Update core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1515-L1571) |
 | `provider-template` | [Code reference](https://github.com/crossplane/provider-template/blob/main/internal/controller/mytype/mytype.go#L232-L247) |
 
-### Delete
+### Delete is confirmed by the next `Observe`
 
 `Delete` calls the third-party delete API after `Observe` reports that a deleting managed resource still exists externally. On a later reconciliation, `Observe` reports `ResourceExists: false`; together with [`meta.WasDeleted() == true`](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1235-L1236), the runtime removes its finalizer. If the external resource remains, it keeps retrying deletion until the resource ceases to exist.
+
+```go
+func (c *external) Delete(ctx context.Context, cr *v1alpha1.User) (managed.ExternalDelete, error) {
+	externalName := meta.GetExternalName(cr)
+	if externalName == "" {
+		return managed.ExternalDelete{}, nil
+	}
+
+	err := c.client.Delete(ctx, externalName)
+	if err != nil && !isNotFound(err) {
+		return managed.ExternalDelete{}, fmt.Errorf("failed to delete external resource: %s", err)
+	}
+
+	return managed.ExternalDelete{}, nil
+}
+```
 
 | Repository | References |
 | :--------- | :--------- |
