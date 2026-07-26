@@ -49,7 +49,7 @@ Crossplane providers use the controller pattern through a managed reconciler abs
 Besides these specific hooks in the reconcile loop, Crossplane leverages annotations to keep track of reconciliation state. A very important one is [`crossplane.io/external-name`](http://crossplane.io/external-name), which identifies the underlying resource:
 
 - Providers should set it during `Create` when the external system assigns a different identifier, otherwise it is set to `metadata.name` of the resource.
-- Users can pre-populate it to identify and import an existing resource, although it should be used together with an `Observe` management policy to prevent unintended changes ([docs about Crossplane resource import]((https://docs.crossplane.io/v2.3/guides/import-existing-resources/))).
+- Users can pre-populate it to identify and import an existing resource, although it should be used together with an `Observe` management policy to prevent unintended changes ([docs about Crossplane resource import](https://docs.crossplane.io/v2.3/guides/import-existing-resources/)).
 
 The provider lifecycle is:
 
