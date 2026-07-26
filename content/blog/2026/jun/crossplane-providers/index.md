@@ -42,7 +42,35 @@ Besides the specific hooks in the reconcile loop, it leverages annotations to ke
 
 A provider lifecycle follows these steps:
 
-<!-- Add diagram here -->
+```mermaid
+flowchart LR
+    Connect --> ObserveCond{"Observe"}
+
+    %% Create
+    ObserveCond -- "$Exists = false" --> Create["Create Resource"]
+    Create --> CreateStatus["Update MR Status<br/>AND set external-name"]
+    CreateStatus --> End
+    %% Update
+    ObserveCond -- "$Exists = true AND<br>$UpToDate = false" --> Update["Update Resource"]
+    Update --> UpdateStatus["Update MR Status"]
+    UpdateStatus --> End
+    %% Get
+    ObserveCond -- "$Exists = true AND<br>$UpToDate = true" --> End["UpToDate"]
+    %% Delete
+
+    ObserveCond -- "$WasDeleted AND $Exists = false" --> End
+    Connect --> DeleteCond{"Delete"}
+    DeleteCond -- "$WasDeleted AND<br/>$Exists = true" --> Delete["Delete resource"]
+    DeleteCond -- "$WasDeleted AND<br/>$Exists = false" --> Removed["Finalised</br>(external resource deleted)"]
+
+    %% Comment / Annotation
+    NoteA["$Exists = non-empty crossplane.io/external-name"]
+    style NoteA fill:#BBDEFB
+
+    style End fill:#C8E6C9
+    style Delete fill:#FFF9C4
+    style Removed fill:#FFCDD2
+```
 
 1. **Setup:** only called when the provider starts up (once), not being part of the reconcile loop. In many cases though, it is where the API client will be set up, as sometimes it is not desirable to create a new client on every reconcile loop (eg: in Connect).
 2. **Connect:** sets up client connections or anything required for the next steps of the reconciliation process. Different from `Setup`, this is done per-reconciliation loop and is paired with `Disconnect`.
@@ -89,8 +117,6 @@ Paired with `Connect`, you must implement a `Disconnect` function to call `Close
 
 ### Observe
 
-\<DIAGRAM\>
-
 This is one of the most important hooks since it defines what will (or not) be called next. It tries to fetch the resource via through the [`crossplane.io/external-name`](http://crossplane.io/external-name) resource annotation and then:
 
 1. If the annotation does not exist, is empty or the the vendor returns “not found”, it triggers `Create` by returning `ResourceExists: false`
@@ -128,8 +154,6 @@ A simple call to the third-party delete API. Once this is called, a subsequent r
 All the above is okay if the API used is synchronous. For asynchronous APIs, the flow uses the same hooks, but acts differently. Mainly, once the provider creates or updates a resource, it will get an “operation id” and that should be stored as a status field, not as the external name.
 
 On subsequent `Observe` calls, the provider can check the status of it against the provider and, once is deemed completed, it can return a `Resource{Exists|UpToDate}: true` and `LateInitialise: true` \+ update annotation such as the external name. The idea is that late initialisation allows setting fields after the object has been created.
-
-\<DIAGRAM\>
 
 \<TODO: probably add some examples why uptodate/exists must be set… can ask AI\>
 
