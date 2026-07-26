@@ -13,11 +13,9 @@ aliases:
 
 ## Introduction
 
-Kubernetes is popular for workload orchestration, but its controller pattern is what makes it extensible. Every CRD relies on that pattern. Implementing one yourself requires code to manage a resource's lifecycle. Crossplane lets teams define their own CRDs without writing the controllers themselves.
+Crossplane allows defining Kubernetes CRDs without writing controllers, mainly by defining compositions. Although allow you to define how resources interact, the real magic happens in providers: they are controllers that handle the lifecycle of an external resource (e.g. Bucket), such as creating, updating, and deleting it.
 
-Crossplane does this through compositions and providers. Compositions are similar to Terraform modules and are usually defined in YAML, although they can also use Go. Providers are controllers for Crossplane managed resources, similar to Terraform providers. They manage the lifecycle of a specific object, such as creating, updating, and deleting a bucket.
-
-Most of the time you will either use an official provider or leverage upjet (generate from Terraform), but sometimes you will need to implement your own.
+Usually official providers or upjet generated ones are good enough, but sometimes you might come across issues. This is when you will need to implement your own, which we will cover in this post.
 
 ## Why create your own provider?
 
