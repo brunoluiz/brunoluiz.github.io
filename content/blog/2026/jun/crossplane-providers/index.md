@@ -13,9 +13,9 @@ aliases:
 
 ## Introduction
 
-Kubernetes might be popular for its workload orchestration, but it really shines in how easily extendable it is via the controller pattern. Every time you install a CRD, you are essentially leveraging it. The problem is that it requires teams to create plenty of code to manage the lifecycle of a resource. Crossplane allows teams to write their own CRDs without having to write controllers (sort of).
+Kubernetes is popular for workload orchestration, but its controller pattern is what makes it extensible. Every CRD relies on that pattern. Implementing one yourself requires code to manage a resource's lifecycle. Crossplane lets teams define their own CRDs without writing the controllers themselves.
 
-This is possible via compositions and providers, where compositions are similar to Terraform modules and defined primarily using YAML (although some use Golang), and providers are essentially controllers for the Crossplane managed resources (similar to Terraform providers). They are responsible for managing the lifecycle of a specific object, such as “create, update and delete” a Bucket.
+Crossplane does this through compositions and providers. Compositions are similar to Terraform modules and are usually defined in YAML, although they can also use Go. Providers are controllers for Crossplane managed resources, similar to Terraform providers. They manage the lifecycle of a specific object, such as creating, updating, and deleting a bucket.
 
 Most of the time you will either use an official provider or leverage upjet (generate from Terraform), but sometimes you will need to implement your own.
 
@@ -36,7 +36,7 @@ If you hit one of the above, you are left with implementing a provider from scra
 
 Since Crossplane follows the controller pattern, a provider essentially implements the reconciliation loop, but with its own abstraction.
 
-Instead of requiring a simple “reconcile” function, provider controllers must implement a strict interface with a few hooks, making it almost an “integration” framework. The lifecycle, order and state is managed by the Crossplane runtime, abstracting complexities that would generally need to be implemented using tools such as kubebuilder. Although, **I highly recommend engineers to go at least once through the managed reconciler controller,** since when troubleshooting something that will have most answers.
+Instead of a single `Reconcile` function, provider controllers implement a strict interface with several hooks. The Crossplane runtime manages their lifecycle, ordering, and state, handling work that a controller built with Kubebuilder would otherwise need to implement. Read through the managed reconciler at least once. It is the best reference when troubleshooting provider behavior.
 
 Besides the specific hooks in the reconcile loop, Crossplane uses annotations to keep track of reconciliation state. A very important one is [`crossplane.io/external-name`](http://crossplane.io/external-name), which identifies the underlying resource. The runtime initializes a missing external name from `metadata.name`; providers should set it during `Create` when the external system assigns a different identifier. Users can pre-populate it to identify an existing resource, but should first import it with an [`Observe` management policy](https://docs.crossplane.io/v2.3/guides/import-existing-resources/) to prevent unintended changes.
 
@@ -73,19 +73,17 @@ flowchart TD
 6. **Delete:** when the managed resource is being deleted, `Observe` still runs first. If it returns `ResourceExists: true`, the reconciler calls `Delete` and retries until `Observe` reports the resource absent. When `Observe` returns `ResourceExists: false`, the reconciler removes its finalizer in the same reconciliation.
 7. **Disconnect:** runs at the end of every reconciliation. It can be a no-op for reusable clients such as `http.Client`; use it to close resources with a per-reconciliation lifecycle, such as an ephemeral database session.
 
-## Anatomy of a provider repository
-
 ## Implementation
 
 ### Scaffolding
 
-So you are ready to start implementing your custom provider? The Crossplane team maintains a [provider template](https://github.com/crossplane/provider-template), which is a good starting point for most. The README has most instructions on how to set it up and create your first controller with `make provider.addtype`.
+So you are ready to start implementing your custom provider? The Crossplane team maintains a [provider template](https://github.com/crossplane/provider-template), which is a good starting point for most providers. Its README covers setup and creating a first controller with `make provider.addtype`.
 
 Once you generate your type with `make provider.addtype`, you will get a `internal/controller/{}` which is what defines the aforementioned reconciliation hooks ([example](https://github.com/crossplane/provider-template/tree/main/internal/controller/mytype)).
 
 ### Setup
 
-This function is called once on the provider setup and will mostly configure the `controller-runtime` for this specific resource. In general it is *“boilerplatey”*, but I suggest to add a few things here:
+This function runs once during provider setup and configures `controller-runtime` for the resource. It is also the right place to add a few shared dependencies:
 
 1. Inject the `controller.Options Logger` in the `connector` being created, since it is better to use the same logger used by the controller, with the same fields set by it
 2. In case opening a connection to your vendor can be expensive / slow, you might want to implement and inject a connection pool map at this stage. An example is a provider that connects to databases and lazily starts a connection at `Connect`, adds to this pool, and re-uses across reconciles, instead of always terminating it at `Disconnect`. **Bear in mind this is in general an optimisation and not always required** since it adds extra complexity (eg: configuring connections timeouts).
@@ -94,9 +92,9 @@ This function is called once on the provider setup and will mostly configure the
 
 This is the first function called on the reconciliation loop ([example](https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go#L120-L162)). Since all further hooks will need a client to be set up, **the provider must set it up at this stage and keep a reference in the generated `external` instance.**
 
-The provider should read the `ProviderConfig` to wire up the auth and other bits for the client setup. Bear in mind that in Crossplane v2 this can be at cluster or namespace level.
+The provider should read `ProviderConfig` to configure authentication and other client settings. In Crossplane v2, `ProviderConfig` can be cluster- or namespace-scoped.
 
-One thing to note is that some SDKs / clients might require credential injection on every method call (eg: OpenAPI generated). Since they have HTTP Clients underneath, my recommendation is to create a custom HTTP Transport that sets the required auth headers, avoiding further boilerplate.
+Some SDKs, including OpenAPI-generated clients, require credentials on every method call. When they use `http.Client` underneath, a custom HTTP transport can set the required authorization headers and avoid duplicating that work at each call site.
 
 Paired with `Connect`, implement `Disconnect` to close resources that need closing. It can be a no-op for reusable clients such as `http.Client`, but might be required in cases of database connections (depending on how they are managed).
 
