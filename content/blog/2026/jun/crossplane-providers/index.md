@@ -92,15 +92,15 @@ This function runs once during provider setup and configures `controller-runtime
 func Setup(mgr ctrl.Manager, o controller.Options) error {
 	r := managed.NewReconciler(
 		mgr,
-		resource.ManagedKind(v1alpha1.MyTypeGroupVersionKind),
-		managed.WithTypedExternalConnector[*v1alpha1.MyType](&connector{}),
+		resource.ManagedKind(v1alpha1.UserGroupVersionKind),
+		managed.WithTypedExternalConnector[*v1alpha1.User](&connector{}),
 	)
 
   // Setup other flags and controller options
   // ...
 
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&v1alpha1.MyType{}).
+		For(&v1alpha1.User{}).
 		Complete(r)
 }
 ```
@@ -119,8 +119,8 @@ This is the first function called on the reconciliation loop ([example](https://
 ```go
 func (c *connector) Connect(
 	ctx context.Context,
-	cr *v1alpha1.MyType,
-) (managed.TypedExternalClient[*v1alpha1.MyType], error) {
+	cr *v1alpha1.User,
+) (managed.TypedExternalClient[*v1alpha1.User], error) {
 	// Read `ProviderConfig`` and create the vendor client. It may be an HTTP
 	// client, database connection, or CLI wrapper. It lives for this
 	// reconciliation unless the provider implements connection pooling.
