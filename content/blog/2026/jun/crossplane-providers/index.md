@@ -82,9 +82,10 @@ One thing to note is that some SDKs / clients might require credential injection
 
 Paired with `Connect`, you must implement a `Disconnect` function to call `Close` on anything that needs closing. If you don't use some pool of lazily created connections, probably this is required and, if you don't implement it, congrats: you will have a memory leak.
 
-| `crossplane-runtime` call reference | Connect/Disconnect: [https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go\#L1145-L1176](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1145-L1176)  |
-| :---- | :---- |
-| `provider-template` example | [https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go\#L120-L162](https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go#L120-L162)  |
+| Repository | References |
+| :--------- | :--------- |
+| `crossplane-runtime` | [Connect/Disconnect core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1145-L1176) |
+| `provider-template` | [Code reference](https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go#L120-L162) |
 
 ### Observe
 
@@ -97,25 +98,28 @@ This is one of the most important hooks since it defines what will (or not) be c
    1. If it matches, this is effectively an import and the it must return `ResourceUpToDate: true` and set it to available
    2. If does not, it must trigger an `Update` by returning `ResourceUpToDate: false`
 
-| `crossplane-runtime` call reference | Update: [https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go\#L1178-L1196](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1178-L1196)  |
-| :---- | :---- |
-| `provider-template` example | [https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go\#L172-L218](https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go#L172-L218)  |
+| Repository | References |
+| :--------- | :--------- |
+| `crossplane-runtime` | [Update core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1178-L1196) |
+| `provider-template` | [Code reference](https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go#L172-L218) |
 
 ### Create / Update
 
 `Create` and `Update` are simple hooks: they receive a call from the controller, call either create/update within the third-party and update the `cr.Status.AtProvider` fields. The main difference between them is that `Create` must always set an `external-name` at the end of its call (ID on the third-party).
 
-| `crossplane-runtime` call reference | Create: [https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go\#L1349-L1471](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1349-L1471)  Update: [https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go\#L1515-L1571](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1515-L1571)  |
-| :---- | :---- |
-| `provider-template` example | [https://github.com/crossplane/provider-template/blob/](https://github.com/crossplane/provider-template/blob/main/internal/controller/mytype/mytype.go#L220-L247)[328a8a692f06a0306ffe7623463560fd3633a643](https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go#L249-L255)[/internal/controller/mytype/mytype.go\#L220-L247](https://github.com/crossplane/provider-template/blob/main/internal/controller/mytype/mytype.go#L220-L247)  |
+| Repository | References |
+| :--------- | :--------- |
+| `crossplane-runtime` | [Create core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1349-L1471) <br/> [Update core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1515-L1571) |
+| `provider-template` | [Code reference](https://github.com/crossplane/provider-template/blob/main/internal/controller/mytype/mytype.go#L220-L247) |
 
 ### Delete
 
 A simple call to the third-party delete API. Once this is called, a subsequent reconcile will trigger `Observe`, which will not find the item and return `ResourceExists: false`. [Together with the `meta.WasDeleted() == true`](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1235-L1236), the runtime will conclude its deletion is finished. If for some reason though the delete did not work properly, it will keep retrying until the resource ceases to exist.
 
-| `crossplane-runtime` call reference | Delete: [https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go\#L1225-L1316](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1225-L1316)  |
-| :---- | :---- |
-| `provider-template` example | [https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go\#L249-L255](https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go#L249-L255)  |
+| Repository | References |
+| :--------- | :--------- |
+| `crossplane-runtime` | [Delete core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1225-L1316) |
+| `provider-template` | [Code reference](https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go#L249-L255) |
 
 ###
 
@@ -129,8 +133,9 @@ On subsequent `Observe` calls, the provider can check the status of it against t
 
 \<TODO: probably add some examples why uptodate/exists must be set… can ask AI\>
 
-| `crossplane-runtime` call reference | LateInitialise: [https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go\#L1473-L1488](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1473-L1488)  |
-| :---- | :---- |
+| Repository | References |
+| :--------- | :--------- |
+| `crossplane-runtime` | [LateInitialise core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1473-L1488) |
 
 ###
 
