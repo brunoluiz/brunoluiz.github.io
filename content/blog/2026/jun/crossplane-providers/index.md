@@ -44,22 +44,27 @@ A provider lifecycle follows these steps:
 
 ```mermaid
 flowchart TD
+    Setup["Setup controller (once)"] --> Connect["Connect"]
     Connect --> Observe{"Observe"}
 
     Observe -- "Not deleting AND ResourceExists = false" --> Create["Create external resource"]
     Create --> CreateName["Persist external-name annotation"]
-    CreateName --> End["Requeue / poll"]
+    CreateName --> Disconnect["Disconnect"]
 
     Observe -- "Not deleting AND ResourceExists = true AND ResourceUpToDate = false" --> Update["Update external resource"]
     Update --> UpdateStatus["Persist managed-resource status"]
-    UpdateStatus --> End
+    UpdateStatus --> Disconnect
 
-    Observe -- "Not deleting AND ResourceExists = true AND ResourceUpToDate = true" --> End
+    Observe -- "Not deleting AND ResourceExists = true AND ResourceUpToDate = true" --> Disconnect
 
     Observe -- "Deleting AND ResourceExists = true" --> Delete["Delete external resource"]
-    Delete --> End
+    Delete --> Disconnect
     Observe -- "Deleting AND ResourceExists = false" --> Removed["Remove finalizer"]
+    Removed --> Disconnect
 
+    Disconnect --> End["End reconciliation"]
+
+    style Setup fill:#BBDEFB
     style End fill:#C8E6C9
     style Delete fill:#FFF9C4
     style Removed fill:#FFCDD2
