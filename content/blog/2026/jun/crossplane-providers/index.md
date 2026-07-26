@@ -1,7 +1,7 @@
 ---
-title: "When Crossplane providers aren't enough: building your own in Go"
+title: "Building Crossplane providers from scratch using Go"
 date: '2026-04-14T10:00:00Z'
-summary: 'A practical guide for building Crossplane providers in Go when other providers failed you, from the managed reconciler lifecycle to examples of how to implement and best pratices.'
+summary: 'A practical guide for building Crossplane providers in Go when other providers failed you, from the managed reconciler lifecycle to examples of how to implement and best practices.'
 cover:
   image: cover.jpg
   relative: true
@@ -34,7 +34,7 @@ If you hit one of the above, you are left with implementing a provider from scra
 
 ## Start with the provider template
 
-Don't panic: you won't start fully from scratch. The Crossplane team maintains a [provider template](https://github.com/crossplane/provider-template), which is a good starting point for most providers and also it maintains some very popular providers you can base yourself on.
+Don't panic: you won't start fully from scratch. The Crossplane team maintains a [provider template](https://github.com/crossplane/provider-template), which is a good starting point for most providers and also they maintain very popular providers you can base yourself on.
 
 The template gives you the repository structure, build tooling and scaffolding utils (e.g. `make provider.addtype`). All generated types will be placed in `internal/controller/{}` and those will define the reconciliation hooks described in the next section ([example](https://github.com/crossplane/provider-template/tree/main/internal/controller/mytype)). The provider's behavior comes from how those hooks interact with the external API.
 
@@ -198,7 +198,7 @@ func (c *external) Observe(
 
 ### Create: resource creation and `external-name` setting
 
-`Create` is called after `Observe` returns `ResourceExists: false`. It creates the resource in the external system and sets `external-name` if it assigns an identifier (e.g. ID). The managed reconciler persists annotation changes made in this hook, but discards status changes. Because of the latter, do not implement `cr.Status.AtProvider` mutations in `Create` and populate status during the next `Observe` instead.
+`Create` is called after `Observe` returns `ResourceExists: false`. It creates the resource in the external system and sets `external-name` if it assigns an identifier (e.g. ID). The managed reconciler persists annotation changes made in this hook, but discards status changes. Because of the latter, do not implement `cr.Status.AtProvider` mutations in `Create` and populate status during the next `Observe` instead. Connection details are separate from status: return them in `managed.ExternalCreation` and the reconciler publishes them to the configured connection store.
 
 ```go
 func (c *external) Create(
@@ -214,7 +214,11 @@ func (c *external) Create(
 
 	// Create persists annotations, but not status. Observe hydrates status later.
 	meta.SetExternalName(cr, created.ID)
-	return managed.ExternalCreation{}, nil
+	return managed.ExternalCreation{
+		ConnectionDetails: managed.ConnectionDetails{
+			"url": []byte(created.URL),
+		},
+	}, nil
 }
 ```
 
@@ -250,7 +254,7 @@ func (c *external) Update(
 | `crossplane-runtime` | [Update core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1515-L1571) |
 | `provider-template` | [Code reference](https://github.com/crossplane/provider-template/blob/main/internal/controller/mytype/mytype.go#L232-L247) |
 
-### Delete: adios to the resource (multi-steps)
+### Delete: ensuring resource is gone
 
 `Delete` calls the external delete API after `Observe` reports that a deleting managed resource still exists externally. On a later reconciliation, `Observe` reports `ResourceExists: false` and, together with [`meta.WasDeleted() == true`](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1235-L1236), the runtime removes its finaliser. If the external resource remains, it keeps retrying deletion until the resource ceases to exist.
 
@@ -282,7 +286,7 @@ func (c *external) Delete(
 
 ### Put connection defaults in `ProviderConfig`
 
-Store connection-level details such as credentials, API endpoints, account or cluster identifiers, and default regions in `ProviderConfig`. This avoids repeating the same values across multiple resources and keeps your APIs cleaner. `spec.forProvider` should be for fields that represent the desired state of a resource resource (e.g. database name, size, or network). If multiple resources using the same credentials could have different values, it belongs in the resource spec — not the `ProviderConfig`.
+Store connection-level details such as credentials, API endpoints, account or cluster identifiers, and default regions in `ProviderConfig`. This avoids repeating the same values across multiple resources and keeps your APIs cleaner. `spec.forProvider` should be for fields that represent the desired state of a resource (e.g. database name, size, or network). If multiple resources using the same credentials could have different values, it belongs in the resource spec — not the `ProviderConfig`.
 
 ### Treat `crossplane.io/external-name` as a stable lookup key
 
@@ -304,6 +308,6 @@ Crossplane V2 allows cluster and namespaced resources. If you support both, avoi
 
 ## Start building a provider
 
-Hopefully you now have a good understanding of how operators work and are implemented. Start with the [Crossplane provider template](https://github.com/crossplane/provider-template), and use providers such as [`provider-opentofu`](https://github.com/upbound/provider-opentofu), [`provider-http`](https://github.com/crossplane-contrib/provider-http) and my own [crossplane-demo acme provider](https://github.com/brunoluiz/crossplane-demo/tree/main/provider-acme) for a working reference.
+Hopefully you now have a good understanding of how providers work and are implemented. Start with the [Crossplane provider template](https://github.com/crossplane/provider-template), and use providers such as [`provider-opentofu`](https://github.com/upbound/provider-opentofu), [`provider-http`](https://github.com/crossplane-contrib/provider-http) and my own [crossplane-demo acme provider](https://github.com/brunoluiz/crossplane-demo/tree/main/provider-acme) for a working reference.
 
 If a vendor API makes idempotency, imports, or asynchronous operations awkward, document those constraints before writing the controller. They will shape the provider's API and reconciliation behavior more than its Go code will.
