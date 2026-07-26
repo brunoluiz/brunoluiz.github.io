@@ -58,19 +58,19 @@ flowchart TD
     Setup["Setup controller (once)"] --> Connect["Connect"]
     Connect --> Observe{"Observe"}
 
-    Observe -- "Not deleting AND ResourceExists = false" --> Create["Create() external resource"]
+    Observe -- "!Deleting AND ResourceExists" --> Create["Create() external resource"]
     Create --> CreateName["Persist external-name"]
     CreateName --> Disconnect["Disconnect"]
 
-    Observe -- "Not deleting AND ResourceExists = true AND ResourceUpToDate = false" --> Update["Update() external resource"]
+    Observe -- "!Deleting AND<br/>ResourceExists AND<br/>!ResourceUpToDate" --> Update["Update() external resource"]
     Update --> UpdateStatus["Persist resource status"]
     UpdateStatus --> Disconnect
 
-    Observe -- "Not deleting AND ResourceExists = true AND ResourceUpToDate = true" --> Disconnect
+    Observe -- "!Deleting AND ResourceExists AND ResourceUpToDate" --> Disconnect
 
-    Observe -- "Deleting AND ResourceExists = true" --> Delete["Delete() external resource"]
+    Observe -- "Deleting AND ResourceExists" --> Delete["Delete() external resource"]
     Delete --> Disconnect
-    Observe -- "Deleting AND ResourceExists = false" --> Removed["Remove finalizer"]
+    Observe -- "Deleting AND !ResourceExists" --> Removed["Remove finalizer"]
     Removed --> Disconnect
 
     Disconnect --> End["End reconciliation"]
