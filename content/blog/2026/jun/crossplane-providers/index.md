@@ -13,7 +13,7 @@ aliases:
 
 ## Introduction
 
-Crossplane allows defining Kubernetes CRDs without writing controllers, mainly by defining compositions. Although allow you to define how resources interact, the real magic happens in providers: they are controllers that handle the lifecycle of an external resource (e.g. Bucket), such as creating, updating, and deleting it.
+Crossplane allows you to define Kubernetes APIs without writing controllers, mainly by defining compositions. Although they allow you to define how resources interact, the real magic happens in providers: they are controllers that handle the lifecycle of an external resource (e.g. a bucket), such as creating, updating, and deleting it.
 
 Usually official providers or upjet generated ones are good enough, but sometimes you might come across issues. This is when you will need to implement your own, which we will cover in this post.
 
@@ -34,11 +34,11 @@ If you hit one of the above, you are left with implementing a provider from scra
 
 Don't panic: you won't start fully from scratch. The Crossplane team maintains a [provider template](https://github.com/crossplane/provider-template), which is a good starting point for most providers and also they maintain very popular providers you can base yourself on.
 
-The template gives you the repository structure, build tooling and scaffolding utils (e.g. `make provider.addtype`). All generated types will be placed in `internal/controller/{}` and those will define the reconciliation hooks described in the next section ([example](https://github.com/crossplane/provider-template/tree/main/internal/controller/mytype)). The provider's behavior comes from how those hooks interact with the external API.
+The template gives you the repository structure, build tooling and scaffolding utilities (e.g. `make provider.addtype`). All generated types will be placed in `internal/controller/{}` and those will define the reconciliation hooks described in the next section ([example](https://github.com/crossplane/provider-template/tree/main/internal/controller/mytype)). The provider's behaviour comes from how those hooks interact with the external API.
 
 ## Implementing the Crossplane reconcile loop
 
-<sub><sub>ℹ️ The following consider [default management policies](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/api.go#L48-L61) being in place, as otherwise they change the lifecycle behaviour.<sub><sub>
+<small>ℹ️ The following assumes that [default management policies](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/api.go#L48-L61) are in place, as otherwise they change the lifecycle behaviour.</small>
 
 Crossplane providers use the controller pattern through a managed reconciler abstraction. Instead of a single `Reconcile` function, provider controllers implement a strict interface with several hooks. The Crossplane runtime manages their lifecycle, ordering, and state, handling work that a controller built with Kubebuilder would otherwise need to implement (and probably lose some hair when bugs end up surfacing).
 
@@ -51,14 +51,14 @@ Besides these specific hooks in the reconcile loop, Crossplane leverages annotat
 - Before `Connect` and `Observe`, the [managed reconciler's default initializer](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/api.go#L48-L61) persists `metadata.name` as the external name when the annotation is absent. Providers overwrite it during `Create` only when the external system returns a different stable lookup key.
 - Users can pre-populate it to identify and import an existing resource, although it should be used together with an `Observe` management policy (beta feature) to prevent unintended changes ([docs about Crossplane resource import](https://docs.crossplane.io/v2.3/guides/import-existing-resources/)).
 
-If [management policies are to the `*` (default)](https://docs.crossplane.io/v2.3/managed-resources/managed-resources/#managementpolicies), where no hook is excluded, the provider lifecycle can be summarised as:
+If [management policies are set to `*` (the default)](https://docs.crossplane.io/v2.3/managed-resources/managed-resources/#managementpolicies), so that no hook is excluded, the provider lifecycle can be summarised as:
 
 ```mermaid
 flowchart TD
     Setup["Setup controller (once)"] --> Connect["Connect"]
     Connect --> Observe{"Observe"}
 
-    Observe -- "!Deleting AND ResourceExists" --> Create["Create() external resource"]
+    Observe -- "!Deleting AND !ResourceExists" --> Create["Create() external resource"]
     Create --> CreateName["Persist external-name"]
     CreateName --> Disconnect["Disconnect"]
 
@@ -114,7 +114,7 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 This is the first function called on the reconciliation loop ([example](https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go#L120-L162)). Since all further hooks will need a client to be set up, **the provider must set it up at this stage and keep a reference in the generated `external` instance.**
 
 - The provider should read `ProviderConfig` to configure authentication and other client settings. In Crossplane v2, `ProviderConfig` can be cluster or namespace-scoped, so be aware you might need to specify a logic to read the correct one ([provider-template](https://github.com/crossplane/provider-template/blob/main/internal/controller/mytype/mytype.go#L132-L149) has examples of it).
-- Clients most likely will require credentials on method calls. A custom middleware (e.g. HTTP Transport, gRPC interceptor) can set the required authorization details and avoid duplicating that work at each call site, requiring only injecting those.
+- Clients most likely will require credentials on method calls. A custom middleware (e.g. HTTP Transport, gRPC interceptor) can set the required authorisation details and avoid duplicating that work at each call site, requiring only injecting those.
 
 ```go
 func (c *connector) Connect(
@@ -151,7 +151,7 @@ func (c *external) Disconnect(context.Context) error {
 
 This is one of the most important hooks since it defines what will (or not) be called next. It fetches the resource through the `crossplane.io/external-name` annotation and then:
 
-1. The default managed reconciler initializes the annotation from `metadata.name`, so `Observe` normally queries the vendor with a non-empty external name. A vendor “not found” response triggers `Create` by returning `ResourceExists: false`.
+1. The default managed reconciler initialises the annotation from `metadata.name`, so `Observe` normally queries the vendor with a non-empty external name. A vendor “not found” response triggers `Create` by returning `ResourceExists: false`.
 2. If it exists, it should always update the status of the MR (it is done via pointer when `cr.Status.AtProvider` is set) and the return must always have `ResourceExists: true`. The last part depends if the observed status matches the managed resource's desired state in `spec.forProvider`:
     1. If it matches, no action is required and it must return `ResourceUpToDate: true` + set it to available
     2. If does not, it must trigger an `Update` by returning `ResourceUpToDate: false`
@@ -292,7 +292,7 @@ Use `external-name` as the stable key your provider uses to look up an external 
 
 ### Classify vendor errors before returning an observation
 
-Return `ResourceExists: false` only for a vendor not-found response. Authentication, authorization, throttling, timeout, and malformed-response errors must be detected and returned as errors (usually dealt with in an adapter layer). Reporting any of those as an absent resource can make Crossplane create a duplicate resource.
+Return `ResourceExists: false` only for a vendor not-found response. Authentication, authorisation, throttling, timeout, and malformed-response errors must be detected and returned as errors (usually dealt with in an adapter layer). Reporting any of those as an absent resource can make Crossplane create a duplicate resource.
 
 ### Let Crossplane persist state and minimise Kube client calls
 
@@ -302,10 +302,10 @@ Using the Kubernetes client in `Connect` to read the referenced `ProviderConfig`
 
 ### Share logic between namespaced and cluster-scoped resources
 
-Crossplane V2 allows cluster and namespaced resources. If you support both, avoid duplicating reconciliation logic. The external API interactions (observe, create, update, delete) are usually identical regardless of scope. Share this logic across controllers and only introduce separate implementations when there is a real difference in behavior or a compatibility requirement. This reduces maintenance overhead and keeps your provider easier to evolve and test.
+Crossplane V2 allows cluster and namespaced resources. If you support both, avoid duplicating reconciliation logic. The external API interactions (observe, create, update, delete) are usually identical regardless of scope. Share this logic across controllers and only introduce separate implementations when there is a real difference in behaviour or a compatibility requirement. This reduces maintenance overhead and keeps your provider easier to evolve and test.
 
 ## Start building a provider
 
 Hopefully you now have a good understanding of how providers work and are implemented. Start with the [Crossplane provider template](https://github.com/crossplane/provider-template), and use providers such as [`provider-opentofu`](https://github.com/upbound/provider-opentofu), [`provider-http`](https://github.com/crossplane-contrib/provider-http) and my own [crossplane-demo acme provider](https://github.com/brunoluiz/crossplane-demo/tree/main/provider-acme) for a working reference.
 
-If a vendor API makes idempotency, imports, or asynchronous operations awkward, document those constraints before writing the controller. They will shape the provider's API and reconciliation behavior more than its Go code will.
+If a vendor API makes idempotency, imports, or asynchronous operations awkward, document those constraints before writing the controller. They will shape the provider's API and reconciliation behaviour more than its Go code will.
