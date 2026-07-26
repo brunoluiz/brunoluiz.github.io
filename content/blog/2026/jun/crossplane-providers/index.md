@@ -1,12 +1,12 @@
 ---
 title: "When Crossplane providers aren't enough: building your own in Go"
 date: '2026-04-14T10:00:00Z'
-summary: 'A practical guide to building Crossplane providers in Go, from the managed reconciler lifecycle to async operations, safe retries, and provider design trade-offs.'
+summary: 'A practical guide for building Crossplane providers in Go when other providers failed you, from the managed reconciler lifecycle to examples of how to implement and best pratices.'
 cover:
   image: cover.jpg
   relative: true
-  alt: Photo by Kai Pilger on Unsplash
-  caption: Photo by <a href="https://unsplash.com/@kaip?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Kai Pilger</a> on <a href="https://unsplash.com/photos/closeup-photo-of-street-go-and-stop-signage-displaying-stop-1k3vsv7iIIc?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>
+  alt: Photo by Guillaume TECHER on Unsplash
+  caption: Photo by <a href="https://unsplash.com/@guillaume_t?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Guillaume TECHER</a> on <a href="https://unsplash.com/photos/person-sitting-on-tower-at-daytime-XvNPUh6fWVk?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>
 aliases:
   - /crossplane-provider/
 ---
@@ -28,7 +28,7 @@ In most cases, you will be able to find an official provider (AWS/GCP) that is d
 1. Not all vendors will have a proper Terraform provider, if they have one at all
 2. Some Terraform providers might be incompatible with Upjet
 3. Teams might want to have custom logic between reconciliation logic (e.g. emit specific metrics)
-4. Upjet performance proves subpar due to Terraform integration limitation, resulting in delayed reconcile loops or OOMs
+4. Generated providers can be slow or memory-intensive when Terraform overhead is a poor fit
 
 If you hit one of the above, you are left with implementing a provider from scratch.
 
@@ -36,9 +36,11 @@ If you hit one of the above, you are left with implementing a provider from scra
 
 Don't panic: you won't start fully from scratch. The Crossplane team maintains a [provider template](https://github.com/crossplane/provider-template), which is a good starting point for most providers and also it maintains some very popular providers you can base yourself on.
 
-The template gives you the repository structure, build tooling and scaffolding utils (e.g. `make provider.addtype`). All generated types will will be placed in `internal/controller/{}` and those will define the reconciliation hooks described in the next section ([example](https://github.com/crossplane/provider-template/tree/main/internal/controller/mytype)). The provider's behavior comes from how those hooks interact with the external API.
+The template gives you the repository structure, build tooling and scaffolding utils (e.g. `make provider.addtype`). All generated types will be placed in `internal/controller/{}` and those will define the reconciliation hooks described in the next section ([example](https://github.com/crossplane/provider-template/tree/main/internal/controller/mytype)). The provider's behavior comes from how those hooks interact with the external API.
 
 ## Implementing the Crossplane reconcile loop
+
+<sub><sub>ℹ️ The following consider [default management policies](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/api.go#L48-L61) being in place, as otherwise they change the lifecycle behaviour.<sub><sub>
 
 Crossplane providers use the controller pattern through a managed reconciler abstraction. Instead of a single `Reconcile` function, provider controllers implement a strict interface with several hooks. The Crossplane runtime manages their lifecycle, ordering, and state, handling work that a controller built with Kubebuilder would otherwise need to implement (and probably lose some hair when bugs end up surfacing).
 
@@ -51,7 +53,7 @@ Besides these specific hooks in the reconcile loop, Crossplane leverages annotat
 - Before `Connect` and `Observe`, the [managed reconciler's default initializer](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/api.go#L48-L61) persists `metadata.name` as the external name when the annotation is absent. Providers overwrite it during `Create` only when the external system returns a different stable lookup key.
 - Users can pre-populate it to identify and import an existing resource, although it should be used together with an `Observe` management policy (beta feature) to prevent unintended changes ([docs about Crossplane resource import](https://docs.crossplane.io/v2.3/guides/import-existing-resources/)).
 
-The provider lifecycle is:
+If [management policies are to the `*` (default)](https://docs.crossplane.io/v2.3/managed-resources/managed-resources/#managementpolicies), where no hook is excluded, the provider lifecycle can be summarised as:
 
 ```mermaid
 flowchart TD
@@ -121,7 +123,7 @@ func (c *connector) Connect(
 	ctx context.Context,
 	cr *v1alpha1.User,
 ) (managed.TypedExternalClient[*v1alpha1.User], error) {
-	// Read `ProviderConfig`` and create the vendor client. It may be an HTTP
+	// Read `ProviderConfig` and create the vendor client. It may be an HTTP
 	// client, database connection, or CLI wrapper. It lives for this
 	// reconciliation unless the provider implements connection pooling.
 	client, err := newClient(ctx, cr)
@@ -149,7 +151,7 @@ func (c *external) Disconnect(context.Context) error {
 
 ### Observe: the provider's "brain"
 
-This is one of the most important hooks since it defines what will (or not) be called next. It tries to fetch the resource via through the `crossplane.io/external-name` resource annotation and then:
+This is one of the most important hooks since it defines what will (or not) be called next. It fetches the resource through the `crossplane.io/external-name` annotation and then:
 
 1. The default managed reconciler initializes the annotation from `metadata.name`, so `Observe` normally queries the vendor with a non-empty external name. A vendor “not found” response triggers `Create` by returning `ResourceExists: false`.
 2. If it exists, it should always update the status of the MR (it is done via pointer when `cr.Status.AtProvider` is set) and the return must always have `ResourceExists: true`. The last part depends if the observed status matches the managed resource's desired state in `spec.forProvider`:
@@ -196,7 +198,7 @@ func (c *external) Observe(
 
 ### Create: resource creation and `external-name` setting
 
-`Create` is called after `Observe` returns `ResourceExists: false`. It creates the resource in the external system and sets `external-name` if the it assigns its identifier (e.g. ID). The managed reconciler persists annotation changes made in this hook, but discards status changes. Because of the latter, do not implement `cr.Status.AtProvider` mutations in `Create` and populate status during the next `Observe` instead.
+`Create` is called after `Observe` returns `ResourceExists: false`. It creates the resource in the external system and sets `external-name` if it assigns an identifier (e.g. ID). The managed reconciler persists annotation changes made in this hook, but discards status changes. Because of the latter, do not implement `cr.Status.AtProvider` mutations in `Create` and populate status during the next `Observe` instead.
 
 ```go
 func (c *external) Create(
@@ -223,7 +225,7 @@ func (c *external) Create(
 
 ### Update: resource update and status refresh
 
-`Update` is called after `Observe` returns `ResourceExists: true` and `ResourceUpToDate: false`. It changes the external resource to match `spec.forProvider`. Unlike `Create`, the reconciler persists status changes made by `Update`, so it can refresh `cr.Status.AtProvider` and conditions. Do not mutate annotations this hook, because they are not persisted. A subsequent `Observe` should confirm that the resource is now up to date.
+`Update` is called after `Observe` returns `ResourceExists: true` and `ResourceUpToDate: false`. It changes the external resource to match `spec.forProvider`. Unlike `Create`, the reconciler persists status changes made by `Update`, so it can refresh `cr.Status.AtProvider` and conditions. Do not mutate annotations in this hook, because they are not persisted. A subsequent `Observe` should confirm that the resource is now up to date.
 
 ```go
 func (c *external) Update(
@@ -282,9 +284,13 @@ func (c *external) Delete(
 
 Store connection-level details such as credentials, API endpoints, account or cluster identifiers, and default regions in `ProviderConfig`. This avoids repeating the same values across multiple resources and keeps your APIs cleaner. `spec.forProvider` should be for fields that represent the desired state of a resource resource (e.g. database name, size, or network). If multiple resources using the same credentials could have different values, it belongs in the resource spec — not the `ProviderConfig`.
 
-### Treat `crossplane.io/external-name` as the source of truth
+### Treat `crossplane.io/external-name` as a stable lookup key
 
-Always set the `external-name` annotation to the identifier used by the external system (e.g. ID, ARN, or resource path). This ensures your provider can reliably observe, update, and delete the resource. It also enables importing existing infrastructure by pre-populating the annotation. Avoid assuming the Kubernetes `metadata.name` matches the external name, since most of the time they won't.
+Use `external-name` as the stable key your provider uses to look up an external resource. The managed reconciler defaults it to `metadata.name`; overwrite it during `Create` only when the external system returns a different name, ID, ARN, or resource path. Pre-populating the annotation also enables importing existing infrastructure.
+
+### Classify vendor errors before returning an observation
+
+Return `ResourceExists: false` only for a vendor not-found response. Authentication, authorization, throttling, timeout, and malformed-response errors must be detected and returned as errors (usually dealt with in an adapter layer). Reporting any of those as an absent resource can make Crossplane create a duplicate resource.
 
 ### Let Crossplane persist managed-resource state
 
