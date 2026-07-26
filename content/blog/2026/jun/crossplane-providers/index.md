@@ -21,7 +21,7 @@ Most of the time you will either use an official provider or leverage upjet (gen
 
 ## Why create your own provider?
 
-In most cases, you will be able to find an official provider (AWS/GCP) that is decent and well maintained, but many times you won't since Crossplane still does not have as much coverage as Terraform. Hence, there are two options: generate a provider using [upjet](https://github.com/crossplane/upjet) or implement a provider yourself.
+Sometimes you will be able to find an official provider (AWS/GCP) that is decent and well maintained, but other times you won't since Crossplane still does not have as much coverage as Terraform. Hence, there are two options: generate a provider using [upjet](https://github.com/crossplane/upjet) or implement a provider yourself.
 
 [Upjet](https://github.com/crossplane/upjet) leverages the Terraform ecosystem and it generates providers that hook to its providers. In many cases this is enough, especially for well maintained Terraform providers. Many of the official Upbound and Crossplane providers use it and it is the quickest way to implement a custom provider. But, there are a few caveats:
 
