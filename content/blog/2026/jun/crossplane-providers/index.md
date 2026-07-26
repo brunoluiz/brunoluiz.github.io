@@ -1,7 +1,7 @@
 ---
-title: Beyond Crossplane community providers using Golang
+title: "When Crossplane providers aren't enough: building your own in Go"
 date: '2026-04-14T10:00:00Z'
-summary: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer venenatis, velit luctus porta consectetur, ex sem finibus arcu, malesuada gravida mi enim at tellus'
+summary: 'A practical guide to building Crossplane providers in Go, from the managed reconciler lifecycle to async operations, safe retries, and provider design trade-offs.'
 cover:
   image: cover.jpg
   relative: true
@@ -170,28 +170,28 @@ The managed reconciler records `external-create-pending` before it calls `Create
 | :--------- | :--------- |
 | `crossplane-runtime` | [External client contract](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L290-L331) <br/> [Create safety and annotations](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1100-L1119) <br/> [Create core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1349-L1471) |
 
-## Best practices
+## Provider design choices that prevent reconciliation bugs
 
-#### **Keep shared configuration in `ProviderConfig`**
+### Put connection defaults in `ProviderConfig`
 
 Store connection-level details such as credentials, API endpoints, account or cluster identifiers, and default regions in `ProviderConfig`. This avoids repeating the same values across multiple resources and keeps your APIs cleaner. `spec.forProvider` should be for fields that represent the desired state of a resource resource (e.g. database name, size, or network). If multiple resources using the same credentials could have different values, it belongs in the resource spec — not the `ProviderConfig`.
 
-#### **Use `crossplane.io/external-name` as the source of truth**
+### Treat `crossplane.io/external-name` as the source of truth
 
 Always set the `external-name` annotation to the identifier used by the external system (e.g. ID, ARN, or resource path). This ensures your provider can reliably observe, update, and delete the resource. It also enables importing existing infrastructure by pre-populating the annotation. Avoid assuming the Kubernetes `metadata.name` matches the external name, since most of the time they won't.
 
-#### **Let Crossplane persist managed-resource state**
+### Let Crossplane persist managed-resource state
 
 Your external client logic should focus on reconciling the external system, not persisting changes to the managed resource. Crossplane’s managed reconciler already handles lifecycle concerns such as updating status, managing finalizers, and persisting annotations. Calling the Kubernetes API to mutate the managed resource from an external client can lead to race conditions, conflicts, and harder-to-maintain code. Instead, return the appropriate observation or update results and let Crossplane handle the rest.
 
 Using the Kubernetes client in `Connect` to read the referenced `ProviderConfig` and credentials Secret is expected. When you need other Kubernetes resources, first check whether Crossplane provides an abstraction. For example, use `ProviderConfig` secret references for credentials rather than defining a separate secret-management mechanism.
 
-#### **Don't duplicate controllers unnecessarily**
+### Share logic between namespaced and cluster-scoped resources
 
 Crossplane V2 allows cluster and namespaced resources. If you support both, avoid duplicating reconciliation logic. The external API interactions (observe, create, update, delete) are usually identical regardless of scope. Share this logic across controllers and only introduce separate implementations when there is a real difference in behavior or a compatibility requirement. This reduces maintenance overhead and keeps your provider easier to evolve and test.
 
-## Ready to develop your first provider?
+## Start building a provider
 
-After all of that, I hope you are ready to develop your first provider. Feel free to have a look on [crossplane-demo](https://github.com/brunoluiz/crossplane-demo), which I have created for a [Container Days presentation on the topic](https://www.linkedin.com/feed/update/urn:li:activity:7428027963859755008/).
+Start with the [Crossplane provider template](https://github.com/crossplane/provider-template), then use [crossplane-demo](https://github.com/brunoluiz/crossplane-demo) alongside the [Container Days presentation](https://www.linkedin.com/feed/update/urn:li:activity:7428027963859755008/) for a working reference.
 
-This document will be a live document and I will update it as I learn new things.
+If a vendor API makes idempotency, imports, or asynchronous operations awkward, document those constraints before writing the controller. They will shape the provider's API and reconciliation behavior more than its Go code will.
