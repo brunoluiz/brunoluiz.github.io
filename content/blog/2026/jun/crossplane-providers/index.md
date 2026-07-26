@@ -38,50 +38,40 @@ Since Crossplane follows the controller pattern, a provider essentially implemen
 
 Instead of requiring a simple “reconcile” function, provider controllers must implement a strict interface with a few hooks, making it almost an “integration” framework. The lifecycle, order and state is managed by the Crossplane runtime, abstracting complexities that would generally need to be implemented using tools such as kubebuilder. Although, **I highly recommend engineers to go at least once through the managed reconciler controller,** since when troubleshooting something that will have most answers.
 
-Besides the specific hooks in the reconcile loop, it leverages annotations to keep track of some of the reconciliation state. A very important one is [`crossplane.io/external-name`](http://crossplane.io/external-name): it keeps track of the underlying resource ID. If not set, the provider must set during its lifecycle (eg: on create), but the user might want to define it when applying the resource, [forcing an “import” on the first Observe loop](https://docs.crossplane.io/v2.3/guides/import-existing-resources/).
+Besides the specific hooks in the reconcile loop, Crossplane uses annotations to keep track of reconciliation state. A very important one is [`crossplane.io/external-name`](http://crossplane.io/external-name), which identifies the underlying resource. The runtime initializes a missing external name from `metadata.name`; providers should set it during `Create` when the external system assigns a different identifier. Users can pre-populate it to identify an existing resource, but should first import it with an [`Observe` management policy](https://docs.crossplane.io/v2.3/guides/import-existing-resources/) to prevent unintended changes.
 
 A provider lifecycle follows these steps:
 
 ```mermaid
-flowchart LR
-    Connect --> ObserveCond{"Observe"}
+flowchart TD
+    Connect --> Observe{"Observe"}
 
-    %% Create
-    ObserveCond -- "$Exists = false" --> Create["Create Resource"]
-    Create --> CreateStatus["Update MR Status<br/>AND set external-name"]
-    CreateStatus --> End
-    %% Update
-    ObserveCond -- "$Exists = true AND<br>$UpToDate = false" --> Update["Update Resource"]
-    Update --> UpdateStatus["Update MR Status"]
+    Observe -- "Not deleting AND ResourceExists = false" --> Create["Create external resource"]
+    Create --> CreateName["Persist external-name annotation"]
+    CreateName --> End["Requeue / poll"]
+
+    Observe -- "Not deleting AND ResourceExists = true AND ResourceUpToDate = false" --> Update["Update external resource"]
+    Update --> UpdateStatus["Persist managed-resource status"]
     UpdateStatus --> End
-    %% Get
-    ObserveCond -- "$Exists = true AND<br>$UpToDate = true" --> End["UpToDate"]
-    %% Delete
 
-    ObserveCond -- "$WasDeleted AND $Exists = false" --> End
-    Connect --> DeleteCond{"Delete"}
-    DeleteCond -- "$WasDeleted AND<br/>$Exists = true" --> Delete["Delete resource"]
-    DeleteCond -- "$WasDeleted AND<br/>$Exists = false" --> Removed["Finalised</br>(external resource deleted)"]
+    Observe -- "Not deleting AND ResourceExists = true AND ResourceUpToDate = true" --> End
 
-    %% Comment / Annotation
-    NoteA["$Exists = non-empty crossplane.io/external-name"]
-    style NoteA fill:#BBDEFB
+    Observe -- "Deleting AND ResourceExists = true" --> Delete["Delete external resource"]
+    Delete --> End
+    Observe -- "Deleting AND ResourceExists = false" --> Removed["Remove finalizer"]
 
     style End fill:#C8E6C9
     style Delete fill:#FFF9C4
     style Removed fill:#FFCDD2
 ```
 
-1. **Setup:** only called when the provider starts up (once), not being part of the reconcile loop. In many cases though, it is where the API client will be set up, as sometimes it is not desirable to create a new client on every reconcile loop (eg: in Connect).
-2. **Connect:** sets up client connections or anything required for the next steps of the reconciliation process. Different from `Setup`, this is done per-reconciliation loop and is paired with `Disconnect`.
-3. **Observe:** fetches the resource from the third-party API and decides what to do next. It tries to fetch the resource via through the [`crossplane.io/external-name`](http://crossplane.io/external-name) resource annotation and then:
-   1. If the annotation does not exist or the the vendor returns “not found”, it triggers `Create`
-   2. If the resource exists but vendor response differs from the spec, it must trigger `Update`
-   3. If the resource exists and vendor response matches the spec, it stores data in the resource status (this is essentially an “import”)
-4. **Create:** creates it within the vendor and, once finished, it sets the external name in the managed resource object. Once the reconciliation kicks again, Observe will hydrate details to the object status.
-5. **Update:** similar to create, but instead it calls update and does not change the external name
-6. **Delete:** handles the resource deletion. If the resource still exists on the next reconciliation loop (when Observe gets triggered), it will still try to delete, ensuring no resource is left behind.
-7. **Disconnect:** not always required, but in case you have resources that require clean up from the Connect stage, such as ephemeral database connections, this is the place (omitted in the diagram for simplicity).
+1. **Setup:** registers a controller for one managed-resource kind. It runs outside the reconciliation loop and is the right place to construct shared dependencies, such as a connector. The managed resource and its `ProviderConfig` are available only later, in `Connect`.
+2. **Connect:** sets up the client or other dependencies required by the remaining lifecycle steps. It runs once per reconciliation and returns the `external` instance that owns the client.
+3. **Observe:** queries the third-party API, usually using [`crossplane.io/external-name`](http://crossplane.io/external-name), and returns `ResourceExists` and `ResourceUpToDate`. A vendor "not found" response returns `ResourceExists: false`; a real API error must be returned as an error. If the resource exists, `Observe` hydrates `status.atProvider` and compares the observed resource with `spec.forProvider` to decide whether it is up to date.
+4. **Create:** runs when `Observe` returns `ResourceExists: false`. It creates the external resource and sets `external-name` when the provider learns an externally assigned identifier. The reconciler persists annotation changes made by `Create`, but discards status changes, so a later `Observe` hydrates the resource status.
+5. **Update:** runs when `Observe` returns `ResourceExists: true` and `ResourceUpToDate: false`. It updates the external resource to match the desired state. The reconciler persists status changes made by `Update`, but not changes to annotations or spec fields. The next `Observe` confirms that the external resource is up to date.
+6. **Delete:** when the managed resource is being deleted, `Observe` still runs first. If it returns `ResourceExists: true`, the reconciler calls `Delete` and retries until `Observe` reports the resource absent. When `Observe` returns `ResourceExists: false`, the reconciler removes its finalizer in the same reconciliation.
+7. **Disconnect:** runs at the end of every reconciliation. It can be a no-op for reusable clients such as `http.Client`; use it to close resources with a per-reconciliation lifecycle, such as an ephemeral database session.
 
 ## Anatomy of a provider repository
 
@@ -108,7 +98,7 @@ The provider should read the `ProviderConfig` to wire up the auth and other bits
 
 One thing to note is that some SDKs / clients might require credential injection on every method call (eg: OpenAPI generated). Since they have HTTP Clients underneath, my recommendation is to create a custom HTTP Transport that sets the required auth headers, avoiding further boilerplate.
 
-Paired with `Connect`, you must implement a `Disconnect` function to call `Close` on anything that needs closing. If you don't use some pool of lazily created connections, probably this is required and, if you don't implement it, congrats: you will have a memory leak.
+Paired with `Connect`, implement `Disconnect` to close resources that need closing. It can be a no-op for reusable clients such as `http.Client`, but might be required in cases of database connections (depending on how they are managed).
 
 | Repository | References |
 | :--------- | :--------- |
@@ -129,18 +119,27 @@ This is one of the most important hooks since it defines what will (or not) be c
 | `crossplane-runtime` | [Update core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1178-L1196) |
 | `provider-template` | [Code reference](https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go#L172-L218) |
 
-### Create / Update
+### Create
 
-`Create` and `Update` are simple hooks: they receive a call from the controller, call either create/update within the third-party and update the `cr.Status.AtProvider` fields. The main difference between them is that `Create` must always set an `external-name` at the end of its call (ID on the third-party).
+`Create` is called after `Observe` returns `ResourceExists: false`. It creates the resource in the third-party system and sets `external-name` if the third-party assigns its identifier. The managed reconciler persists annotation changes made in this hook, but discards status changes. Do not rely on `cr.Status.AtProvider` mutations in `Create`; populate status during the next `Observe` instead.
 
 | Repository | References |
 | :--------- | :--------- |
-| `crossplane-runtime` | [Create core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1349-L1471) <br/> [Update core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1515-L1571) |
-| `provider-template` | [Code reference](https://github.com/crossplane/provider-template/blob/main/internal/controller/mytype/mytype.go#L220-L247) |
+| `crossplane-runtime` | [Create core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1349-L1471) |
+| `provider-template` | [Code reference](https://github.com/crossplane/provider-template/blob/main/internal/controller/mytype/mytype.go#L220-L230) |
+
+### Update
+
+`Update` is called after `Observe` returns `ResourceExists: true` and `ResourceUpToDate: false`. It changes the external resource to match `spec.forProvider`. Unlike `Create`, the reconciler persists status changes made by `Update`, so it can refresh `cr.Status.AtProvider` and conditions. Do not mutate annotations or spec fields in this hook, because they are not persisted. A subsequent `Observe` should confirm that the resource is now up to date.
+
+| Repository | References |
+| :--------- | :--------- |
+| `crossplane-runtime` | [Update core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1515-L1571) |
+| `provider-template` | [Code reference](https://github.com/crossplane/provider-template/blob/main/internal/controller/mytype/mytype.go#L232-L247) |
 
 ### Delete
 
-A simple call to the third-party delete API. Once this is called, a subsequent reconcile will trigger `Observe`, which will not find the item and return `ResourceExists: false`. [Together with the `meta.WasDeleted() == true`](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1235-L1236), the runtime will conclude its deletion is finished. If for some reason though the delete did not work properly, it will keep retrying until the resource ceases to exist.
+`Delete` calls the third-party delete API after `Observe` reports that a deleting managed resource still exists externally. On a later reconciliation, `Observe` reports `ResourceExists: false`; together with [`meta.WasDeleted() == true`](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1235-L1236), the runtime removes its finalizer. If the external resource remains, it keeps retrying deletion until the resource ceases to exist.
 
 | Repository | References |
 | :--------- | :--------- |
