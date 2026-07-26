@@ -168,15 +168,15 @@ func (c *external) Observe(
 		return managed.ExternalObservation{ResourceExists: false}, nil
 	}
 	if err != nil {
-		return managed.ExternalObservation{}, fmt.Errorf("get resource: %w", err)
+		return managed.ExternalObservation{}, fmt.Errorf("get res: %w", err)
 	}
 
-	// Update managed-resource status from the observed state. Extract this to
-	// updateStatus once it spans several fields.
+	// Update managed-resource status from the observed state.
+	// Extract this to updateStatus once it spans several fields.
 	cr.Status.AtProvider.Name = observed.Name
 
-	// Compare observed and desired state. Extract this to isUpToDate when
-	// several fields must be compared.
+	// Compare observed and desired state. Extract this to isUpToDate
+	// when several fields must be compared.
 	upToDate := cr.Spec.ForProvider.Name == observed.Name
 	if upToDate {
 		cr.Status.SetConditions(xpv1.Available())
@@ -207,10 +207,10 @@ func (c *external) Create(
 	req := toCreateRequest(cr.Spec.ForProvider)
 	created, err := c.client.Create(ctx, req)
 	if err != nil {
-		return managed.ExternalCreation{}, fmt.Errorf("create resource: %w", err)
+		return managed.ExternalCreation{}, fmt.Errorf("create res: %w", err)
 	}
 
-	// Create persists annotations, but not status. Observe hydrates status later.
+	// Create persists annotations, but not status. Observe hydrates status.
 	meta.SetExternalName(cr, created.ID)
 	return managed.ExternalCreation{
 		ConnectionDetails: managed.ConnectionDetails{
@@ -238,7 +238,7 @@ func (c *external) Update(
 	req := toUpdateRequest(cr.Spec.ForProvider)
 	updated, err := c.client.Update(ctx, meta.GetExternalName(cr), req)
 	if err != nil {
-		return managed.ExternalUpdate{}, fmt.Errorf("update resource: %w", err)
+		return managed.ExternalUpdate{}, fmt.Errorf("update res: %w", err)
 	}
 
 	// Update persists status, unlike Create.
@@ -268,7 +268,7 @@ func (c *external) Delete(
 
 	err := c.client.Delete(ctx, externalName)
 	if err != nil && !isNotFound(err) {
-		return managed.ExternalDelete{}, fmt.Errorf("delete resource: %w", err)
+		return managed.ExternalDelete{}, fmt.Errorf("delete res: %w", err)
 	}
 
 	return managed.ExternalDelete{}, nil
