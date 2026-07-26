@@ -44,16 +44,16 @@ A provider lifecycle follows these steps:
 
 <!-- Add diagram here -->
 
-1. **`Setup`:** only called when the provider starts up (once), not being part of the reconcile loop. In many cases though, it is where the API client will be set up, as sometimes it is not desirable to create a new client on every reconcile loop (eg: in Connect).
-2. **`Connect`:** sets up client connections or anything required for the next steps of the reconciliation process. Different from `Setup`, this is done per-reconciliation loop and is paired with `Disconnect`.
-3. **`Observe`:** fetches the resource from the third-party API and decides what to do next. It tries to fetch the resource via through the [`crossplane.io/external-name`](http://crossplane.io/external-name) resource annotation and then:
+1. **Setup:** only called when the provider starts up (once), not being part of the reconcile loop. In many cases though, it is where the API client will be set up, as sometimes it is not desirable to create a new client on every reconcile loop (eg: in Connect).
+2. **Connect:** sets up client connections or anything required for the next steps of the reconciliation process. Different from `Setup`, this is done per-reconciliation loop and is paired with `Disconnect`.
+3. **Observe:** fetches the resource from the third-party API and decides what to do next. It tries to fetch the resource via through the [`crossplane.io/external-name`](http://crossplane.io/external-name) resource annotation and then:
    1. If the annotation does not exist or the the vendor returns “not found”, it triggers `Create`
    2. If the resource exists but vendor response differs from the spec, it must trigger `Update`
    3. If the resource exists and vendor response matches the spec, it stores data in the resource status (this is essentially an “import”)
-4. **`Create`:** creates it within the vendor and, once finished, it sets the external name in the managed resource object. Once the reconciliation kicks again, Observe will hydrate details to the object status.
-5. **`Update`:** similar to create, but instead it calls update and does not change the external name
-6. **`Delete`:** handles the resource deletion. If the resource still exists on the next reconciliation loop (when Observe gets triggered), it will still try to delete, ensuring no resource is left behind.
-7. **`Disconnect`:** not always required, but in case you have resources that require clean up from the Connect stage (eg: ephemeral database connections), this is the place.
+4. **Create:** creates it within the vendor and, once finished, it sets the external name in the managed resource object. Once the reconciliation kicks again, Observe will hydrate details to the object status.
+5. **Update:** similar to create, but instead it calls update and does not change the external name
+6. **Delete:** handles the resource deletion. If the resource still exists on the next reconciliation loop (when Observe gets triggered), it will still try to delete, ensuring no resource is left behind.
+7. **Disconnect:** not always required, but in case you have resources that require clean up from the Connect stage (eg: ephemeral database connections), this is the place.
 
 ## Anatomy of a provider repository
 
