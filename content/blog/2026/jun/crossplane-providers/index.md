@@ -89,9 +89,9 @@ flowchart LR
 
 ### Scaffolding
 
-So you are ready to start implementing your custom provider? The Crossplane team maintains a [provider template](https://github.com/crossplane/provider-template), which is a good starting point for most. The README has most instructions on how to set it up and create your first controller (`provider.addType`).
+So you are ready to start implementing your custom provider? The Crossplane team maintains a [provider template](https://github.com/crossplane/provider-template), which is a good starting point for most. The README has most instructions on how to set it up and create your first controller with `make provider.addtype`.
 
-Once you generate your type, you will get a `internal/controller/{}` which is what defines the aforementioned reconciliation hooks ([example](https://github.com/crossplane/provider-template/tree/main/internal/controller/mytype)).
+Once you generate your type with `make provider.addtype`, you will get a `internal/controller/{}` which is what defines the aforementioned reconciliation hooks ([example](https://github.com/crossplane/provider-template/tree/main/internal/controller/mytype)).
 
 ### Setup
 
@@ -120,7 +120,7 @@ Paired with `Connect`, you must implement a `Disconnect` function to call `Close
 This is one of the most important hooks since it defines what will (or not) be called next. It tries to fetch the resource via through the [`crossplane.io/external-name`](http://crossplane.io/external-name) resource annotation and then:
 
 1. If the annotation does not exist, is empty or the the vendor returns “not found”, it triggers `Create` by returning `ResourceExists: false`
-2. If it exists, it should always update the status of the MR (it is done via pointer when `cr.Status.AtProvider` is set) and the return must always have `ResourceExists: true`. The last part depends if the observed status matches the claim spec:
+2. If it exists, it should always update the status of the MR (it is done via pointer when `cr.Status.AtProvider` is set) and the return must always have `ResourceExists: true`. The last part depends if the observed status matches the managed resource's desired state in `spec.forProvider`:
    1. If it matches, this is effectively an import and the it must return `ResourceUpToDate: true` and set it to available
    2. If does not, it must trigger an `Update` by returning `ResourceUpToDate: false`
 
@@ -173,11 +173,11 @@ Store connection-level details such as credentials, API endpoints, account or cl
 
 Always set the `external-name` annotation to the identifier used by the external system (e.g. ID, ARN, or resource path). This ensures your provider can reliably observe, update, and delete the resource. It also enables importing existing infrastructure by pre-populating the annotation. Avoid assuming the Kubernetes `metadata.name` matches the external name, since most of the time they won't.
 
-#### **Avoid interacting with the Kubernetes API directly**
+#### **Let Crossplane persist managed-resource state**
 
-Your provider logic should focus on reconciling the external system, not managing Kubernetes objects. Crossplane’s managed reconciler already handles lifecycle concerns such as fetching resources, updating status, managing finalizers, and persisting annotations, all through pointers. Calling the Kubernetes API directly from your external client can lead to race conditions, conflicts, and harder-to-maintain code. Instead, return the appropriate observation or update results and let Crossplane handle the rest.
+Your external client logic should focus on reconciling the external system, not persisting changes to the managed resource. Crossplane’s managed reconciler already handles lifecycle concerns such as updating status, managing finalizers, and persisting annotations. Calling the Kubernetes API to mutate the managed resource from an external client can lead to race conditions, conflicts, and harder-to-maintain code. Instead, return the appropriate observation or update results and let Crossplane handle the rest.
 
-In case you need to do it, analyse if Crossplane doesn't provide some other abstraction to solve this. An example is secrets: most likely you should be relying on `ProviderConfig` secret references instead of implementing your own.
+Using the Kubernetes client in `Connect` to read the referenced `ProviderConfig` and credentials Secret is expected. When you need other Kubernetes resources, first check whether Crossplane provides an abstraction. For example, use `ProviderConfig` secret references for credentials rather than defining a separate secret-management mechanism.
 
 #### **Don't duplicate controllers unnecessarily**
 
