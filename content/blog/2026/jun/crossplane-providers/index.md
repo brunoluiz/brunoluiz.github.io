@@ -1,6 +1,6 @@
 ---
 title: "Building Crossplane providers from scratch using Go"
-date: '2026-04-14T10:00:00Z'
+date: '2026-07-25T10:00:00Z'
 summary: 'A practical guide for building Crossplane providers in Go when other providers failed you, from the managed reconciler lifecycle to examples of how to implement and best practices.'
 cover:
   image: cover.jpg
