@@ -286,13 +286,13 @@ Store connection-level details such as credentials, API endpoints, account or cl
 
 ### Treat `crossplane.io/external-name` as a stable lookup key
 
-Use `external-name` as the stable key your provider uses to look up an external resource. The managed reconciler defaults it to `metadata.name`; overwrite it during `Create` only when the external system returns a different name, ID, ARN, or resource path. Pre-populating the annotation also enables importing existing infrastructure.
+Use `external-name` as the stable key your provider uses to look up an external resource. The managed reconciler defaults it to `metadata.name`, but providers must overwrite it during `Create` when the external system returns a different name, such as an ID. Pre-populating the annotation also enables importing existing infrastructure, as previously mentioned.
 
 ### Classify vendor errors before returning an observation
 
 Return `ResourceExists: false` only for a vendor not-found response. Authentication, authorization, throttling, timeout, and malformed-response errors must be detected and returned as errors (usually dealt with in an adapter layer). Reporting any of those as an absent resource can make Crossplane create a duplicate resource.
 
-### Let Crossplane persist managed-resource state
+### Let Crossplane persist state and minimise Kube client calls
 
 Your external client logic should focus on reconciling the external system, not persisting changes to the managed resource. Crossplane’s managed reconciler already handles lifecycle concerns such as updating status, managing finalizers, and persisting annotations. Calling the Kubernetes API to mutate the managed resource from an external client can lead to race conditions, conflicts, and harder-to-maintain code. Instead, return the appropriate observation or update results and let Crossplane handle the rest.
 
