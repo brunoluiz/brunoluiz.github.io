@@ -326,6 +326,6 @@ Crossplane V2 allows cluster and namespaced resources. If you support both, avoi
 
 ## Start building a provider
 
-Start with the [Crossplane provider template](https://github.com/crossplane/provider-template), then use [crossplane-demo](https://github.com/brunoluiz/crossplane-demo) alongside the [Container Days presentation](https://www.linkedin.com/feed/update/urn:li:activity:7428027963859755008/) for a working reference.
+Hopefully you now have a good understanding of how operators work and are implemented. Start with the [Crossplane provider template](https://github.com/crossplane/provider-template), and use providers such as [`provider-opentofu`](https://github.com/upbound/provider-opentofu), [`provider-http`](https://github.com/crossplane-contrib/provider-http) and my own [crossplane-demo acme provider](https://github.com/brunoluiz/crossplane-demo/tree/main/provider-acme) for a working reference.
 
 If a vendor API makes idempotency, imports, or asynchronous operations awkward, document those constraints before writing the controller. They will shape the provider's API and reconciliation behavior more than its Go code will.
