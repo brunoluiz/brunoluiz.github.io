@@ -108,12 +108,16 @@ The provider should read `ProviderConfig` to configure authentication and other 
 Some SDKs, including OpenAPI-generated clients, require credentials on every method call. When they use `http.Client` underneath, a custom HTTP transport can set the required authorization headers and avoid duplicating that work at each call site.
 
 ```go
-func (c *connector) Connect(ctx context.Context, cr *v1alpha1.MyType) (managed.TypedExternalClient[*v1alpha1.MyType], error) {
-	// Read ProviderConfig and create the vendor client. Might be an HTTP Client, database connection or even some CLI call.
-  // This will be used across this reconciliation loop only, unless there is some pooling logic implemented.
+func (c *connector) Connect(
+	ctx context.Context,
+	cr *v1alpha1.MyType,
+) (managed.TypedExternalClient[*v1alpha1.MyType], error) {
+	// Read ProviderConfig and create the vendor client. It may be an HTTP
+	// client, database connection, or CLI wrapper. It lives for this
+	// reconciliation unless the provider implements connection pooling.
 	client, err := newClient(ctx, cr)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create client on connect: %s", err)
+		return nil, fmt.Errorf("create client during connect: %w", err)
 	}
 
 	return &external{client: client}, nil
@@ -146,8 +150,11 @@ This is one of the most important hooks since it defines what will (or not) be c
 The example below assumes the vendor adapter exposes `Get`, `Create`, `Update`, and `Delete`, and that `isNotFound` recognizes its not-found response.
 
 ```go
-func (c *external) Observe(ctx context.Context, cr *v1alpha1.User) (managed.ExternalObservation, error) {
-  // If external name is empty, the resource has not being created yet and is deemed "non-existent"
+func (c *external) Observe(
+	ctx context.Context,
+	cr *v1alpha1.User,
+) (managed.ExternalObservation, error) {
+	// Without an external name, the resource has not been created yet.
 	externalName := meta.GetExternalName(cr)
 	if externalName == "" {
 		return managed.ExternalObservation{ResourceExists: false}, nil
@@ -158,21 +165,24 @@ func (c *external) Observe(ctx context.Context, cr *v1alpha1.User) (managed.Exte
 		return managed.ExternalObservation{ResourceExists: false}, nil
 	}
 	if err != nil {
-		return managed.ExternalObservation{}, fmt.Errorf("failed to get external resource: %s", err)
+		return managed.ExternalObservation{}, fmt.Errorf("get resource: %w", err)
 	}
 
-  // Updates MR status with the observed state. Once too many fields are set, consolidate it in a
-  // private method such as `updateStatus`
+	// Update managed-resource status from the observed state. Extract this to
+	// updateStatus once it spans several fields.
 	cr.Status.AtProvider.Name = observed.Name
 
-  // Defines if the status is up-to-date based on field comparison. Similar to above,
-  // it can benefit from a private method such as `isUpToDate`
+	// Compare observed and desired state. Extract this to isUpToDate when
+	// several fields must be compared.
 	upToDate := cr.Spec.ForProvider.Name == observed.Name
 	if upToDate {
 		cr.Status.SetConditions(xpv1.Available())
 	}
 
-	return managed.ExternalObservation{ResourceExists: true, ResourceUpToDate: upToDate}, nil
+	return managed.ExternalObservation{
+		ResourceExists:   true,
+		ResourceUpToDate: upToDate,
+	}, nil
 }
 ```
 
@@ -186,11 +196,15 @@ func (c *external) Observe(ctx context.Context, cr *v1alpha1.User) (managed.Exte
 `Create` is called after `Observe` returns `ResourceExists: false`. It creates the resource in the third-party system and sets `external-name` if the third-party assigns its identifier. The managed reconciler persists annotation changes made in this hook, but discards status changes. Do not rely on `cr.Status.AtProvider` mutations in `Create`; populate status during the next `Observe` instead.
 
 ```go
-func (c *external) Create(ctx context.Context, cr *v1alpha1.User) (managed.ExternalCreation, error) {
-  // Converts CR spec to vendors request using a mapper such as `toCreateRequest`.
-	created, err := c.client.Create(ctx, toCreateRequest(cr.Spec.ForProvider))
+func (c *external) Create(
+	ctx context.Context,
+	cr *v1alpha1.User,
+) (managed.ExternalCreation, error) {
+	// Convert the managed-resource spec to a vendor request.
+	req := toCreateRequest(cr.Spec.ForProvider)
+	created, err := c.client.Create(ctx, req)
 	if err != nil {
-		return managed.ExternalCreation{}, fmt.Errorf("failed to create external resource: %s", err)
+		return managed.ExternalCreation{}, fmt.Errorf("create resource: %w", err)
 	}
 
 	// Create persists annotations, but not status. Observe hydrates status later.
@@ -209,11 +223,15 @@ func (c *external) Create(ctx context.Context, cr *v1alpha1.User) (managed.Exter
 `Update` is called after `Observe` returns `ResourceExists: true` and `ResourceUpToDate: false`. It changes the external resource to match `spec.forProvider`. Unlike `Create`, the reconciler persists status changes made by `Update`, so it can refresh `cr.Status.AtProvider` and conditions. Do not mutate annotations or spec fields in this hook, because they are not persisted. A subsequent `Observe` should confirm that the resource is now up to date.
 
 ```go
-func (c *external) Update(ctx context.Context, cr *v1alpha1.User) (managed.ExternalUpdate, error) {
-  // Converts CR spec to vendors request using a mapper such as `toUpdateRequest`.
-	updated, err := c.client.Update(ctx, meta.GetExternalName(cr), toUpdateRequest(cr.Spec.ForProvider))
+func (c *external) Update(
+	ctx context.Context,
+	cr *v1alpha1.User,
+) (managed.ExternalUpdate, error) {
+	// Convert the managed-resource spec to a vendor request.
+	req := toUpdateRequest(cr.Spec.ForProvider)
+	updated, err := c.client.Update(ctx, meta.GetExternalName(cr), req)
 	if err != nil {
-		return managed.ExternalUpdate{}, fmt.Errorf("failed to update external resource: %s", err)
+		return managed.ExternalUpdate{}, fmt.Errorf("update resource: %w", err)
 	}
 
 	// Update persists status, unlike Create.
@@ -232,7 +250,10 @@ func (c *external) Update(ctx context.Context, cr *v1alpha1.User) (managed.Exter
 `Delete` calls the third-party delete API after `Observe` reports that a deleting managed resource still exists externally. On a later reconciliation, `Observe` reports `ResourceExists: false`; together with [`meta.WasDeleted() == true`](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1235-L1236), the runtime removes its finalizer. If the external resource remains, it keeps retrying deletion until the resource ceases to exist.
 
 ```go
-func (c *external) Delete(ctx context.Context, cr *v1alpha1.User) (managed.ExternalDelete, error) {
+func (c *external) Delete(
+	ctx context.Context,
+	cr *v1alpha1.User,
+) (managed.ExternalDelete, error) {
 	externalName := meta.GetExternalName(cr)
 	if externalName == "" {
 		return managed.ExternalDelete{}, nil
@@ -240,7 +261,7 @@ func (c *external) Delete(ctx context.Context, cr *v1alpha1.User) (managed.Exter
 
 	err := c.client.Delete(ctx, externalName)
 	if err != nil && !isNotFound(err) {
-		return managed.ExternalDelete{}, fmt.Errorf("failed to delete external resource: %s", err)
+		return managed.ExternalDelete{}, fmt.Errorf("delete resource: %w", err)
 	}
 
 	return managed.ExternalDelete{}, nil
