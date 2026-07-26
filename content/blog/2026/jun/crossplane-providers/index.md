@@ -48,7 +48,7 @@ Crossplane providers use the controller pattern through a managed reconciler abs
 
 Besides these specific hooks in the reconcile loop, Crossplane leverages annotations to keep track of reconciliation state. A very important one is [`crossplane.io/external-name`](http://crossplane.io/external-name), which identifies the underlying resource:
 
-- Providers should set it during `Create` when the external system assigns a different identifier, otherwise it is set to `metadata.name` of the resource.
+- Before `Connect` and `Observe`, the [managed reconciler's default initializer](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/api.go#L48-L61) persists `metadata.name` as the external name when the annotation is absent. Providers overwrite it during `Create` only when the external system returns a different stable lookup key.
 - Users can pre-populate it to identify and import an existing resource, although it should be used together with an `Observe` management policy to prevent unintended changes ([docs about Crossplane resource import](https://docs.crossplane.io/v2.3/guides/import-existing-resources/)).
 
 The provider lifecycle is:
@@ -151,7 +151,7 @@ func (c *external) Disconnect(context.Context) error {
 
 This is one of the most important hooks since it defines what will (or not) be called next. It tries to fetch the resource via through the `crossplane.io/external-name` resource annotation and then:
 
-1. If the annotation does not exist, is empty or the the vendor returns “not found”, it triggers `Create` by returning `ResourceExists: false`
+1. The default managed reconciler initializes the annotation from `metadata.name`, so `Observe` normally queries the vendor with a non-empty external name. A vendor “not found” response triggers `Create` by returning `ResourceExists: false`.
 2. If it exists, it should always update the status of the MR (it is done via pointer when `cr.Status.AtProvider` is set) and the return must always have `ResourceExists: true`. The last part depends if the observed status matches the managed resource's desired state in `spec.forProvider`:
     1. If it matches, no action is required and it must return `ResourceUpToDate: true` + set it to available
     2. If does not, it must trigger an `Update` by returning `ResourceUpToDate: false`
@@ -163,13 +163,7 @@ func (c *external) Observe(
 	ctx context.Context,
 	cr *v1alpha1.User,
 ) (managed.ExternalObservation, error) {
-	// Without an external name, the resource has not been created yet.
-	externalName := meta.GetExternalName(cr)
-	if externalName == "" {
-		return managed.ExternalObservation{ResourceExists: false}, nil
-	}
-
-	observed, err := c.client.Get(ctx, externalName)
+	observed, err := c.client.Get(ctx, meta.GetExternalName(cr))
 	if isNotFound(err) {
 		return managed.ExternalObservation{ResourceExists: false}, nil
 	}
@@ -281,30 +275,6 @@ func (c *external) Delete(
 | :--------- | :--------- |
 | `crossplane-runtime` | [Delete core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1225-L1316) |
 | `provider-template` | [Code reference](https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go#L249-L255) |
-
-## Asynchronous and safe creation
-
-The same hooks work with asynchronous APIs, but `Create`, `Update`, and `Delete` must start work or check its progress rather than wait for a long-running vendor operation to complete. Always pass the reconciliation context to the vendor SDK and configure bounded request timeouts. Do not start an unbounded goroutine to wait for a hanging request: it ignores cancellation and makes retries harder to reason about.
-
-After the vendor accepts a create request, persist a stable lookup identity. Use `crossplane.io/external-name` when it identifies the target resource; otherwise, store an operation ID in a provider-specific annotation. `Create` cannot persist `status` changes, so storing an operation ID in `status.atProvider` from that hook loses it. `Observe` uses the stable identity to poll the resource or operation and hydrate status once it is available.
-
-While provisioning is in progress, `Observe` must not report `ResourceExists: false` solely because the target resource is not ready yet: that would invoke `Create` again. Once the vendor has accepted the request, report an existing external state and use `ResourceUpToDate` to reflect whether the resource has reached the desired state. `Update` must tolerate being called while the operation is still in progress. Set `ResourceLateInitialized` only when `Observe` fills previously unset `spec` defaults; it is unrelated to operation status or annotations.
-
-### Make ambiguous creates safe
-
-A request timeout is not proof that the vendor rejected the request. The vendor might have accepted the POST and created the resource, while its response was lost. Retrying that request with a new random identity can leak a duplicate resource. Make retries converge on the same resource using one of these patterns:
-
-1. Send a vendor-supported idempotency key derived from a stable managed-resource identity, such as its UID.
-2. Choose a deterministic vendor name or ID, use it as the external name, and look it up before retrying.
-3. Attach a stable unique tag or label to the create request, then search for it before issuing another POST.
-
-Treat an existing resource with the same key, ID, or tag as successful convergence, not as an error. If the vendor assigns a random ID and provides neither an idempotency key nor a reliable lookup mechanism, the provider cannot safely guarantee that an ambiguous create will not duplicate resources.
-
-The managed reconciler records `external-create-pending` before it calls `Create`, then records success or failure afterward. If the provider crashes after the pending marker but before recording an outcome, Crossplane stops rather than risk creating another resource. These annotations detect an unknown outcome; they do not deduplicate requests in the vendor API.
-
-| Repository | References |
-| :--------- | :--------- |
-| `crossplane-runtime` | [External client contract](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L290-L331) <br/> [Create safety and annotations](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1100-L1119) <br/> [Create core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1349-L1471) |
 
 ## Provider design choices that prevent reconciliation bugs
 
