@@ -146,21 +146,29 @@ This is one of the most important hooks since it defines what will (or not) be c
 | `crossplane-runtime` | [Delete core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1225-L1316) |
 | `provider-template` | [Code reference](https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go#L249-L255) |
 
-###
+## Asynchronous and safe creation
 
-## Async operations
+The same hooks work with asynchronous APIs, but `Create`, `Update`, and `Delete` must start work or check its progress rather than wait for a long-running vendor operation to complete. Always pass the reconciliation context to the vendor SDK and configure bounded request timeouts. Do not start an unbounded goroutine to wait for a hanging request: it ignores cancellation and makes retries harder to reason about.
 
-All the above is okay if the API used is synchronous. For asynchronous APIs, the flow uses the same hooks, but acts differently. Mainly, once the provider creates or updates a resource, it will get an “operation id” and that should be stored as a status field, not as the external name.
+After the vendor accepts a create request, persist a stable lookup identity. Use `crossplane.io/external-name` when it identifies the target resource; otherwise, store an operation ID in a provider-specific annotation. `Create` cannot persist `status` changes, so storing an operation ID in `status.atProvider` from that hook loses it. `Observe` uses the stable identity to poll the resource or operation and hydrate status once it is available.
 
-On subsequent `Observe` calls, the provider can check the status of it against the provider and, once is deemed completed, it can return a `Resource{Exists|UpToDate}: true` and `LateInitialise: true` \+ update annotation such as the external name. The idea is that late initialisation allows setting fields after the object has been created.
+While provisioning is in progress, `Observe` must not report `ResourceExists: false` solely because the target resource is not ready yet: that would invoke `Create` again. Once the vendor has accepted the request, report an existing external state and use `ResourceUpToDate` to reflect whether the resource has reached the desired state. `Update` must tolerate being called while the operation is still in progress. Set `ResourceLateInitialized` only when `Observe` fills previously unset `spec` defaults; it is unrelated to operation status or annotations.
 
-\<TODO: probably add some examples why uptodate/exists must be set… can ask AI\>
+### Make ambiguous creates safe
+
+A request timeout is not proof that the vendor rejected the request. The vendor might have accepted the POST and created the resource, while its response was lost. Retrying that request with a new random identity can leak a duplicate resource. Make retries converge on the same resource using one of these patterns:
+
+1. Send a vendor-supported idempotency key derived from a stable managed-resource identity, such as its UID.
+2. Choose a deterministic vendor name or ID, use it as the external name, and look it up before retrying.
+3. Attach a stable unique tag or label to the create request, then search for it before issuing another POST.
+
+Treat an existing resource with the same key, ID, or tag as successful convergence, not as an error. If the vendor assigns a random ID and provides neither an idempotency key nor a reliable lookup mechanism, the provider cannot safely guarantee that an ambiguous create will not duplicate resources.
+
+The managed reconciler records `external-create-pending` before it calls `Create`, then records success or failure afterward. If the provider crashes after the pending marker but before recording an outcome, Crossplane stops rather than risk creating another resource. These annotations detect an unknown outcome; they do not deduplicate requests in the vendor API.
 
 | Repository | References |
 | :--------- | :--------- |
-| `crossplane-runtime` | [LateInitialise core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1473-L1488) |
-
-###
+| `crossplane-runtime` | [External client contract](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L290-L331) <br/> [Create safety and annotations](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1100-L1119) <br/> [Create core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1349-L1471) |
 
 ## Best practices
 
