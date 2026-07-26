@@ -105,7 +105,9 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 }
 ```
 
-<!--TODO: add table similar to the other ones with code references-->
+| Repository | References |
+| :--------- | :--------- |
+| `provider-template` | [Setup and reconciler wiring](https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go#L58-L110) |
 
 ### Connect once per reconciliation, reuse expensive clients carefully
 
@@ -225,7 +227,7 @@ func (c *external) Create(
 | `crossplane-runtime` | [Create core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1349-L1471) |
 | `provider-template` | [Code reference](https://github.com/crossplane/provider-template/blob/main/internal/controller/mytype/mytype.go#L220-L230) |
 
-### Update refreshes status, but cannot change spec or annotations
+### Update refreshes status, but cannot update annotations
 
 `Update` is called after `Observe` returns `ResourceExists: true` and `ResourceUpToDate: false`. It changes the external resource to match `spec.forProvider`. Unlike `Create`, the reconciler persists status changes made by `Update`, so it can refresh `cr.Status.AtProvider` and conditions. Do not mutate annotations this hook, because they are not persisted. A subsequent `Observe` should confirm that the resource is now up to date.
 
