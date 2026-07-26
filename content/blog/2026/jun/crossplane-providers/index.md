@@ -81,7 +81,7 @@ flowchart LR
 4. **Create:** creates it within the vendor and, once finished, it sets the external name in the managed resource object. Once the reconciliation kicks again, Observe will hydrate details to the object status.
 5. **Update:** similar to create, but instead it calls update and does not change the external name
 6. **Delete:** handles the resource deletion. If the resource still exists on the next reconciliation loop (when Observe gets triggered), it will still try to delete, ensuring no resource is left behind.
-7. **Disconnect:** not always required, but in case you have resources that require clean up from the Connect stage (eg: ephemeral database connections), this is the place.
+7. **Disconnect:** not always required, but in case you have resources that require clean up from the Connect stage, such as ephemeral database connections, this is the place (omitted in the diagram for simplicity).
 
 ## Anatomy of a provider repository
 
