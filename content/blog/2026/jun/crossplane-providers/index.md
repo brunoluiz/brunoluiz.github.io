@@ -90,16 +90,25 @@ This function runs once during provider setup and configures `controller-runtime
 
 ```go
 func Setup(mgr ctrl.Manager, o controller.Options) error {
-	r := managed.NewReconciler(
-		mgr,
+	name := managed.ControllerName(v1alpha1.UserGroupKind)
+	connector := &connector{
+		kube:  mgr.GetClient(),
+		usage: resource.NewProviderConfigUsageTracker(
+			mgr.GetClient(), &apisv1alpha1.ProviderConfigUsage{},
+		),
+	}
+
+	r := managed.NewReconciler(mgr,
 		resource.ManagedKind(v1alpha1.UserGroupVersionKind),
-		managed.WithTypedExternalConnector[*v1alpha1.User](&connector{}),
+		managed.WithExternalConnector(connector),
+		managed.WithLogger(o.Logger.WithValues("controller", name)),
 	)
 
-  // Setup other flags and controller options
-  // ...
+  // ... Other settings and flags
 
-	return ctrl.NewControllerManagedBy(mgr).
+	return ctrl.NewControllerManagedBy(mgr).Named(name).
+		WithOptions(o.ForControllerRuntime()).
+		WithEventFilter(resource.DesiredStateChanged()).
 		For(&v1alpha1.User{}).
 		Complete(r)
 }
@@ -111,35 +120,46 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 
 ### Connect: create your clients
 
-This is the first function called on the reconciliation loop ([example](https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go#L120-L162)). Since all further hooks will need a client to be set up, **the provider must set it up at this stage and keep a reference in the generated `external` instance.**
+This is the first function called on the reconciliation loop
+([example](https://github.com/brunoluiz/crossplane-demo), in
+`provider-acme/internal/controller/user/user.go`). Since all further hooks need
+a client, **the provider must set it up here and keep a reference in the
+generated `external` instance.**
 
-- The provider should read `ProviderConfig` to configure authentication and other client settings. In Crossplane v2, `ProviderConfig` can be cluster or namespace-scoped, so be aware you might need to specify a logic to read the correct one ([provider-template](https://github.com/crossplane/provider-template/blob/main/internal/controller/mytype/mytype.go#L132-L149) has examples of it).
+- The provider should read `ProviderConfig` to configure authentication and
+  other client settings. In Crossplane v2, it can be cluster or
+  namespace-scoped, so be aware you might need logic to read the correct one
+  ([provider-acme](https://github.com/brunoluiz/crossplane-demo)) has an example:
+  `provider-acme/internal/controller/user/user.go`.
 - Clients most likely will require credentials on method calls. A custom middleware (e.g. HTTP Transport, gRPC interceptor) can set the required authorisation details and avoid duplicating that work at each call site, requiring only injecting those.
 
 ```go
 func (c *connector) Connect(
 	ctx context.Context,
-	cr *v1alpha1.User,
-) (managed.TypedExternalClient[*v1alpha1.User], error) {
-	// Read `ProviderConfig` and create the vendor client. It may be an HTTP
-	// client, database connection, or CLI wrapper. It lives for this
-	// reconciliation unless the provider implements connection pooling.
-	client, err := newClient(ctx, cr)
+	mg resource.Managed,
+) (managed.ExternalClient, error) {
+	cr := mg.(*v1alpha1.User)
+	if err := c.usage.Track(ctx, cr); err != nil {
+		return nil, fmt.Errorf("track ProviderConfig usage: %w", err)
+	}
+
+	// Read either ProviderConfig or ClusterProviderConfig, then resolve both
+	// SecretKeySelectors independently before creating the vendor client.
+	baseURL, username, password, err := c.providerConfig(ctx, cr)
 	if err != nil {
 		return nil, fmt.Errorf("create client during connect: %w", err)
 	}
 
-	return &external{client: client}, nil
+	return &external{
+		client: acme.NewClient(baseURL, username, password),
+	}, nil
 }
 ```
 
 Paired with `Connect`, implement `Disconnect` to close resources that need closing. It can be a no-op for reusable clients such as `http.Client`, but might be required in cases of database connections (depending on how they are managed).
 
 ```go
-func (c *external) Disconnect(context.Context) error {
-	// Close a per-reconciliation client here, if it has resources to release.
-	return nil
-}
+func (c *external) Disconnect(context.Context) error { return nil }
 ```
 
 | Repository | References |
@@ -152,35 +172,40 @@ func (c *external) Disconnect(context.Context) error {
 This is one of the most important hooks since it defines what will (or not) be called next. It fetches the resource through the `crossplane.io/external-name` annotation and then:
 
 1. The default managed reconciler initialises the annotation from `metadata.name`, so `Observe` normally queries the vendor with a non-empty external name. A vendor “not found” response triggers `Create` by returning `ResourceExists: false`.
-2. If it exists, it should always update the status of the MR (it is done via pointer when `cr.Status.AtProvider` is set) and the return must always have `ResourceExists: true`. The last part depends if the observed status matches the managed resource's desired state in `spec.forProvider`:
-    1. If it matches, no action is required and it must return `ResourceUpToDate: true` + set it to available
-    2. If does not, it must trigger an `Update` by returning `ResourceUpToDate: false`
+2. If it exists, it should always update the status of the MR (it is done via
+   pointer when `cr.Status.AtProvider` is set) and the return must always have
+   `ResourceExists: true`. The provider can mark it available after a successful
+   lookup, independently of drift. It should return `ResourceUpToDate: true`
+   when the observed `name` and `email` match `spec.forProvider`, otherwise
+   `Update` is triggered.
 
-The example below assumes the vendor adapter exposes `Get`, `Create`, `Update`, and `Delete`, and that `isNotFound` recognizes its not-found response.
+The example below assumes the vendor adapter exposes user-specific CRUD methods
+and that it returns a typed `ErrNotFound`.
 
 ```go
 func (c *external) Observe(
 	ctx context.Context,
-	cr *v1alpha1.User,
+	mg resource.Managed,
 ) (managed.ExternalObservation, error) {
-	observed, err := c.client.Get(ctx, meta.GetExternalName(cr))
-	if isNotFound(err) {
+	cr := mg.(*v1alpha1.User)
+	observed, err := c.client.GetUser(ctx, meta.GetExternalName(cr))
+	if errors.Is(err, acme.ErrNotFound) {
 		return managed.ExternalObservation{ResourceExists: false}, nil
 	}
 	if err != nil {
-		return managed.ExternalObservation{}, fmt.Errorf("get res: %w", err)
+		return managed.ExternalObservation{}, fmt.Errorf("get user: %w", err)
 	}
 
-	// Update managed-resource status from the observed state.
+	// A successful lookup means the external resource is available.
 	// Extract this to updateStatus once it spans several fields.
+	cr.Status.AtProvider.ID = observed.ID
 	cr.Status.AtProvider.Name = observed.Name
+	cr.Status.AtProvider.Email = observed.Email
+	cr.Status.SetConditions(xpv1.Available())
 
-	// Compare observed and desired state. Extract this to isUpToDate
-	// when several fields must be compared.
-	upToDate := cr.Spec.ForProvider.Name == observed.Name
-	if upToDate {
-		cr.Status.SetConditions(xpv1.Available())
-	}
+	// Extract this to isUpToDate when several fields must be compared.
+	upToDate := cr.Spec.ForProvider.Name == observed.Name &&
+		cr.Spec.ForProvider.Email == observed.Email
 
 	return managed.ExternalObservation{
 		ResourceExists:   true,
@@ -196,27 +221,31 @@ func (c *external) Observe(
 
 ### Create: resource creation and `external-name` setting
 
-`Create` is called after `Observe` returns `ResourceExists: false`. It creates the resource in the external system and sets `external-name` if it assigns an identifier (e.g. ID). The managed reconciler persists annotation changes made in this hook, but discards status changes. Because of the latter, do not implement `cr.Status.AtProvider` mutations in `Create` and populate status during the next `Observe` instead. Connection details are separate from status: return them in `managed.ExternalCreation` and the reconciler publishes them to the configured connection store.
+`Create` is called after `Observe` returns `ResourceExists: false`. It creates
+the resource in the external system and sets `external-name` if it assigns an
+identifier (e.g. ID). The managed reconciler persists annotation changes made
+in this hook, but discards status changes. Because of the latter, do not
+implement `cr.Status.AtProvider` mutations in `Create` and populate status
+during the next `Observe` instead. The ACME User has no connection details, so
+this provider returns an empty `managed.ExternalCreation`.
 
 ```go
 func (c *external) Create(
 	ctx context.Context,
-	cr *v1alpha1.User,
+	mg resource.Managed,
 ) (managed.ExternalCreation, error) {
-	// Convert the managed-resource spec to a vendor request.
-	req := toCreateRequest(cr.Spec.ForProvider)
-	created, err := c.client.Create(ctx, req)
+	cr := mg.(*v1alpha1.User)
+	created, err := c.client.CreateUser(ctx, acme.User{
+		Name:  cr.Spec.ForProvider.Name,
+		Email: cr.Spec.ForProvider.Email,
+	})
 	if err != nil {
-		return managed.ExternalCreation{}, fmt.Errorf("create res: %w", err)
+		return managed.ExternalCreation{}, fmt.Errorf("create user: %w", err)
 	}
 
 	// Create persists annotations, but not status. Observe hydrates status.
 	meta.SetExternalName(cr, created.ID)
-	return managed.ExternalCreation{
-		ConnectionDetails: managed.ConnectionDetails{
-			"url": []byte(created.URL),
-		},
-	}, nil
+	return managed.ExternalCreation{}, nil
 }
 ```
 
@@ -232,17 +261,21 @@ func (c *external) Create(
 ```go
 func (c *external) Update(
 	ctx context.Context,
-	cr *v1alpha1.User,
+	mg resource.Managed,
 ) (managed.ExternalUpdate, error) {
-	// Convert the managed-resource spec to a vendor request.
-	req := toUpdateRequest(cr.Spec.ForProvider)
-	updated, err := c.client.Update(ctx, meta.GetExternalName(cr), req)
+	cr := mg.(*v1alpha1.User)
+	updated, err := c.client.UpdateUser(ctx, meta.GetExternalName(cr), acme.User{
+		Name:  cr.Spec.ForProvider.Name,
+		Email: cr.Spec.ForProvider.Email,
+	})
 	if err != nil {
-		return managed.ExternalUpdate{}, fmt.Errorf("update res: %w", err)
+		return managed.ExternalUpdate{}, fmt.Errorf("update user: %w", err)
 	}
 
-	// Update persists status, unlike Create.
+	// Update persists status, unlike Create, so refresh the observed fields.
+	cr.Status.AtProvider.ID = updated.ID
 	cr.Status.AtProvider.Name = updated.Name
+	cr.Status.AtProvider.Email = updated.Email
 	return managed.ExternalUpdate{}, nil
 }
 ```
@@ -259,16 +292,15 @@ func (c *external) Update(
 ```go
 func (c *external) Delete(
 	ctx context.Context,
-	cr *v1alpha1.User,
+	mg resource.Managed,
 ) (managed.ExternalDelete, error) {
-	externalName := meta.GetExternalName(cr)
-	if externalName == "" {
+	cr := mg.(*v1alpha1.User)
+	err := c.client.DeleteUser(ctx, meta.GetExternalName(cr))
+	if errors.Is(err, acme.ErrNotFound) {
 		return managed.ExternalDelete{}, nil
 	}
-
-	err := c.client.Delete(ctx, externalName)
-	if err != nil && !isNotFound(err) {
-		return managed.ExternalDelete{}, fmt.Errorf("delete res: %w", err)
+	if err != nil {
+		return managed.ExternalDelete{}, fmt.Errorf("delete user: %w", err)
 	}
 
 	return managed.ExternalDelete{}, nil
