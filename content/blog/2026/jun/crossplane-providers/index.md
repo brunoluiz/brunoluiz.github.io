@@ -326,6 +326,10 @@ Use `external-name` as the stable key your provider uses to look up an external 
 
 Return `ResourceExists: false` only for a vendor not-found response. Authentication, authorisation, throttling, timeout, and malformed-response errors must be detected and returned as errors (usually dealt with in an adapter layer). Reporting any of those as an absent resource can make Crossplane create a duplicate resource.
 
+### Use vendor idempotency mechanisms when creating resources
+
+Network failures or pod crashes can leave a provider unable to tell whether a create request succeeded. When the vendor supports idempotency keys, send a stable key with the request so a retry cannot create a duplicate resource. If idempotency is not supported, you can still try to lookup by a deterministic name / key before issuing another create request. Bear in mind that not all vendors support these mechanisms.
+
 ### Let Crossplane persist state and minimise Kube client calls
 
 Your external client logic should focus on reconciling the external system, not persisting changes to the managed resource. Crossplane’s managed reconciler already handles lifecycle concerns such as updating status, managing finalizers, and persisting annotations. Calling the Kubernetes API to mutate the managed resource from an external client can lead to race conditions, conflicts, and harder-to-maintain code. Instead, return the appropriate observation or update results and let Crossplane handle the rest.
