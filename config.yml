@@ -47,3 +47,7 @@ markup:
   goldmark:
     renderer:
       unsafe: true
+  highlight:
+    style: catppuccin-mocha
+    lineNos: true
+    tabWidth: 2

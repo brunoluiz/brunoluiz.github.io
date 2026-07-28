@@ -2,3 +2,6 @@
     -webkit-line-clamp: 3;
 }
 
+.post-content pre code {
+    line-height: 1.7;
+}
