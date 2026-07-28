@@ -13,7 +13,7 @@ aliases:
 
 ## Introduction
 
-Crossplane allows you to define Kubernetes APIs without writing controllers, mainly by defining compositions. Although they allow you to define how resources interact, the real magic happens in providers: they are controllers that handle the lifecycle of an external resource (e.g. a bucket), such as creating, updating, and deleting it.
+Crossplane allows you to define Kubernetes APIs without writing controllers. There are many components that enable it, such as compositions and XRDs, but providers are on the heart of it: they are controllers that handle the lifecycle of an external resource (e.g. a bucket), such as creating, updating, and deleting it.
 
 Usually official providers or upjet generated ones are good enough, but sometimes you might come across issues. This is when you will need to implement your own, which we will cover in this post.
 
@@ -32,7 +32,7 @@ If you hit one of the above, you are left with implementing a provider from scra
 
 ## Start with the provider template
 
-Don't panic: you won't start fully from scratch. The Crossplane team maintains a [provider template](https://github.com/crossplane/provider-template), which is a good starting point for most providers and also they maintain very popular providers you can base yourself on.
+Don't panic: you won't start fully from scratch. The Crossplane team maintains a [provider template](https://github.com/crossplane/provider-template), which is a good starting point for most providers and also they maintain very popular providers ([`provider-http`](https://github.com/crossplane-contrib/provider-http) and [`provider-opentofu`](https://github.com/upbound/provider-opentofu)) you can base yourself on.
 
 The template gives you the repository structure, build tooling and scaffolding utilities (e.g. `make provider.addtype`). All generated types will be placed in `internal/controller/{}` and those will define the reconciliation hooks described in the next section ([example](https://github.com/crossplane/provider-template/tree/main/internal/controller/mytype)). The provider's behaviour comes from how those hooks interact with the external API.
 
@@ -44,18 +44,19 @@ Crossplane providers use the controller pattern through a managed reconciler abs
 
 ### Lifecycle hooks in a nutshell
 
-`Setup` runs once to register the controller for a "managed-resource" kind. After that, for each reconciliation the runtime calls `Connect`, `Observe`, and then `Create`, `Update`, or `Delete` when needed before calling `Disconnect`.
+`Setup` runs once to register the controller for a "managed-resource" kind, but it is not part of the reconciliation loop. After it is all setup, the controller runtime will start reconciling and each time it will call `Connect`, `Observe`, and then `Create`, `Update`, or `Delete` when needed before calling `Disconnect`.
 
 Besides these specific hooks in the reconcile loop, Crossplane leverages annotations to keep track of reconciliation state. The most important one is [`crossplane.io/external-name`](http://crossplane.io/external-name), which identifies the underlying resource via a stable lookup key (e.g. ID, ARN, or resource path):
 
 - Before `Connect` and `Observe`, the [managed reconciler's default initializer](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/api.go#L48-L61) persists `metadata.name` as the external name when the annotation is absent. Providers overwrite it during `Create` only when the external system returns a different stable lookup key.
-- Users can pre-populate it to identify and import an existing resource, although it should be used together with an `Observe` management policy (beta feature) to prevent unintended changes ([docs about Crossplane resource import](https://docs.crossplane.io/v2.3/guides/import-existing-resources/)).
+- Users can pre-populate it to identify and import an existing resource, although it should be used together with an `Observe` management policy to prevent unintended changes ([docs about Crossplane resource import](https://docs.crossplane.io/v2.3/guides/import-existing-resources/)).
 
 If [management policies are set to `*` (the default)](https://docs.crossplane.io/v2.3/managed-resources/managed-resources/#managementpolicies), so that no hook is excluded, the provider lifecycle can be summarised as:
 
 ```mermaid
 flowchart TD
-    Setup["Setup controller (once)"] --> Connect["Connect"]
+    Setup["Setup controller<br/>(once)"] --> Start
+    Start["Start reconciliation<br/>(loop)"] --> Connect
     Connect --> Observe{"Observe"}
 
     Observe -- "!Deleting AND !ResourceExists" --> Create["Create() external resource"]
@@ -73,20 +74,23 @@ flowchart TD
     Observe -- "Deleting AND !ResourceExists" --> Removed["Remove finalizer"]
     Removed --> Disconnect
 
-    Disconnect --> End["End reconciliation"]
+    Disconnect --> End["End reconciliation<br/>(requeue)"]
 
     style Setup fill:#BBDEFB
+    style Start fill:#C8E6C9
     style End fill:#C8E6C9
-    style Delete fill:#FFF9C4
+    style Delete fill:#
     style Removed fill:#FFCDD2
 ```
 
-### Setup registers controller dependencies
+### Setup: registers controller dependencies
 
-This function runs once during provider setup and configures `controller-runtime` for the resource. It is also the right place to add a few shared dependencies:
+This hook runs once during provider setup and configures `controller-runtime` for the resource. It is also the right place to add a few shared dependencies:
 
 1. Inject the `controller.Options Logger` in the `connector` being created, since it is better to use the same logger used by the controller, with the same fields set by it
 2. In case opening a connection to your vendor can be expensive / slow, you might want to implement and inject a connection pool map at this stage. An example is a provider that connects to databases and lazily starts a connection at `Connect`, adds to this pool, and re-uses across reconciles, instead of always terminating it at `Disconnect`. **Bear in mind this is in general an optimisation and not always required** since it adds extra complexity (e.g. configuring connections timeouts).
+
+Once the setup is finished, the controller runtime will only call the other hooks related to the reconciliation.
 
 ```go
 func Setup(mgr ctrl.Manager, o controller.Options) error {
@@ -120,7 +124,7 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 
 ### Connect: create your clients
 
-This is the first function called on the reconciliation loop
+This is the first hook called on the reconciliation loop
 ([example](https://github.com/brunoluiz/crossplane-demo), in
 `provider-acme/internal/controller/user/user.go`). Since all further hooks need
 a client, **the provider must set it up here and keep a reference in the
