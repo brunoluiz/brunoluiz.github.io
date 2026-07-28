@@ -127,17 +127,10 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 
 ### Connect: create your clients
 
-This is the first hook called on the reconciliation loop
-([example](https://github.com/brunoluiz/crossplane-demo), in
-`provider-acme/internal/controller/user/user.go`). Since all further hooks need
-a client, **the provider must set it up here and keep a reference in the
+This is the first hook called on the Crossplane reconciliation loop. Since all further hooks need a client, **the provider must set it up here and keep a reference in the
 generated `external` instance.**
 
-- The provider should read `ProviderConfig` to configure authentication and
-  other client settings. In Crossplane v2, it can be cluster or
-  namespace-scoped, so be aware you might need logic to read the correct one
-  ([provider-acme](https://github.com/brunoluiz/crossplane-demo)) has an example:
-  `provider-acme/internal/controller/user/user.go`.
+- The provider should read `ProviderConfig` to configure authentication and other client settings. In Crossplane v2, it can be cluster or namespace-scoped, so be aware you might need logic to read the correct one.
 - Clients most likely will require credentials on method calls. A custom middleware (e.g. HTTP Transport, gRPC interceptor) can set the required authorisation details and avoid duplicating that work at each call site, requiring only injecting those.
 
 ```go
@@ -180,15 +173,9 @@ func (c *external) Disconnect(context.Context) error { return nil }
 This is one of the most important hooks since it defines what will (or not) be called next. It fetches the resource through the `crossplane.io/external-name` annotation and then:
 
 1. The default managed reconciler initialises the annotation from `metadata.name`, so `Observe` normally queries the vendor with a non-empty external name. A vendor “not found” response triggers `Create` by returning `ResourceExists: false`.
-2. If it exists, it should always update the status of the MR (it is done via
-   pointer when `cr.Status.AtProvider` is set) and the return must always have
-   `ResourceExists: true`. The provider can mark it available after a successful
-   lookup, independently of drift. It should return `ResourceUpToDate: true`
-   when the observed `name` and `email` match `spec.forProvider`, otherwise
-   `Update` is triggered.
+2. If it exists, it should always update the status of the MR (it is done via pointer when `cr.Status.AtProvider` is set) and the return must always have `ResourceExists: true`. The provider can mark it available after a successful lookup. It should return `ResourceUpToDate: true` when the vendor observed object match `spec.forProvider`, otherwise `Update` is triggered (drift).
 
-The example below assumes the vendor adapter exposes user-specific CRUD methods
-and that it returns a typed `ErrNotFound`.
+The example below assumes the vendor adapter exposes user-specific CRUD methods and that it returns a typed `ErrNotFound`.
 
 ```go
 func (c *external) Observe(
@@ -230,13 +217,7 @@ func (c *external) Observe(
 
 ### Create: resource creation and `external-name` setting
 
-`Create` is called after `Observe` returns `ResourceExists: false`. It creates
-the resource in the external system and sets `external-name` if it assigns an
-identifier (e.g. ID). The managed reconciler persists annotation changes made
-in this hook, but discards status changes. Because of the latter, do not
-implement `cr.Status.AtProvider` mutations in `Create` and populate status
-during the next `Observe` instead. The ACME User has no connection details, so
-this provider returns an empty `managed.ExternalCreation`.
+`Create` is called after `Observe` returns `ResourceExists: false`. It creates the resource in the external system and sets `external-name` if it assigns a stable identifier (e.g. ID). Crossplane's managed reconciler persists the annotation changes made in this hook, but discards status changes. The status gets hydrated during the next `Observe` instead.
 
 ```go
 func (c *external) Create(
@@ -266,7 +247,7 @@ func (c *external) Create(
 
 ### Update: resource update and status refresh
 
-`Update` is called after `Observe` returns `ResourceExists: true` and `ResourceUpToDate: false`. It changes the external resource to match `spec.forProvider`. Unlike `Create`, the reconciler persists status changes made by `Update`, so it can refresh `cr.Status.AtProvider` and conditions. Do not mutate annotations in this hook, because they are not persisted. A subsequent `Observe` should confirm that the resource is now up to date.
+`Update` is called after `Observe` returns `ResourceExists: true` and `ResourceUpToDate: false`. It changes the external resource to match `spec.forProvider`. Unlike `Create`, the reconciler persists status changes made by `Update`, so it can refresh `cr.Status.AtProvider` and conditions, but no annotations mutation is persisted here. A subsequent `Observe` should confirm that the resource is now up to date.
 
 ```go
 func (c *external) Update(
@@ -324,19 +305,12 @@ func (c *external) Delete(
 | `provider-template` | [Code reference](https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go#L249-L255) |
 | `crossplane-demo/provider-acme` | [Delete](https://github.com/brunoluiz/crossplane-demo/blob/main/provider-acme/internal/controller/user/user.go#L226-L240) |
 
-## Provider design choices that prevent reconciliation bugs
 
-### Put connection defaults in `ProviderConfig`
-
-Store connection-level details such as credentials, API endpoints, account or cluster identifiers, and default regions in `ProviderConfig`. This avoids repeating the same values across multiple resources and keeps your APIs cleaner. `spec.forProvider` should be for fields that represent the desired state of a resource (e.g. database name, size, or network). If multiple resources using the same credentials could have different values, it belongs in the resource spec — not the `ProviderConfig`.
-
-### Treat `crossplane.io/external-name` as a stable lookup key
-
-Use `external-name` as the stable key your provider uses to look up an external resource. The managed reconciler defaults it to `metadata.name`, but providers must overwrite it during `Create` when the external system returns a different name, such as an ID. Pre-populating the annotation also enables importing existing infrastructure, as previously mentioned.
+## Best practices learned the hard way
 
 ### Classify vendor errors before returning an observation
 
-Return `ResourceExists: false` only for a vendor not-found response. Authentication, authorisation, throttling, timeout, and malformed-response errors must be detected and returned as errors (usually dealt with in an adapter layer). Reporting any of those as an absent resource can make Crossplane create a duplicate resource.
+In the adapter/client layer, not found errors must always be mapped differently than other errors when returning (eg: `ErrNotFound` x `ErrInternal`). This will enable the controller to return `ResourceExists: false` correctly when an error is returned on `Observe`. Not handling this properly can make Crossplane create resource duplicates.
 
 ### Use vendor idempotency mechanisms when creating resources
 
@@ -352,8 +326,50 @@ Using the Kubernetes client in `Connect` to read the referenced `ProviderConfig`
 
 Crossplane V2 allows cluster and namespaced resources. If you support both, avoid duplicating reconciliation logic. The external API interactions (observe, create, update, delete) are usually identical regardless of scope. Share this logic across controllers and only introduce separate implementations when there is a real difference in behaviour or a compatibility requirement. This reduces maintenance overhead and keeps your provider easier to evolve and test.
 
+
+### Put connection defaults in `ProviderConfig`
+
+Store connection-level details such as credentials, API endpoints, account or cluster identifiers, and default regions in `ProviderConfig`. This avoids repeating the same values across multiple resources and keeps your APIs cleaner. `spec.forProvider` should be for fields that represent the desired state of a resource (e.g. database name, size, or network), not for connection URLs or similar. An example could be
+
+```yaml
+# You don't need to pass database and host or any other information to MRs
+# Instead, they can just infer from the ProviderConfig
+---
+apiVersion: postgres.acme.io/v1alpha1
+kind: ProviderConfig
+metadata:
+  name: users
+spec:
+  host: "users.default"
+  database: users
+  credentials:
+    user:
+      name: pg-users-auth
+      key: user
+    password:
+      name: pg-users-auth
+      key: password
+---
+apiVersion: postgres.acme.io/v1alpha1
+kind: ProviderConfig
+metadata:
+  name: billing
+spec:
+  host: "billing.default:5432"
+  databse: billing
+  credentials:
+    user:
+      name: pg-billing-auth
+      key: user
+    password:
+      name: pg-billing-auth
+      key: password
+```
+
 ## Start building a provider
 
-Hopefully you now have a good understanding of how providers work and are implemented. Start with the [Crossplane provider template](https://github.com/crossplane/provider-template), and use providers such as [`provider-opentofu`](https://github.com/upbound/provider-opentofu), [`provider-http`](https://github.com/crossplane-contrib/provider-http) and my own [crossplane-demo acme provider](https://github.com/brunoluiz/crossplane-demo/tree/main/provider-acme) for a working reference.
+Hopefully you now have a good understanding of how providers work and are implemented. Understanding the state machine that is the managed resource reconciler will give you a real edge when implementing and troubleshooting providers.
 
-If a vendor API makes idempotency, imports, or asynchronous operations awkward, document those constraints before writing the controller. They will shape the provider's API and reconciliation behaviour more than its Go code will.
+Bear in mind that that although this is a long post, there are certainly flows I have not covered and others that I have not come across yet. It really comes down to trying things out and discovering along the way. I will update this blog post if I find out more best practices or anything of note around the general flow.
+
+To start your own provider, I suggest cloning the [Crossplane provider template](https://github.com/crossplane/provider-template), and use providers such as [`provider-opentofu`](https://github.com/upbound/provider-opentofu), [`provider-http`](https://github.com/crossplane-contrib/provider-http) and my own [crossplane-demo acme provider](https://github.com/brunoluiz/crossplane-demo/tree/main/provider-acme) for a working reference. It is daunting at first, especially with the considerable amount of boilerplate, but eventually most of the focus goes towards API and controller packages.
