@@ -32,7 +32,7 @@ If you hit one of the above, you are left with implementing a provider from scra
 
 ## Start with the provider template
 
-Don't panic: you won't start fully from scratch. The Crossplane team maintains a [provider template](https://github.com/crossplane/provider-template), which is a good starting point for most providers and also they maintain very popular providers ([`provider-http`](https://github.com/crossplane-contrib/provider-http) and [`provider-opentofu`](https://github.com/upbound/provider-opentofu)) you can base yourself on.
+Don't panic: you won't start fully from scratch. The Crossplane team maintains a [provider template](https://github.com/crossplane/provider-template), which is a good starting point for most providers and also they maintain very popular providers ([provider-http](https://github.com/crossplane-contrib/provider-http) and [provider-opentofu](https://github.com/upbound/provider-opentofu)) you can base yourself on.
 
 The template gives you the repository structure, build tooling and scaffolding utilities (e.g. `make provider.addtype`). All generated types will be placed in `internal/controller/{}` and those will define the reconciliation hooks described in the next section ([example](https://github.com/crossplane/provider-template/tree/main/internal/controller/mytype)). The provider's behaviour comes from how those hooks interact with the external API.
 
@@ -46,7 +46,7 @@ Crossplane providers use the controller pattern through a managed reconciler abs
 
 `Setup` runs once to register the controller for a "managed-resource" kind, but it is not part of the reconciliation loop. After it is all setup, the controller runtime will start reconciling and each time it will call `Connect`, `Observe`, and then `Create`, `Update`, or `Delete` when needed before calling `Disconnect`.
 
-Besides these specific hooks in the reconcile loop, Crossplane leverages annotations to keep track of reconciliation state. The most important one is [`crossplane.io/external-name`](http://crossplane.io/external-name), which identifies the underlying resource via a stable lookup key (e.g. ID, ARN, or resource path):
+Besides these specific hooks in the reconcile loop, Crossplane leverages annotations to keep track of reconciliation state. The most important one is [`crossplane.io/external-name`](https://docs.crossplane.io/v2.3/managed-resources/managed-resources/#naming-external-resources), which identifies the underlying resource via a stable lookup key (e.g. ID, ARN, or resource path):
 
 - Before `Connect` and `Observe`, the [managed reconciler's default initializer](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/api.go#L48-L61) persists `metadata.name` as the external name when the annotation is absent. Providers overwrite it during `Create` only when the external system returns a different stable lookup key.
 - Users can pre-populate it to identify and import an existing resource, although it should be used together with an `Observe` management policy to prevent unintended changes ([docs about Crossplane resource import](https://docs.crossplane.io/v2.3/guides/import-existing-resources/)).
@@ -83,7 +83,7 @@ flowchart TD
     style Removed fill:#FFCDD2
 ```
 
-The only way I fully grasped the above was after I gone through the [`crossplane-runtime@managed/reconciler` code](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L919-L1572) while implementing a provider. I suggest going through it at least once, since most of the heavy lifting is done there and is useful to know how it behaves and how it calls the described hooks.
+The only way I fully grasped the above was after I gone through the [crossplane-runtime managed reconciler code](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L919-L1572) while implementing a provider. I suggest going through it at least once, since most of the heavy lifting is done there and is useful to know how it behaves and how it calls the described hooks.
 
 ### Setup: registers controller dependencies
 
@@ -123,7 +123,7 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 | Repository | References |
 | :--------- | :--------- |
 | `provider-template` | [Setup and reconciler wiring](https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go#L58-L110) |
-| `crossplane-demo/provider-acme` | [Setup and reconciler wiring](https://github.com/brunoluiz/crossplane-demo/blob/main/provider-acme/internal/controller/user/user.go#L40-L80) |
+| `crossplane-demo/provider-acme` | [Setup and reconciler wiring](https://github.com/brunoluiz/crossplane-demo/blob/cad548528c58e407430d6e0e23b128c45403bf70/provider-acme/internal/controller/user/user.go#L38-L59) |
 
 ### Connect: create your clients
 
@@ -166,7 +166,7 @@ func (c *external) Disconnect(context.Context) error { return nil }
 | :--------- | :--------- |
 | `crossplane-runtime` | [Connect/Disconnect core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1145-L1176) |
 | `provider-template` | [Code reference](https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go#L120-L162) |
-| `crossplane-demo/provider-acme` | [Connect and Disconnect](https://github.com/brunoluiz/crossplane-demo/blob/main/provider-acme/internal/controller/user/user.go#L82-L141) |
+| `crossplane-demo/provider-acme` | [Connect and Disconnect](https://github.com/brunoluiz/crossplane-demo/blob/cad548528c58e407430d6e0e23b128c45403bf70/provider-acme/internal/controller/user/user.go#L61-L115) |
 
 ### Observe: the provider's "brain"
 
@@ -213,7 +213,7 @@ func (c *external) Observe(
 | :--------- | :--------- |
 | `crossplane-runtime` | [Update core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1178-L1196) |
 | `provider-template` | [Code reference](https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go#L172-L218) |
-| `crossplane-demo/provider-acme` | [Observe](https://github.com/brunoluiz/crossplane-demo/blob/main/provider-acme/internal/controller/user/user.go#L143-L177) |
+| `crossplane-demo/provider-acme` | [Observe](https://github.com/brunoluiz/crossplane-demo/blob/cad548528c58e407430d6e0e23b128c45403bf70/provider-acme/internal/controller/user/user.go#L135-L157) |
 
 ### Create: resource creation and `external-name` setting
 
@@ -243,7 +243,7 @@ func (c *external) Create(
 | :--------- | :--------- |
 | `crossplane-runtime` | [Create core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1349-L1471) |
 | `provider-template` | [Code reference](https://github.com/crossplane/provider-template/blob/main/internal/controller/mytype/mytype.go#L220-L230) |
-| `crossplane-demo/provider-acme` | [Create](https://github.com/brunoluiz/crossplane-demo/blob/main/provider-acme/internal/controller/user/user.go#L179-L196) |
+| `crossplane-demo/provider-acme` | [Create](https://github.com/brunoluiz/crossplane-demo/blob/cad548528c58e407430d6e0e23b128c45403bf70/provider-acme/internal/controller/user/user.go#L159-L176) |
 
 ### Update: resource update and status refresh
 
@@ -275,7 +275,7 @@ func (c *external) Update(
 | :--------- | :--------- |
 | `crossplane-runtime` | [Update core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1515-L1571) |
 | `provider-template` | [Code reference](https://github.com/crossplane/provider-template/blob/main/internal/controller/mytype/mytype.go#L232-L247) |
-| `crossplane-demo/provider-acme` | [Update](https://github.com/brunoluiz/crossplane-demo/blob/main/provider-acme/internal/controller/user/user.go#L198-L224) |
+| `crossplane-demo/provider-acme` | [Update](https://github.com/brunoluiz/crossplane-demo/blob/cad548528c58e407430d6e0e23b128c45403bf70/provider-acme/internal/controller/user/user.go#L178-L195) |
 
 ### Delete: ensuring resource is gone
 
@@ -303,7 +303,7 @@ func (c *external) Delete(
 | :--------- | :--------- |
 | `crossplane-runtime` | [Delete core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1225-L1316) |
 | `provider-template` | [Code reference](https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go#L249-L255) |
-| `crossplane-demo/provider-acme` | [Delete](https://github.com/brunoluiz/crossplane-demo/blob/main/provider-acme/internal/controller/user/user.go#L226-L240) |
+| `crossplane-demo/provider-acme` | [Delete](https://github.com/brunoluiz/crossplane-demo/blob/cad548528c58e407430d6e0e23b128c45403bf70/provider-acme/internal/controller/user/user.go#L197-L212) |
 
 
 ## Best practices learned the hard way
@@ -372,4 +372,4 @@ Hopefully you now have a good understanding of how providers work and are implem
 
 Bear in mind that that although this is a long post, there are certainly flows I have not covered and others that I have not come across yet. It really comes down to trying things out and discovering along the way. I will update this blog post if I find out more best practices or anything of note around the general flow.
 
-To start your own provider, I suggest cloning the [Crossplane provider template](https://github.com/crossplane/provider-template), and use providers such as [`provider-opentofu`](https://github.com/upbound/provider-opentofu), [`provider-http`](https://github.com/crossplane-contrib/provider-http) and my own [crossplane-demo acme provider](https://github.com/brunoluiz/crossplane-demo/tree/main/provider-acme) for a working reference. It is daunting at first, especially with the considerable amount of boilerplate, but eventually most of the focus goes towards API and controller packages.
+To start your own provider, I suggest cloning the [Crossplane provider template](https://github.com/crossplane/provider-template), and leverage [provider-opentofu](https://github.com/upbound/provider-opentofu), [provider-http](https://github.com/crossplane-contrib/provider-http) and my [provider-acme](https://github.com/brunoluiz/crossplane-demo/tree/main/provider-acme) for a working reference. It is daunting at first, especially with the considerable amount of boilerplate, but eventually the reconciler flow settles and most of your focus will go towards API design and integration, feeling almost like any other API or controller implementation.
