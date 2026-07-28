@@ -83,6 +83,8 @@ flowchart TD
     style Removed fill:#FFCDD2
 ```
 
+The only way I fully grasped the above was after I gone through the [`crossplane-runtime@managed/reconciler` code](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L919-L1572) while implementing a provider. I suggest going through it at least once, since most of the heavy lifting is done there and is useful to know how it behaves and how it calls the described hooks.
+
 ### Setup: registers controller dependencies
 
 This hook runs once during provider setup and configures `controller-runtime` for the resource. It is also the right place to add a few shared dependencies:
