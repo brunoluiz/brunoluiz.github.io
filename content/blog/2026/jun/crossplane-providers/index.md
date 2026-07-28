@@ -123,6 +123,7 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 | Repository | References |
 | :--------- | :--------- |
 | `provider-template` | [Setup and reconciler wiring](https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go#L58-L110) |
+| `crossplane-demo/provider-acme` | [Setup and reconciler wiring](https://github.com/brunoluiz/crossplane-demo/blob/main/provider-acme/internal/controller/user/user.go#L40-L80) |
 
 ### Connect: create your clients
 
@@ -172,6 +173,7 @@ func (c *external) Disconnect(context.Context) error { return nil }
 | :--------- | :--------- |
 | `crossplane-runtime` | [Connect/Disconnect core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1145-L1176) |
 | `provider-template` | [Code reference](https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go#L120-L162) |
+| `crossplane-demo/provider-acme` | [Connect and Disconnect](https://github.com/brunoluiz/crossplane-demo/blob/main/provider-acme/internal/controller/user/user.go#L82-L141) |
 
 ### Observe: the provider's "brain"
 
@@ -224,6 +226,7 @@ func (c *external) Observe(
 | :--------- | :--------- |
 | `crossplane-runtime` | [Update core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1178-L1196) |
 | `provider-template` | [Code reference](https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go#L172-L218) |
+| `crossplane-demo/provider-acme` | [Observe](https://github.com/brunoluiz/crossplane-demo/blob/main/provider-acme/internal/controller/user/user.go#L143-L177) |
 
 ### Create: resource creation and `external-name` setting
 
@@ -259,6 +262,7 @@ func (c *external) Create(
 | :--------- | :--------- |
 | `crossplane-runtime` | [Create core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1349-L1471) |
 | `provider-template` | [Code reference](https://github.com/crossplane/provider-template/blob/main/internal/controller/mytype/mytype.go#L220-L230) |
+| `crossplane-demo/provider-acme` | [Create](https://github.com/brunoluiz/crossplane-demo/blob/main/provider-acme/internal/controller/user/user.go#L179-L196) |
 
 ### Update: resource update and status refresh
 
@@ -290,6 +294,7 @@ func (c *external) Update(
 | :--------- | :--------- |
 | `crossplane-runtime` | [Update core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1515-L1571) |
 | `provider-template` | [Code reference](https://github.com/crossplane/provider-template/blob/main/internal/controller/mytype/mytype.go#L232-L247) |
+| `crossplane-demo/provider-acme` | [Update](https://github.com/brunoluiz/crossplane-demo/blob/main/provider-acme/internal/controller/user/user.go#L198-L224) |
 
 ### Delete: ensuring resource is gone
 
@@ -317,6 +322,7 @@ func (c *external) Delete(
 | :--------- | :--------- |
 | `crossplane-runtime` | [Delete core reference](https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1225-L1316) |
 | `provider-template` | [Code reference](https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go#L249-L255) |
+| `crossplane-demo/provider-acme` | [Delete](https://github.com/brunoluiz/crossplane-demo/blob/main/provider-acme/internal/controller/user/user.go#L226-L240) |
 
 ## Provider design choices that prevent reconciliation bugs
 
