@@ -97,6 +97,8 @@ Once the setup is finished, the controller runtime will only call the other hook
 ```go
 func Setup(mgr ctrl.Manager, o controller.Options) error {
 	name := managed.ControllerName(v1alpha1.UserGroupKind)
+  // Sets up the connector which will define how to handle and initialise
+  // the external resource lifecycle (eg: via an external API client)
 	connector := &connector{
 		kube:  mgr.GetClient(),
 		usage: resource.NewProviderConfigUsageTracker(
@@ -104,6 +106,8 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 		),
 	}
 
+  // Creates the managed reconciler for the specified CRD Kind, pointing
+  // to the specific connector. It allows also many features/opts to be set.
 	r := managed.NewReconciler(mgr,
 		resource.ManagedKind(v1alpha1.UserGroupVersionKind),
 		managed.WithExternalConnector(connector),
