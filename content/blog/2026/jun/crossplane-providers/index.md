@@ -13,7 +13,7 @@ aliases:
 
 ## Introduction
 
-Crossplane allows you to define Kubernetes APIs without writing controllers. There are many components that enable it, such as compositions and XRDs, but providers are on the heart of it: they are controllers that handle the lifecycle of an external resource (e.g. a bucket), such as creating, updating, and deleting it.
+Crossplane allows you to define Kubernetes APIs without writing controllers. Instead, users define custom resources using (usually) YAML. There are many components required for this abstraction, such as compositions and XRDs, but providers are on the heart of it: they are controllers that handle the lifecycle of an external resource (e.g. a bucket), such as creating, updating, and deleting it.
 
 Usually official providers or upjet generated ones are good enough, but sometimes you might come across issues. This is when you will need to implement your own, which we will cover in this post.
 
