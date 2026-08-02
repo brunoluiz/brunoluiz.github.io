@@ -1,4 +1,602 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Bruno Luiz da Silva</title><link>https://brunoluiz.net/</link><description>Recent content on Bruno Luiz da Silva</description><generator>Hugo -- 0.148.2</generator><language>en</language><lastBuildDate>Tue, 14 Apr 2026 10:00:00 +0000</lastBuildDate><atom:link href="https://brunoluiz.net/index.xml" rel="self" type="application/rss+xml"/><item><title>Engineers must learn how to say "no"</title><link>https://brunoluiz.net/blog/2026/apr/say-no/</link><pubDate>Tue, 14 Apr 2026 10:00:00 +0000</pubDate><guid>https://brunoluiz.net/blog/2026/apr/say-no/</guid><description>A reminder to my future self and a guide for those early in their careers on why &amp;ldquo;no&amp;rdquo; is often the most productive word in an engineer vocabulary.</description><content:encoded><![CDATA[<p>In my first years in the software industry, I used to say <em>&ldquo;nothing is impossible, it is just a matter of time&rdquo;</em> (cliché, I know). This is &ldquo;fun&rdquo; at first, but it leads to distractions, team friction and that usual feature that no one wants to maintain but that now will forever exist. I am writing this as a reminder to my future self and as a guide for those early in their careers on why &ldquo;no&rdquo; is often the most productive word in your vocabulary.</p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Bruno Luiz da Silva</title><link>https://brunoluiz.net/</link><description>Recent content on Bruno Luiz da Silva</description><generator>Hugo -- 0.148.2</generator><language>en</language><lastBuildDate>Sat, 25 Jul 2026 10:00:00 +0000</lastBuildDate><atom:link href="https://brunoluiz.net/index.xml" rel="self" type="application/rss+xml"/><item><title>Building Crossplane providers from scratch using Go</title><link>https://brunoluiz.net/blog/2026/jun/crossplane-providers/</link><pubDate>Sat, 25 Jul 2026 10:00:00 +0000</pubDate><guid>https://brunoluiz.net/blog/2026/jun/crossplane-providers/</guid><description>A practical guide for building Crossplane providers in Go when other providers failed you, from the managed reconciler lifecycle to examples of how to implement and best practices.</description><content:encoded><![CDATA[<h2 id="introduction">Introduction</h2>
+<p>Crossplane allows you to define Kubernetes APIs without writing controllers. Instead, users define custom resources using (usually) YAML. There are many components required for this abstraction, such as compositions and XRDs, but providers are on the heart of it: they are controllers that handle the lifecycle of an external resource (e.g. a bucket), such as creating, updating, and deleting it.</p>
+<p>Usually official providers or upjet generated ones are good enough, but sometimes you might come across issues. This is when you will need to implement your own, which we will cover in this post.</p>
+<h2 id="why-create-your-own-provider">Why create your own provider?</h2>
+<p>Sometimes you will be able to find an official provider (AWS/GCP) that is decent and well maintained, but other times you won&rsquo;t since Crossplane still does not have as much coverage as Terraform. Hence, there are two options: generate a provider using <a href="https://github.com/crossplane/upjet">upjet</a> or implement a provider yourself.</p>
+<p><a href="https://github.com/crossplane/upjet">Upjet</a> leverages the Terraform ecosystem and it generates providers that hook to its providers. In many cases this is enough, especially for well maintained Terraform providers. Many of the official Upbound and Crossplane providers use it and it is the quickest way to implement a custom provider. But, there are a few caveats:</p>
+<ol>
+<li>Not all vendors will have a proper Terraform provider, if they have one at all</li>
+<li>Some Terraform providers might be incompatible with Upjet</li>
+<li>Teams might want to have custom logic between reconciliation logic (e.g. emit specific metrics)</li>
+<li>Generated providers can be slow or memory-intensive when Terraform overhead is a poor fit</li>
+</ol>
+<p>If you hit one of the above, you are left with implementing a provider from scratch.</p>
+<h2 id="start-with-the-provider-template">Start with the provider template</h2>
+<p>Don&rsquo;t panic: you won&rsquo;t start fully from scratch. The Crossplane team maintains a <a href="https://github.com/crossplane/provider-template">provider template</a>, which is a good starting point for most providers and also they maintain very popular providers (<a href="https://github.com/crossplane-contrib/provider-http">provider-http</a> and <a href="https://github.com/upbound/provider-opentofu">provider-opentofu</a>) you can base yourself on.</p>
+<p>The template gives you the repository structure, build tooling and scaffolding utilities (e.g. <code>make provider.addtype</code>). All generated types will be placed in <code>internal/controller/{}</code> and those will define the reconciliation hooks described in the next section (<a href="https://github.com/crossplane/provider-template/tree/main/internal/controller/mytype">example</a>). The provider&rsquo;s behaviour comes from how those hooks interact with the external API.</p>
+<h2 id="implementing-the-crossplane-reconcile-loop">Implementing the Crossplane reconcile loop</h2>
+<p><small>ℹ️ The following assumes that <a href="https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/api.go#L48-L61">default management policies</a> are in place, as otherwise they change the lifecycle behaviour.</small></p>
+<p>Crossplane providers use the controller pattern through a managed reconciler abstraction. Instead of a single <code>Reconcile</code> function, provider controllers implement a strict interface with several hooks. The Crossplane runtime manages their lifecycle, ordering, and state, handling work that a controller built with Kubebuilder would otherwise need to implement (and probably lose some hair when bugs end up surfacing).</p>
+<h3 id="lifecycle-hooks-in-a-nutshell">Lifecycle hooks in a nutshell</h3>
+<p><code>Setup</code> runs once to register the controller for a &ldquo;managed-resource&rdquo; kind, but it is not part of the reconciliation loop. After it is all setup, the controller runtime will start reconciling and each time it will call <code>Connect</code>, <code>Observe</code>, and then <code>Create</code>, <code>Update</code>, or <code>Delete</code> when needed before calling <code>Disconnect</code>.</p>
+<p>Besides these specific hooks in the reconcile loop, Crossplane leverages annotations to keep track of reconciliation state. The most important one is <a href="https://docs.crossplane.io/v2.3/managed-resources/managed-resources/#naming-external-resources"><code>crossplane.io/external-name</code></a>, which identifies the underlying resource via a stable lookup key (e.g. ID, ARN, or resource path):</p>
+<ul>
+<li>Before <code>Connect</code> and <code>Observe</code>, the <a href="https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/api.go#L48-L61">managed reconciler&rsquo;s default initializer</a> persists <code>metadata.name</code> as the external name when the annotation is absent. Providers overwrite it during <code>Create</code> only when the external system returns a different stable lookup key.</li>
+<li>Users can pre-populate it to identify and import an existing resource, although it should be used together with an <code>Observe</code> management policy to prevent unintended changes (<a href="https://docs.crossplane.io/v2.3/guides/import-existing-resources/">docs about Crossplane resource import</a>).</li>
+</ul>
+<p>If <a href="https://docs.crossplane.io/v2.3/managed-resources/managed-resources/#managementpolicies">management policies are set to <code>*</code> (the default)</a>, so that no hook is excluded, the provider lifecycle can be summarised as:</p>
+<pre class="mermaid">
+  flowchart TD
+    Setup[&#34;Setup controller&lt;br/&gt;(once)&#34;] --&gt; Start
+    Start[&#34;Start reconciliation&lt;br/&gt;(loop)&#34;] --&gt; Connect
+    Connect --&gt; Observe{&#34;Observe&#34;}
+
+    Observe -- &#34;!Deleting AND !ResourceExists&#34; --&gt; Create[&#34;Create() external resource&#34;]
+    Create --&gt; CreateName[&#34;Persist external-name&#34;]
+    CreateName --&gt; Disconnect[&#34;Disconnect&#34;]
+
+    Observe -- &#34;!Deleting AND&lt;br/&gt;ResourceExists AND&lt;br/&gt;!ResourceUpToDate&#34; --&gt; Update[&#34;Update() external resource&#34;]
+    Update --&gt; UpdateStatus[&#34;Persist resource status&#34;]
+    UpdateStatus --&gt; Disconnect
+
+    Observe -- &#34;!Deleting AND ResourceExists AND ResourceUpToDate&#34; --&gt; Disconnect
+
+    Observe -- &#34;Deleting AND ResourceExists&#34; --&gt; Delete[&#34;Delete() external resource&#34;]
+    Delete --&gt; Disconnect
+    Observe -- &#34;Deleting AND !ResourceExists&#34; --&gt; Removed[&#34;Remove finalizer&#34;]
+    Removed --&gt; Disconnect
+
+    Disconnect --&gt; End[&#34;End reconciliation&lt;br/&gt;(requeue)&#34;]
+
+    style Setup fill:#BBDEFB
+    style Start fill:#C8E6C9
+    style End fill:#C8E6C9
+    style Delete fill:#
+    style Removed fill:#FFCDD2
+</pre>
+
+<p>The only way I fully grasped the above was after I gone through the <a href="https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L919-L1572">crossplane-runtime managed reconciler code</a> while implementing a provider. I suggest going through it at least once, since most of the heavy lifting is done there and is useful to know how it behaves and how it calls the described hooks.</p>
+<h3 id="setup-registers-controller-dependencies">Setup: registers controller dependencies</h3>
+<p>This hook runs once during provider setup and configures <code>controller-runtime</code> for the resource. It is also the right place to add a few shared dependencies:</p>
+<ol>
+<li>Inject the <code>controller.Options Logger</code> in the <code>connector</code> being created, since it is better to use the same logger used by the controller, with the same fields set by it</li>
+<li>In case opening a connection to your vendor can be expensive / slow, you might want to implement and inject a connection pool map at this stage. An example is a provider that connects to databases and lazily starts a connection at <code>Connect</code>, adds to this pool, and re-uses across reconciles, instead of always terminating it at <code>Disconnect</code>. <strong>Bear in mind this is in general an optimisation and not always required</strong> since it adds extra complexity (e.g. configuring connections timeouts).</li>
+</ol>
+<p>Once the setup is finished, the controller runtime will only call the other hooks related to the reconciliation.</p>
+<div class="highlight"><div style="color:#cdd6f4;background-color:#1e1e2e;-moz-tab-size:2;-o-tab-size:2;tab-size:2;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#cdd6f4;background-color:#1e1e2e;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">21
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">22
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">23
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">24
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">25
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">26
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">27
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#cdd6f4;background-color:#1e1e2e;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#f38ba8">func</span> <span style="color:#89b4fa">Setup</span>(mgr ctrl.Manager, o controller.Options) <span style="color:#f38ba8">error</span> {
+</span></span><span style="display:flex;"><span>	name <span style="color:#89dceb;font-weight:bold">:=</span> managed.<span style="color:#89b4fa">ControllerName</span>(v1alpha1.UserGroupKind)
+</span></span><span style="display:flex;"><span>  <span style="color:#6c7086;font-style:italic">// Sets up the connector which will define how to handle and initialise</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#6c7086;font-style:italic">// the external resource lifecycle (eg: via an external API client)</span>
+</span></span><span style="display:flex;"><span>	connector <span style="color:#89dceb;font-weight:bold">:=</span> <span style="color:#89dceb;font-weight:bold">&amp;</span>connector{
+</span></span><span style="display:flex;"><span>		kube:  mgr.<span style="color:#89b4fa">GetClient</span>(),
+</span></span><span style="display:flex;"><span>		usage: resource.<span style="color:#89b4fa">NewProviderConfigUsageTracker</span>(
+</span></span><span style="display:flex;"><span>			mgr.<span style="color:#89b4fa">GetClient</span>(), <span style="color:#89dceb;font-weight:bold">&amp;</span>apisv1alpha1.ProviderConfigUsage{},
+</span></span><span style="display:flex;"><span>		),
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#6c7086;font-style:italic">// Creates the managed reconciler for the specified CRD Kind, pointing</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#6c7086;font-style:italic">// to the specific connector. It allows also many features/opts to be set.</span>
+</span></span><span style="display:flex;"><span>	r <span style="color:#89dceb;font-weight:bold">:=</span> managed.<span style="color:#89b4fa">NewReconciler</span>(mgr,
+</span></span><span style="display:flex;"><span>		resource.<span style="color:#89b4fa">ManagedKind</span>(v1alpha1.UserGroupVersionKind),
+</span></span><span style="display:flex;"><span>		managed.<span style="color:#89b4fa">WithExternalConnector</span>(connector),
+</span></span><span style="display:flex;"><span>		managed.<span style="color:#89b4fa">WithLogger</span>(o.Logger.<span style="color:#89b4fa">WithValues</span>(<span style="color:#a6e3a1">&#34;controller&#34;</span>, name)),
+</span></span><span style="display:flex;"><span>	)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#6c7086;font-style:italic">// ... Other settings and flags</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#cba6f7">return</span> ctrl.<span style="color:#89b4fa">NewControllerManagedBy</span>(mgr).<span style="color:#89b4fa">Named</span>(name).
+</span></span><span style="display:flex;"><span>		<span style="color:#89b4fa">WithOptions</span>(o.<span style="color:#89b4fa">ForControllerRuntime</span>()).
+</span></span><span style="display:flex;"><span>		<span style="color:#89b4fa">WithEventFilter</span>(resource.<span style="color:#89b4fa">DesiredStateChanged</span>()).
+</span></span><span style="display:flex;"><span>		<span style="color:#89b4fa">For</span>(<span style="color:#89dceb;font-weight:bold">&amp;</span>v1alpha1.User{}).
+</span></span><span style="display:flex;"><span>		<span style="color:#89b4fa">Complete</span>(r)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Repository</th>
+          <th style="text-align: left">References</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left"><code>provider-template</code></td>
+          <td style="text-align: left"><a href="https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go#L58-L110">Setup and reconciler wiring</a></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>crossplane-demo/provider-acme</code></td>
+          <td style="text-align: left"><a href="https://github.com/brunoluiz/crossplane-demo/blob/cad548528c58e407430d6e0e23b128c45403bf70/provider-acme/internal/controller/user/user.go#L38-L59">Setup and reconciler wiring</a></td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="connect-create-your-clients">Connect: create your clients</h3>
+<p>This is the first hook called on the Crossplane reconciliation loop. Since all further hooks need a client, <strong>the provider must set it up here and keep a reference in the
+generated <code>external</code> instance.</strong></p>
+<ul>
+<li>The provider should read <code>ProviderConfig</code> to configure authentication and other client settings. In Crossplane v2, it can be cluster or namespace-scoped, so be aware you might need logic to read the correct one.</li>
+<li>Clients most likely will require credentials on method calls. A custom middleware (e.g. HTTP Transport, gRPC interceptor) can set the required authorisation details and avoid duplicating that work at each call site, requiring only injecting those.</li>
+</ul>
+<div class="highlight"><div style="color:#cdd6f4;background-color:#1e1e2e;-moz-tab-size:2;-o-tab-size:2;tab-size:2;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#cdd6f4;background-color:#1e1e2e;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">20
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#cdd6f4;background-color:#1e1e2e;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#f38ba8">func</span> (c <span style="color:#89dceb;font-weight:bold">*</span>connector) <span style="color:#89b4fa">Connect</span>(
+</span></span><span style="display:flex;"><span>	ctx context.Context,
+</span></span><span style="display:flex;"><span>	mg resource.Managed,
+</span></span><span style="display:flex;"><span>) (managed.ExternalClient, <span style="color:#f38ba8">error</span>) {
+</span></span><span style="display:flex;"><span>	cr <span style="color:#89dceb;font-weight:bold">:=</span> mg.(<span style="color:#89dceb;font-weight:bold">*</span>v1alpha1.User)
+</span></span><span style="display:flex;"><span>	<span style="color:#cba6f7">if</span> err <span style="color:#89dceb;font-weight:bold">:=</span> c.usage.<span style="color:#89b4fa">Track</span>(ctx, cr); err <span style="color:#89dceb;font-weight:bold">!=</span> <span style="color:#fab387">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#cba6f7">return</span> <span style="color:#fab387">nil</span>, fmt.<span style="color:#89b4fa">Errorf</span>(<span style="color:#a6e3a1">&#34;track ProviderConfig usage: %w&#34;</span>, err)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6c7086;font-style:italic">// Read either ProviderConfig or ClusterProviderConfig, then resolve both</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6c7086;font-style:italic">// SecretKeySelectors independently before creating the vendor client.</span>
+</span></span><span style="display:flex;"><span>	baseURL, username, password, err <span style="color:#89dceb;font-weight:bold">:=</span> c.<span style="color:#89b4fa">providerConfig</span>(ctx, cr)
+</span></span><span style="display:flex;"><span>	<span style="color:#cba6f7">if</span> err <span style="color:#89dceb;font-weight:bold">!=</span> <span style="color:#fab387">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#cba6f7">return</span> <span style="color:#fab387">nil</span>, fmt.<span style="color:#89b4fa">Errorf</span>(<span style="color:#a6e3a1">&#34;create client during connect: %w&#34;</span>, err)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#cba6f7">return</span> <span style="color:#89dceb;font-weight:bold">&amp;</span>external{
+</span></span><span style="display:flex;"><span>		client: acme.<span style="color:#89b4fa">NewClient</span>(baseURL, username, password),
+</span></span><span style="display:flex;"><span>	}, <span style="color:#fab387">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Paired with <code>Connect</code>, implement <code>Disconnect</code> to close resources that need closing. It can be a no-op for reusable clients such as <code>http.Client</code>, but might be required in cases of database connections (depending on how they are managed).</p>
+<div class="highlight"><div style="color:#cdd6f4;background-color:#1e1e2e;-moz-tab-size:2;-o-tab-size:2;tab-size:2;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#cdd6f4;background-color:#1e1e2e;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#cdd6f4;background-color:#1e1e2e;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#f38ba8">func</span> (c <span style="color:#89dceb;font-weight:bold">*</span>external) <span style="color:#89b4fa">Disconnect</span>(context.Context) <span style="color:#f38ba8">error</span> { <span style="color:#cba6f7">return</span> <span style="color:#fab387">nil</span> }
+</span></span></code></pre></td></tr></table>
+</div>
+</div><table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Repository</th>
+          <th style="text-align: left">References</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left"><code>crossplane-runtime</code></td>
+          <td style="text-align: left"><a href="https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1145-L1176">Connect/Disconnect core reference</a></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>provider-template</code></td>
+          <td style="text-align: left"><a href="https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go#L120-L162">Code reference</a></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>crossplane-demo/provider-acme</code></td>
+          <td style="text-align: left"><a href="https://github.com/brunoluiz/crossplane-demo/blob/cad548528c58e407430d6e0e23b128c45403bf70/provider-acme/internal/controller/user/user.go#L61-L115">Connect and Disconnect</a></td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="observe-the-providers-brain">Observe: the provider&rsquo;s &ldquo;brain&rdquo;</h3>
+<p>This is one of the most important hooks since it defines what will (or not) be called next. It fetches the resource through the <code>crossplane.io/external-name</code> annotation and then:</p>
+<ol>
+<li>The default managed reconciler initialises the annotation from <code>metadata.name</code>, so <code>Observe</code> normally queries the vendor with a non-empty external name. A vendor “not found” response triggers <code>Create</code> by returning <code>ResourceExists: false</code>.</li>
+<li>If it exists, it should always update the status of the MR (it is done via pointer when <code>cr.Status.AtProvider</code> is set) and the return must always have <code>ResourceExists: true</code>. The provider can mark it available after a successful lookup. It should return <code>ResourceUpToDate: true</code> when the vendor observed object match <code>spec.forProvider</code>, otherwise <code>Update</code> is triggered (drift).</li>
+</ol>
+<p>The example below assumes the vendor adapter exposes user-specific CRUD methods and that it returns a typed <code>ErrNotFound</code>.</p>
+<div class="highlight"><div style="color:#cdd6f4;background-color:#1e1e2e;-moz-tab-size:2;-o-tab-size:2;tab-size:2;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#cdd6f4;background-color:#1e1e2e;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">21
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">22
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">23
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">24
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">25
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">26
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">27
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">28
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">29
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#cdd6f4;background-color:#1e1e2e;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#f38ba8">func</span> (c <span style="color:#89dceb;font-weight:bold">*</span>external) <span style="color:#89b4fa">Observe</span>(
+</span></span><span style="display:flex;"><span>	ctx context.Context,
+</span></span><span style="display:flex;"><span>	mg resource.Managed,
+</span></span><span style="display:flex;"><span>) (managed.ExternalObservation, <span style="color:#f38ba8">error</span>) {
+</span></span><span style="display:flex;"><span>	cr <span style="color:#89dceb;font-weight:bold">:=</span> mg.(<span style="color:#89dceb;font-weight:bold">*</span>v1alpha1.User)
+</span></span><span style="display:flex;"><span>	observed, err <span style="color:#89dceb;font-weight:bold">:=</span> c.client.<span style="color:#89b4fa">GetUser</span>(ctx, meta.<span style="color:#89b4fa">GetExternalName</span>(cr))
+</span></span><span style="display:flex;"><span>	<span style="color:#cba6f7">if</span> errors.<span style="color:#89b4fa">Is</span>(err, acme.ErrNotFound) {
+</span></span><span style="display:flex;"><span>		<span style="color:#cba6f7">return</span> managed.ExternalObservation{ResourceExists: <span style="color:#fab387">false</span>}, <span style="color:#fab387">nil</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#cba6f7">if</span> err <span style="color:#89dceb;font-weight:bold">!=</span> <span style="color:#fab387">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#cba6f7">return</span> managed.ExternalObservation{}, fmt.<span style="color:#89b4fa">Errorf</span>(<span style="color:#a6e3a1">&#34;get user: %w&#34;</span>, err)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6c7086;font-style:italic">// A successful lookup means the external resource is available.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6c7086;font-style:italic">// Extract this to updateStatus once it spans several fields.</span>
+</span></span><span style="display:flex;"><span>	cr.Status.AtProvider.ID = observed.ID
+</span></span><span style="display:flex;"><span>	cr.Status.AtProvider.Name = observed.Name
+</span></span><span style="display:flex;"><span>	cr.Status.AtProvider.Email = observed.Email
+</span></span><span style="display:flex;"><span>	cr.Status.<span style="color:#89b4fa">SetConditions</span>(xpv1.<span style="color:#89b4fa">Available</span>())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6c7086;font-style:italic">// Extract this to isUpToDate when several fields must be compared.</span>
+</span></span><span style="display:flex;"><span>	upToDate <span style="color:#89dceb;font-weight:bold">:=</span> cr.Spec.ForProvider.Name <span style="color:#89dceb;font-weight:bold">==</span> observed.Name <span style="color:#89dceb;font-weight:bold">&amp;&amp;</span>
+</span></span><span style="display:flex;"><span>		cr.Spec.ForProvider.Email <span style="color:#89dceb;font-weight:bold">==</span> observed.Email
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#cba6f7">return</span> managed.ExternalObservation{
+</span></span><span style="display:flex;"><span>		ResourceExists:   <span style="color:#fab387">true</span>,
+</span></span><span style="display:flex;"><span>		ResourceUpToDate: upToDate,
+</span></span><span style="display:flex;"><span>	}, <span style="color:#fab387">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Repository</th>
+          <th style="text-align: left">References</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left"><code>crossplane-runtime</code></td>
+          <td style="text-align: left"><a href="https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1178-L1196">Update core reference</a></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>provider-template</code></td>
+          <td style="text-align: left"><a href="https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go#L172-L218">Code reference</a></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>crossplane-demo/provider-acme</code></td>
+          <td style="text-align: left"><a href="https://github.com/brunoluiz/crossplane-demo/blob/cad548528c58e407430d6e0e23b128c45403bf70/provider-acme/internal/controller/user/user.go#L135-L157">Observe</a></td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="create-resource-creation-and-external-name-setting">Create: resource creation and <code>external-name</code> setting</h3>
+<p><code>Create</code> is called after <code>Observe</code> returns <code>ResourceExists: false</code>. It creates the resource in the external system and sets <code>external-name</code> if it assigns a stable identifier (e.g. ID). Crossplane&rsquo;s managed reconciler persists the annotation changes made in this hook, but discards status changes. The status gets hydrated during the next <code>Observe</code> instead.</p>
+<div class="highlight"><div style="color:#cdd6f4;background-color:#1e1e2e;-moz-tab-size:2;-o-tab-size:2;tab-size:2;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#cdd6f4;background-color:#1e1e2e;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">17
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#cdd6f4;background-color:#1e1e2e;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#f38ba8">func</span> (c <span style="color:#89dceb;font-weight:bold">*</span>external) <span style="color:#89b4fa">Create</span>(
+</span></span><span style="display:flex;"><span>	ctx context.Context,
+</span></span><span style="display:flex;"><span>	mg resource.Managed,
+</span></span><span style="display:flex;"><span>) (managed.ExternalCreation, <span style="color:#f38ba8">error</span>) {
+</span></span><span style="display:flex;"><span>	cr <span style="color:#89dceb;font-weight:bold">:=</span> mg.(<span style="color:#89dceb;font-weight:bold">*</span>v1alpha1.User)
+</span></span><span style="display:flex;"><span>	created, err <span style="color:#89dceb;font-weight:bold">:=</span> c.client.<span style="color:#89b4fa">CreateUser</span>(ctx, acme.User{
+</span></span><span style="display:flex;"><span>		Name:  cr.Spec.ForProvider.Name,
+</span></span><span style="display:flex;"><span>		Email: cr.Spec.ForProvider.Email,
+</span></span><span style="display:flex;"><span>	})
+</span></span><span style="display:flex;"><span>	<span style="color:#cba6f7">if</span> err <span style="color:#89dceb;font-weight:bold">!=</span> <span style="color:#fab387">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#cba6f7">return</span> managed.ExternalCreation{}, fmt.<span style="color:#89b4fa">Errorf</span>(<span style="color:#a6e3a1">&#34;create user: %w&#34;</span>, err)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6c7086;font-style:italic">// Create persists annotations, but not status. Observe hydrates status.</span>
+</span></span><span style="display:flex;"><span>	meta.<span style="color:#89b4fa">SetExternalName</span>(cr, created.ID)
+</span></span><span style="display:flex;"><span>	<span style="color:#cba6f7">return</span> managed.ExternalCreation{}, <span style="color:#fab387">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Repository</th>
+          <th style="text-align: left">References</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left"><code>crossplane-runtime</code></td>
+          <td style="text-align: left"><a href="https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1349-L1471">Create core reference</a></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>provider-template</code></td>
+          <td style="text-align: left"><a href="https://github.com/crossplane/provider-template/blob/main/internal/controller/mytype/mytype.go#L220-L230">Code reference</a></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>crossplane-demo/provider-acme</code></td>
+          <td style="text-align: left"><a href="https://github.com/brunoluiz/crossplane-demo/blob/cad548528c58e407430d6e0e23b128c45403bf70/provider-acme/internal/controller/user/user.go#L159-L176">Create</a></td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="update-resource-update-and-status-refresh">Update: resource update and status refresh</h3>
+<p><code>Update</code> is called after <code>Observe</code> returns <code>ResourceExists: true</code> and <code>ResourceUpToDate: false</code>. It changes the external resource to match <code>spec.forProvider</code>. Unlike <code>Create</code>, the reconciler persists status changes made by <code>Update</code>, so it can refresh <code>cr.Status.AtProvider</code> and conditions, but no annotations mutation is persisted here. A subsequent <code>Observe</code> should confirm that the resource is now up to date.</p>
+<div class="highlight"><div style="color:#cdd6f4;background-color:#1e1e2e;-moz-tab-size:2;-o-tab-size:2;tab-size:2;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#cdd6f4;background-color:#1e1e2e;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">19
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#cdd6f4;background-color:#1e1e2e;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#f38ba8">func</span> (c <span style="color:#89dceb;font-weight:bold">*</span>external) <span style="color:#89b4fa">Update</span>(
+</span></span><span style="display:flex;"><span>	ctx context.Context,
+</span></span><span style="display:flex;"><span>	mg resource.Managed,
+</span></span><span style="display:flex;"><span>) (managed.ExternalUpdate, <span style="color:#f38ba8">error</span>) {
+</span></span><span style="display:flex;"><span>	cr <span style="color:#89dceb;font-weight:bold">:=</span> mg.(<span style="color:#89dceb;font-weight:bold">*</span>v1alpha1.User)
+</span></span><span style="display:flex;"><span>	updated, err <span style="color:#89dceb;font-weight:bold">:=</span> c.client.<span style="color:#89b4fa">UpdateUser</span>(ctx, meta.<span style="color:#89b4fa">GetExternalName</span>(cr), acme.User{
+</span></span><span style="display:flex;"><span>		Name:  cr.Spec.ForProvider.Name,
+</span></span><span style="display:flex;"><span>		Email: cr.Spec.ForProvider.Email,
+</span></span><span style="display:flex;"><span>	})
+</span></span><span style="display:flex;"><span>	<span style="color:#cba6f7">if</span> err <span style="color:#89dceb;font-weight:bold">!=</span> <span style="color:#fab387">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#cba6f7">return</span> managed.ExternalUpdate{}, fmt.<span style="color:#89b4fa">Errorf</span>(<span style="color:#a6e3a1">&#34;update user: %w&#34;</span>, err)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6c7086;font-style:italic">// Update persists status, unlike Create, so refresh the observed fields.</span>
+</span></span><span style="display:flex;"><span>	cr.Status.AtProvider.ID = updated.ID
+</span></span><span style="display:flex;"><span>	cr.Status.AtProvider.Name = updated.Name
+</span></span><span style="display:flex;"><span>	cr.Status.AtProvider.Email = updated.Email
+</span></span><span style="display:flex;"><span>	<span style="color:#cba6f7">return</span> managed.ExternalUpdate{}, <span style="color:#fab387">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Repository</th>
+          <th style="text-align: left">References</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left"><code>crossplane-runtime</code></td>
+          <td style="text-align: left"><a href="https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1515-L1571">Update core reference</a></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>provider-template</code></td>
+          <td style="text-align: left"><a href="https://github.com/crossplane/provider-template/blob/main/internal/controller/mytype/mytype.go#L232-L247">Code reference</a></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>crossplane-demo/provider-acme</code></td>
+          <td style="text-align: left"><a href="https://github.com/brunoluiz/crossplane-demo/blob/cad548528c58e407430d6e0e23b128c45403bf70/provider-acme/internal/controller/user/user.go#L178-L195">Update</a></td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="delete-ensuring-resource-is-gone">Delete: ensuring resource is gone</h3>
+<p><code>Delete</code> calls the external delete API after <code>Observe</code> reports that a deleting managed resource still exists externally. On a later reconciliation, <code>Observe</code> reports <code>ResourceExists: false</code> and, together with <a href="https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1235-L1236"><code>meta.WasDeleted() == true</code></a>, the runtime removes its finaliser. If the external resource remains, it keeps retrying deletion until the resource ceases to exist.</p>
+<div class="highlight"><div style="color:#cdd6f4;background-color:#1e1e2e;-moz-tab-size:2;-o-tab-size:2;tab-size:2;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#cdd6f4;background-color:#1e1e2e;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">15
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#cdd6f4;background-color:#1e1e2e;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#f38ba8">func</span> (c <span style="color:#89dceb;font-weight:bold">*</span>external) <span style="color:#89b4fa">Delete</span>(
+</span></span><span style="display:flex;"><span>	ctx context.Context,
+</span></span><span style="display:flex;"><span>	mg resource.Managed,
+</span></span><span style="display:flex;"><span>) (managed.ExternalDelete, <span style="color:#f38ba8">error</span>) {
+</span></span><span style="display:flex;"><span>	cr <span style="color:#89dceb;font-weight:bold">:=</span> mg.(<span style="color:#89dceb;font-weight:bold">*</span>v1alpha1.User)
+</span></span><span style="display:flex;"><span>	err <span style="color:#89dceb;font-weight:bold">:=</span> c.client.<span style="color:#89b4fa">DeleteUser</span>(ctx, meta.<span style="color:#89b4fa">GetExternalName</span>(cr))
+</span></span><span style="display:flex;"><span>	<span style="color:#cba6f7">if</span> errors.<span style="color:#89b4fa">Is</span>(err, acme.ErrNotFound) {
+</span></span><span style="display:flex;"><span>		<span style="color:#cba6f7">return</span> managed.ExternalDelete{}, <span style="color:#fab387">nil</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#cba6f7">if</span> err <span style="color:#89dceb;font-weight:bold">!=</span> <span style="color:#fab387">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#cba6f7">return</span> managed.ExternalDelete{}, fmt.<span style="color:#89b4fa">Errorf</span>(<span style="color:#a6e3a1">&#34;delete user: %w&#34;</span>, err)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#cba6f7">return</span> managed.ExternalDelete{}, <span style="color:#fab387">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Repository</th>
+          <th style="text-align: left">References</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left"><code>crossplane-runtime</code></td>
+          <td style="text-align: left"><a href="https://github.com/crossplane/crossplane-runtime/blob/5092c39e4b0099816912dc7d07b2a670a0dba9dc/pkg/reconciler/managed/reconciler.go#L1225-L1316">Delete core reference</a></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>provider-template</code></td>
+          <td style="text-align: left"><a href="https://github.com/crossplane/provider-template/blob/328a8a692f06a0306ffe7623463560fd3633a643/internal/controller/mytype/mytype.go#L249-L255">Code reference</a></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>crossplane-demo/provider-acme</code></td>
+          <td style="text-align: left"><a href="https://github.com/brunoluiz/crossplane-demo/blob/cad548528c58e407430d6e0e23b128c45403bf70/provider-acme/internal/controller/user/user.go#L197-L212">Delete</a></td>
+      </tr>
+  </tbody>
+</table>
+<h2 id="best-practices-learned-the-hard-way">Best practices learned the hard way</h2>
+<h3 id="classify-vendor-errors-before-returning-an-observation">Classify vendor errors before returning an observation</h3>
+<p>In the adapter/client layer, not found errors must always be mapped differently than other errors when returning (eg: <code>ErrNotFound</code> x <code>ErrInternal</code>). This will enable the controller to return <code>ResourceExists: false</code> correctly when an error is returned on <code>Observe</code>. Not handling this properly can make Crossplane create resource duplicates.</p>
+<h3 id="use-vendor-idempotency-mechanisms-when-creating-resources">Use vendor idempotency mechanisms when creating resources</h3>
+<p>Network failures or pod crashes can leave a provider unable to tell whether a create request succeeded. When the vendor supports idempotency keys, send a stable key with the request so a retry cannot create a duplicate resource. If idempotency is not supported, you can still try to lookup by a deterministic name / key before issuing another create request. Bear in mind that not all vendors support these mechanisms.</p>
+<h3 id="let-crossplane-persist-state-and-minimise-kube-client-calls">Let Crossplane persist state and minimise Kube client calls</h3>
+<p>Your external client logic should focus on reconciling the external system, not persisting changes to the managed resource. Crossplane’s managed reconciler already handles lifecycle concerns such as updating status, managing finalizers, and persisting annotations. Calling the Kubernetes API to mutate the managed resource from an external client can lead to race conditions, conflicts, and harder-to-maintain code. Instead, return the appropriate observation or update results and let Crossplane handle the rest.</p>
+<p>Using the Kubernetes client in <code>Connect</code> to read the referenced <code>ProviderConfig</code> and credentials Secret is expected. When you need other Kubernetes resources, first check whether Crossplane provides an abstraction. For example, use <code>ProviderConfig</code> secret references for credentials rather than defining a separate secret-management mechanism.</p>
+<h3 id="share-logic-between-namespaced-and-cluster-scoped-resources">Share logic between namespaced and cluster-scoped resources</h3>
+<p>Crossplane V2 allows cluster and namespaced resources. If you support both, avoid duplicating reconciliation logic. The external API interactions (observe, create, update, delete) are usually identical regardless of scope. Share this logic across controllers and only introduce separate implementations when there is a real difference in behaviour or a compatibility requirement. This reduces maintenance overhead and keeps your provider easier to evolve and test.</p>
+<h3 id="put-connection-defaults-in-providerconfig">Put connection defaults in <code>ProviderConfig</code></h3>
+<p>Store connection-level details such as credentials, API endpoints, account or cluster identifiers, and default regions in <code>ProviderConfig</code>. This avoids repeating the same values across multiple resources and keeps your APIs cleaner. <code>spec.forProvider</code> should be for fields that represent the desired state of a resource (e.g. database name, size, or network), not for connection URLs or similar. An example could be</p>
+<div class="highlight"><div style="color:#cdd6f4;background-color:#1e1e2e;-moz-tab-size:2;-o-tab-size:2;tab-size:2;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#cdd6f4;background-color:#1e1e2e;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">21
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">22
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">23
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">24
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">25
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">26
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">27
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">28
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">29
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">30
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">31
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f849c">32
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#cdd6f4;background-color:#1e1e2e;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#6c7086;font-style:italic"># You don&#39;t need to pass database and host or any other information to MRs</span>
+</span></span><span style="display:flex;"><span><span style="color:#6c7086;font-style:italic"># Instead, they can just infer from the ProviderConfig</span>
+</span></span><span style="display:flex;"><span><span style="color:#fab387">---</span>
+</span></span><span style="display:flex;"><span><span style="color:#cba6f7">apiVersion</span>: postgres.acme.io/v1alpha1
+</span></span><span style="display:flex;"><span><span style="color:#cba6f7">kind</span>: ProviderConfig
+</span></span><span style="display:flex;"><span><span style="color:#cba6f7">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#cba6f7">name</span>: users
+</span></span><span style="display:flex;"><span><span style="color:#cba6f7">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#cba6f7">host</span>: <span style="color:#a6e3a1">&#34;users.default&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#cba6f7">database</span>: users
+</span></span><span style="display:flex;"><span>  <span style="color:#cba6f7">credentials</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#cba6f7">user</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#cba6f7">name</span>: pg-users-auth
+</span></span><span style="display:flex;"><span>      <span style="color:#cba6f7">key</span>: user
+</span></span><span style="display:flex;"><span>    <span style="color:#cba6f7">password</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#cba6f7">name</span>: pg-users-auth
+</span></span><span style="display:flex;"><span>      <span style="color:#cba6f7">key</span>: password
+</span></span><span style="display:flex;"><span><span style="color:#fab387">---</span>
+</span></span><span style="display:flex;"><span><span style="color:#cba6f7">apiVersion</span>: postgres.acme.io/v1alpha1
+</span></span><span style="display:flex;"><span><span style="color:#cba6f7">kind</span>: ProviderConfig
+</span></span><span style="display:flex;"><span><span style="color:#cba6f7">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#cba6f7">name</span>: billing
+</span></span><span style="display:flex;"><span><span style="color:#cba6f7">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#cba6f7">host</span>: <span style="color:#a6e3a1">&#34;billing.default:5432&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#cba6f7">databse</span>: billing
+</span></span><span style="display:flex;"><span>  <span style="color:#cba6f7">credentials</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#cba6f7">user</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#cba6f7">name</span>: pg-billing-auth
+</span></span><span style="display:flex;"><span>      <span style="color:#cba6f7">key</span>: user
+</span></span><span style="display:flex;"><span>    <span style="color:#cba6f7">password</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#cba6f7">name</span>: pg-billing-auth
+</span></span><span style="display:flex;"><span>      <span style="color:#cba6f7">key</span>: password
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="start-building-a-provider">Start building a provider</h2>
+<p>Hopefully you now have a good understanding of how providers work and are implemented. Understanding the state machine that is the managed resource reconciler will give you a real edge when implementing and troubleshooting providers.</p>
+<p>Bear in mind that that although this is a long post, there are certainly flows I have not covered and others that I have not come across yet. It really comes down to trying things out and discovering along the way. I will update this blog post if I find out more best practices or anything of note around the general flow.</p>
+<p>To start your own provider, I suggest cloning the <a href="https://github.com/crossplane/provider-template">Crossplane provider template</a>, and leverage <a href="https://github.com/upbound/provider-opentofu">provider-opentofu</a>, <a href="https://github.com/crossplane-contrib/provider-http">provider-http</a> and my <a href="https://github.com/brunoluiz/crossplane-demo/tree/main/provider-acme">provider-acme</a> for a working reference. It is daunting at first, especially with the considerable amount of boilerplate, but eventually the reconciler flow settles and most of your focus will go towards API design and integration, feeling almost like any other API or controller implementation.</p>
+]]></content:encoded></item><item><title>Engineers must learn how to say "no"</title><link>https://brunoluiz.net/blog/2026/apr/say-no/</link><pubDate>Tue, 14 Apr 2026 10:00:00 +0000</pubDate><guid>https://brunoluiz.net/blog/2026/apr/say-no/</guid><description>A reminder to my future self and a guide for those early in their careers on why &amp;ldquo;no&amp;rdquo; is often the most productive word in an engineer vocabulary.</description><content:encoded><![CDATA[<p>In my first years in the software industry, I used to say <em>&ldquo;nothing is impossible, it is just a matter of time&rdquo;</em> (cliché, I know). This is &ldquo;fun&rdquo; at first, but it leads to distractions, team friction and that usual feature that no one wants to maintain but that now will forever exist. I am writing this as a reminder to my future self and as a guide for those early in their careers on why &ldquo;no&rdquo; is often the most productive word in your vocabulary.</p>
 <h2 id="heading"><strong>&ldquo;Yes&rdquo; will hurt your team</strong></h2>
 <p>Product and Engineering managers tend to rely on software engineers to understand how feasible a task is. This is why teams tend to plan and agree on a plan for the next delivery cycle.</p>
 <p>But, there will always be &ldquo;external forces&rdquo; that will bring ad-hoc requests. Sometimes a bug fix or small feature, other times a discovery in a particular tech/area. In the minds of many, those are small enough to be done on the side and some of us can&rsquo;t resist the temptation to say <em>&ldquo;yes&rdquo;</em>. Also, who doesn&rsquo;t want to look good by delivering so much?</p>
