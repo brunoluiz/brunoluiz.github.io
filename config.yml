@@ -43,6 +43,11 @@ params:
   ShowReadingTime: true
   ShowPostNavLinks: true
   ShowFullTextinRSS: true
+menu:
+  main:
+    - name: 🎙️ Conferences Archive
+      url: /talks/
+      weight: 10
 markup:
   goldmark:
     renderer:
