@@ -45,7 +45,7 @@ params:
   ShowFullTextinRSS: true
 menu:
   main:
-    - name: 🎙️ Conferences Archive
+    - name: 🎙️ Talks / Conferences
       url: /talks/
       weight: 10
 markup:
