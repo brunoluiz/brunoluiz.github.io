@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Bruno Luiz da Silva</title><link>https://brunoluiz.net/</link><description>Recent content on Bruno Luiz da Silva</description><generator>Hugo -- 0.148.2</generator><language>en</language><lastBuildDate>Sun, 30 Aug 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://brunoluiz.net/index.xml" rel="self" type="application/rss+xml"/><item><title>Talks</title><link>https://brunoluiz.net/talks/</link><pubDate>Sun, 30 Aug 2026 00:00:00 +0000</pubDate><guid>https://brunoluiz.net/talks/</guid><description>Meetups and conferences where I have spoken.</description><content:encoded><![CDATA[<p>An archive of my meetup and conference talks, from Go release automation to cloud-native infrastructure platforms.</p>
 <h2 id="2026">2026</h2>
-<h3 id="beyond-terraform">Beyond Terraform</h3>
+<h3 id="beyond-terraform-infrastructure-as-code-with-crossplane-and-golang">Beyond Terraform: Infrastructure as Code with Crossplane and Golang</h3>
 <p><strong>ContainerDays London 2026</strong></p>
-<p>Most teams implement Infrastructure as Code (IaC) with Terraform, but cloud-native architectures call for a different approach. After using it at J.P. Morgan, I believe <a href="https://www.crossplane.io/">Crossplane</a> will become a popular open-source choice for building cloud-native platforms.</p>
-<p>Crossplane extends the Kubernetes API to manage infrastructure across providers. Engineers can define and manage resources with familiar Kubernetes concepts, turning Kubernetes into a universal infrastructure control plane. This talk covers Crossplane&rsquo;s core concepts, how it compares with Terraform, and how Go can extend it through custom functions and providers.</p>
-<p>Topics include:</p>
+<p>Most teams implemented Infrastructure as Code (IaC) with Terraform, but cloud-native architectures called for a different approach. After using it at work, I shared why I believed <a href="https://www.crossplane.io/">Crossplane</a> was a strong open-source choice for building cloud-native platforms.</p>
+<p>The talk covered how Crossplane extended the Kubernetes API to manage infrastructure across providers. It showed how engineers could define and manage resources with familiar Kubernetes concepts, turning Kubernetes into a universal infrastructure control plane, and how Go could extend it through custom functions and providers.</p>
+<p>Topics included:</p>
 <ul>
 <li>Crossplane&rsquo;s core concepts and benefits</li>
 <li>When Crossplane is a better fit than Terraform</li>
@@ -16,12 +16,12 @@
 <h2 id="2023">2023</h2>
 <h3 id="imagewand-privacy-first-image-conversion-with-go--wasm">ImageWand: Privacy-First Image Conversion with Go &amp; WASM</h3>
 <p><strong>May Gophers, 2023</strong></p>
-<p>What if a website could convert images locally, without requiring a server? What if the technology for that already existed? This talk follows the journey from an experiment to ImageWand, a privacy-first image conversion project built with Go and WebAssembly.</p>
+<p>What if a website could convert images locally, without requiring a server? What if the technology for that already existed? This talk followed the journey from an experiment to ImageWand, a privacy-first image conversion project built with Go and WebAssembly.</p>
 <p><a href="https://www.youtube.com/watch?v=eo2YNJ9B5qw">Watch the talk</a> · <a href="https://www.meetup.com/londongophers/events/292486307/?eventOrigin=group_events_list">Event details</a></p>
 <h2 id="2020">2020</h2>
 <h3 id="releasing-go-binaries-the-easy-way">Releasing Go Binaries: The Easy Way</h3>
 <p><strong>London Gophers, 20 May 2020</strong></p>
-<p>Building Go applications is relatively easy, but releasing them manually can be laborious. This talk introduces <a href="https://goreleaser.com/">GoReleaser</a> and how it automates the release process, from building binaries to distributing them.</p>
+<p>Building Go applications was relatively easy, but releasing them manually could be laborious. This talk introduced <a href="https://goreleaser.com/">GoReleaser</a> and how it automated the release process, from building binaries to distributing them.</p>
 <p><a href="https://www.youtube.com/watch?v=oqoDeYu4RBs">Watch the talk</a> · <a href="https://www.meetup.com/londongophers/events/270380388/?eventOrigin=group_events_list">Event details</a></p>
 ]]></content:encoded></item><item><title>How Crossplane providers work and how to implement one</title><link>https://brunoluiz.net/blog/2026/jun/crossplane-providers/</link><pubDate>Sat, 25 Jul 2026 10:00:00 +0000</pubDate><guid>https://brunoluiz.net/blog/2026/jun/crossplane-providers/</guid><description>A guide for building Crossplane providers in Golang, from the reconciler lifecycle to examples of how to implement and best practices.</description><content:encoded><![CDATA[<h2 id="introduction">Introduction</h2>
 <p>Crossplane allows you to define Kubernetes APIs without writing controllers. Instead, users define custom resources using (usually) YAML. There are many components required for this abstraction, such as compositions and XRDs, but providers are on the heart of it: they are controllers that handle the lifecycle of an external resource (e.g. a bucket), such as creating, updating, and deleting it.</p>
