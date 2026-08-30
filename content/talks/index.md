@@ -10,15 +10,15 @@ An archive of my meetup and conference talks, from Go release automation to clou
 
 ## 2026
 
-### Beyond Terraform
+### Beyond Terraform: Infrastructure as Code with Crossplane and Golang
 
 **ContainerDays London 2026**
 
-Most teams implement Infrastructure as Code (IaC) with Terraform, but cloud-native architectures call for a different approach. After using it at J.P. Morgan, I believe [Crossplane](https://www.crossplane.io/) will become a popular open-source choice for building cloud-native platforms.
+Most teams implemented Infrastructure as Code (IaC) with Terraform, but cloud-native architectures called for a different approach. After using it at work, I shared why I believed [Crossplane](https://www.crossplane.io/) was a strong open-source choice for building cloud-native platforms.
 
-Crossplane extends the Kubernetes API to manage infrastructure across providers. Engineers can define and manage resources with familiar Kubernetes concepts, turning Kubernetes into a universal infrastructure control plane. This talk covers Crossplane's core concepts, how it compares with Terraform, and how Go can extend it through custom functions and providers.
+The talk covered how Crossplane extended the Kubernetes API to manage infrastructure across providers. It showed how engineers could define and manage resources with familiar Kubernetes concepts, turning Kubernetes into a universal infrastructure control plane, and how Go could extend it through custom functions and providers.
 
-Topics include:
+Topics included:
 
 - Crossplane's core concepts and benefits
 - When Crossplane is a better fit than Terraform
@@ -34,7 +34,7 @@ Topics include:
 
 **May Gophers, 2023**
 
-What if a website could convert images locally, without requiring a server? What if the technology for that already existed? This talk follows the journey from an experiment to ImageWand, a privacy-first image conversion project built with Go and WebAssembly.
+What if a website could convert images locally, without requiring a server? What if the technology for that already existed? This talk followed the journey from an experiment to ImageWand, a privacy-first image conversion project built with Go and WebAssembly.
 
 [Watch the talk](https://www.youtube.com/watch?v=eo2YNJ9B5qw) · [Event details](https://www.meetup.com/londongophers/events/292486307/?eventOrigin=group_events_list)
 
@@ -44,6 +44,6 @@ What if a website could convert images locally, without requiring a server? What
 
 **London Gophers, 20 May 2020**
 
-Building Go applications is relatively easy, but releasing them manually can be laborious. This talk introduces [GoReleaser](https://goreleaser.com/) and how it automates the release process, from building binaries to distributing them.
+Building Go applications was relatively easy, but releasing them manually could be laborious. This talk introduced [GoReleaser](https://goreleaser.com/) and how it automated the release process, from building binaries to distributing them.
 
 [Watch the talk](https://www.youtube.com/watch?v=oqoDeYu4RBs) · [Event details](https://www.meetup.com/londongophers/events/270380388/?eventOrigin=group_events_list)
